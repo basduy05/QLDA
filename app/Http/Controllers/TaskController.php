@@ -85,7 +85,7 @@ class TaskController extends Controller
     {
         $this->ensureTaskViewAccess($task);
 
-        $task->load(['project', 'assignee', 'creator']);
+        $task->load(['project', 'assignee', 'creator', 'comments.user']);
 
         /** @var User $user */
         $user = Auth::user();

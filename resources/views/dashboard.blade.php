@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div>
+        <div class="flex items-center justify-between">
+            <div>
             <p class="text-sm text-slate-500">{{ __('Overview') }}</p>
             <h2 class="text-3xl font-semibold text-slate-900">{{ __('Project command center') }}</h2>
+            </div>
+            <a href="{{ route('exports.reports') }}" class="btn-secondary">{{ __('Export report') }}</a>
         </div>
     </x-slot>
 

@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div>
-            <p class="text-sm text-slate-500">{{ __('Workspace') }}</p>
-            <h2 class="text-3xl font-semibold text-slate-900">{{ __('Tasks') }}</h2>
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-slate-500">{{ __('Workspace') }}</p>
+                <h2 class="text-3xl font-semibold text-slate-900">{{ __('Tasks') }}</h2>
+            </div>
+            <a href="{{ route('exports.tasks') }}" class="btn-secondary">{{ __('Export XLSX') }}</a>
         </div>
     </x-slot>
 

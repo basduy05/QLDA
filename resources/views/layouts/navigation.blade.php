@@ -14,6 +14,13 @@
             </div>
 
             <div class="hidden md:flex items-center gap-4">
+                <a href="{{ route('notifications.index') }}" class="relative text-sm text-slate-600">
+                    {{ __('Notifications') }}
+                    @php($unreadCount = Auth::user()?->unreadNotifications()->count() ?? 0)
+                    @if ($unreadCount > 0)
+                        <span class="absolute -top-2 -right-3 text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full">{{ $unreadCount }}</span>
+                    @endif
+                </a>
                 <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
                     <a href="{{ route('lang.switch', 'vi') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'vi' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200' }}">VI</a>
                     <a href="{{ route('lang.switch', 'en') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'en' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200' }}">EN</a>
@@ -59,6 +66,7 @@
             <a class="block" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
             <a class="block" href="{{ route('projects.index') }}">{{ __('Projects') }}</a>
             <a class="block" href="{{ route('tasks.index') }}">{{ __('Tasks') }}</a>
+            <a class="block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
             @if (Auth::user()?->isAdmin())
                 <a class="block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
             @endif

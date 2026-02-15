@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +39,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('projects', ProjectController::class);
     Route::resource('projects.tasks', TaskController::class)->shallow();
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
+    Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])
+        ->name('tasks.comments.store');
+    Route::get('/exports/projects', [ExportController::class, 'projects'])->name('exports.projects');
+    Route::get('/exports/tasks', [ExportController::class, 'tasks'])->name('exports.tasks');
+    Route::get('/exports/reports', [ExportController::class, 'reports'])->name('exports.reports');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read', [NotificationController::class, 'markAllRead'])
+        ->name('notifications.read');
     Route::get('/admin/users', [AdminUserController::class, 'index'])
         ->middleware('admin')
         ->name('admin.users.index');

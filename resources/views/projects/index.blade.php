@@ -5,7 +5,10 @@
                 <p class="text-sm text-slate-500">{{ __('Workspace') }}</p>
                 <h2 class="text-3xl font-semibold text-slate-900">{{ __('Projects') }}</h2>
             </div>
-            <a href="{{ route('projects.create') }}" class="btn-primary">{{ __('New project') }}</a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('exports.projects') }}" class="btn-secondary">{{ __('Export XLSX') }}</a>
+                <a href="{{ route('projects.create') }}" class="btn-primary">{{ __('New project') }}</a>
+            </div>
         </div>
     </x-slot>
 

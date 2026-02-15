@@ -18,9 +18,10 @@ RUN apt-get update \
         unzip \
         libpq-dev \
         libzip-dev \
+        libpng-dev \
         libonig-dev \
         libcurl4-openssl-dev \
-    && docker-php-ext-install pdo_pgsql pgsql mbstring zip curl \
+    && docker-php-ext-install pdo_pgsql pgsql mbstring zip curl gd \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
