@@ -1,3 +1,12 @@
+FROM node:20-bullseye AS assets
+
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY resources ./resources
+COPY vite.config.js ./vite.config.js
+RUN npm run build
+
 FROM php:8.2-apache
 
 WORKDIR /var/www/html
@@ -18,6 +27,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY . .
+
+COPY --from=assets /app/public/build /var/www/html/public/build
 
 RUN composer install --no-dev --optimize-autoloader
 RUN php artisan storage:link || true
