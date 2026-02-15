@@ -22,4 +22,6 @@ chown -R www-data:www-data storage bootstrap/cache
 
 rm -f public/hot
 
+php artisan optimize:clear || true
+
 exec apache2-foreground
