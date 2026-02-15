@@ -37,6 +37,10 @@ services:
         fromDatabase:
           name: qhorizonpm-db
           property: password
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: RUN_SEED
+        value: "false"
 
 databases:
   - name: qhorizonpm-db

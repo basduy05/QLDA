@@ -62,6 +62,14 @@ Project management website built with Laravel MVC for Admin and User roles.
 5. After deploy, run database migrations once:
    - `php artisan migrate --force`
 
+### No-Shell Option (Auto-migrate on Deploy)
+If your plan does not allow Shell, the service can auto-run migrations on every deploy.
+
+- Ensure these env vars are set (already in `render.yaml`):
+   - `RUN_MIGRATIONS=true`
+   - `RUN_SEED=false`
+- If you want demo data on first deploy, set `RUN_SEED=true`, deploy once, then set it back to `false`.
+
 Notes:
 - Update `APP_URL` in Render env to your actual domain.
 - Change demo passwords in production.
