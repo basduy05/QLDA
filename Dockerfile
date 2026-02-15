@@ -3,6 +3,7 @@ FROM node:20-bullseye AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
+COPY tailwind.config.js postcss.config.js ./
 COPY resources ./resources
 COPY vite.config.js ./vite.config.js
 RUN npm run build

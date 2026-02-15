@@ -15,7 +15,11 @@
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+
+            <div x-data="{ show: false }" class="relative mt-1">
+                <x-text-input id="password" class="block w-full pr-14" name="password" x-bind:type="show ? 'text' : 'password'" required autocomplete="new-password" />
+                <button type="button" class="absolute inset-y-0 right-3 text-xs font-semibold text-slate-500" @click="show = !show" x-text="show ? '{{ __('Hide') }}' : '{{ __('Show') }}'"></button>
+            </div>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
@@ -23,9 +27,11 @@
         <div class="mt-4">
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
+            <div x-data="{ show: false }" class="relative mt-1">
+                <x-text-input id="password_confirmation" class="block w-full pr-14"
+                        name="password_confirmation" x-bind:type="show ? 'text' : 'password'" required autocomplete="new-password" />
+                <button type="button" class="absolute inset-y-0 right-3 text-xs font-semibold text-slate-500" @click="show = !show" x-text="show ? '{{ __('Hide') }}' : '{{ __('Show') }}'"></button>
+            </div>
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
