@@ -1,0 +1,67 @@
+# QhorizonPM
+
+Project management website built with Laravel MVC for Admin and User roles.
+
+## Features
+- Admin and User roles with role-based access
+- Project and task CRUD
+- Dashboard with stats, recent projects, and overdue tasks
+- Vietnamese and English UI toggle
+- Deployment-ready for shared hosting
+
+## Tech Stack
+- Laravel 12 (MVC)
+- MySQL
+- Blade + Tailwind (custom theme)
+
+## Local Setup
+1. Copy environment file:
+   - Windows PowerShell:
+     - `Copy-Item .env.example .env`
+2. Update database connection in `.env`.
+3. Install dependencies:
+   - `composer install`
+4. Generate key:
+   - `php artisan key:generate`
+5. Run migrations + seed:
+   - `php artisan migrate --seed`
+6. Build assets:
+   - `npm install`
+   - `npm run build`
+7. Serve locally:
+   - `php artisan serve`
+
+## Demo Accounts
+- Admin: `admin@example.com` / `Admin@123`
+- User: `user@example.com` / `User@123`
+
+## Shared Hosting Deployment
+1. Upload all files to hosting.
+2. Point document root to the `public` folder.
+3. Create `.env` from `.env.example` and set production values:
+   - `APP_ENV=production`
+   - `APP_DEBUG=false`
+   - `APP_URL` to your domain
+   - `DB_*` for MySQL
+4. Run migrations on server:
+   - `php artisan migrate --force`
+5. Build assets locally and upload `public/build` if your hosting has no Node.
+6. Ensure `storage` and `bootstrap/cache` are writable.
+
+## Notes
+- Change demo passwords in production.
+- Configure mail and queue as needed in `.env`.
+
+## Free Deployment (Render + PostgreSQL)
+1. Push this repo to Git.
+2. Create a new Render Blueprint service and select this repo.
+3. Render will read `render.yaml` and create the web service + free database.
+4. Set `APP_KEY` in Render environment:
+   - Run locally: `php artisan key:generate --show`
+   - Copy the output into `APP_KEY`.
+5. After deploy, run database migrations once:
+   - `php artisan migrate --force`
+
+Notes:
+- Update `APP_URL` in Render env to your actual domain.
+- Change demo passwords in production.

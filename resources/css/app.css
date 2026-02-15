@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--ink: #132237;
+		--ink-soft: #41546b;
+		--accent: #0f766e;
+		--accent-strong: #0a4f49;
+		--sun: #f6c453;
+		--rose: #f4b2a3;
+		--mist: #eef2f6;
+		--cloud: #f7f7fb;
+		--card: #ffffff;
+	}
+
+	body {
+		font-family: "Space Grotesk", "Segoe UI", sans-serif;
+		color: var(--ink);
+		background: radial-gradient(circle at top left, #fff7e7 0%, #f4f7ff 40%, #eef7f7 100%);
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: "Fraunces", "Times New Roman", serif;
+		letter-spacing: -0.02em;
+	}
+}
+
+@layer components {
+	.page-shell {
+		@apply min-h-screen;
+		background: radial-gradient(circle at 20% 20%, #fff2da 0%, transparent 45%),
+			radial-gradient(circle at 80% 0%, #e6f4ff 0%, transparent 45%),
+			linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
+	}
+
+	.card {
+		@apply rounded-2xl shadow-sm border border-slate-100 bg-white/90 backdrop-blur;
+	}
+
+	.card-strong {
+		@apply rounded-2xl shadow-lg border border-slate-200 bg-white;
+	}
+
+	.badge {
+		@apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide;
+	}
+
+	.btn-primary {
+		@apply inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg transition;
+		background: linear-gradient(135deg, var(--accent), #0891b2);
+	}
+
+	.btn-primary:hover {
+		filter: brightness(0.98);
+		transform: translateY(-1px);
+	}
+
+	.btn-secondary {
+		@apply inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-slate-200 text-slate-700 bg-white transition;
+	}
+
+	.btn-secondary:hover {
+		@apply border-slate-300;
+	}
+
+	.table-head {
+		@apply text-xs uppercase tracking-widest text-slate-500;
+	}
+}
