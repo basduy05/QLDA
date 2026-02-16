@@ -35,7 +35,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
             $request->session()->put('register_otp_email', $user->email);
 
-            $error = OtpController::sendOtp($user->email, 'register', __('registration'));
+            $error = OtpController::sendOtp($user->email, 'register_pending', __('registration'));
 
             if ($error) {
                 return redirect()->route('login')

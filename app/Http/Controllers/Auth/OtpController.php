@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\OtpCodeMail;
 use App\Models\EmailOtp;
+use App\Models\PendingRegistration;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -48,7 +51,12 @@ class OtpController extends Controller
             'code' => ['required', 'digits:6'],
         ]);
 
-        $otp = $this->latestOtp($email, 'register');
+        $pending = PendingRegistration::where('email', $email)->first();
+        if (! $pending || ($pending->expires_at && $pending->expires_at->isPast())) {
+            return back()->withErrors(['code' => __('Registration session expired. Please register again.')]);
+        }
+
+        $otp = $this->latestOtp($email, 'register_pending');
         if (! $otp || $this->isExpiredOrBlocked($otp)) {
             return back()->withErrors(['code' => __('OTP expired. Please resend a new code.')]);
         }
@@ -60,12 +68,30 @@ class OtpController extends Controller
 
         $otp->forceFill(['used_at' => now()])->save();
 
-        $user = User::where('email', $email)->first();
-        if (! $user) {
-            return redirect()->route('register');
-        }
+        $user = DB::transaction(function () use ($pending) {
+            $existing = User::where('email', $pending->email)->first();
+            if ($existing) {
+                return $existing;
+            }
 
-        $user->forceFill(['email_verified_at' => now()])->save();
+            $role = User::where('role', 'admin')->exists() ? 'user' : 'admin';
+
+            $created = User::create([
+                'name' => $pending->name,
+                'email' => $pending->email,
+                'password' => $pending->password,
+                'role' => $role,
+                'locale' => $pending->locale,
+                'email_verified_at' => now(),
+                'terms_accepted_at' => $pending->terms_accepted_at ?? now(),
+            ]);
+
+            $pending->delete();
+
+            return $created;
+        });
+
+        event(new Registered($user));
 
         $request->session()->forget('register_otp_email');
 
@@ -83,12 +109,12 @@ class OtpController extends Controller
             return redirect()->route('register');
         }
 
-        $user = User::where('email', $email)->first();
-        if (! $user) {
+        $pending = PendingRegistration::where('email', $email)->first();
+        if (! $pending || ($pending->expires_at && $pending->expires_at->isPast())) {
             return redirect()->route('register');
         }
 
-        $error = $this->sendOtp($email, 'register', __('registration'));
+        $error = $this->sendOtp($email, 'register_pending', __('registration'));
         if ($error) {
             return back()->withErrors(['code' => $error]);
         }

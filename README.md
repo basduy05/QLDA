@@ -89,6 +89,17 @@ Quick test via Tinker:
 - `php artisan tinker`
 - `Mail::raw('SMTP test', fn($m) => $m->to('your_receiver@gmail.com')->subject('Test Mail'));`
 
+Registration flow note:
+- User account is now created only after OTP verification succeeds.
+- Before OTP verification, data is stored in `pending_registrations`.
+- Make sure to run migrations after pull/deploy:
+   - `php artisan migrate --force`
+
+Transient data cleanup:
+- Command: `php artisan app:cleanup-transient-data`
+- Scheduled hourly via `routes/console.php`.
+- If your host does not run scheduler automatically, run the command periodically as a cron/job.
+
 ## Free Deployment (Render + PostgreSQL)
 1. Push this repo to Git.
 2. Create a new Render Blueprint service and select this repo.
