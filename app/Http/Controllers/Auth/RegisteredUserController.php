@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Auth\OtpController;
-use App\Models\PendingRegistration;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
@@ -37,28 +36,25 @@ class RegisteredUserController extends Controller
             'accept_terms' => ['accepted'],
         ]);
 
+        $role = User::where('role', 'admin')->exists() ? 'user' : 'admin';
         $locale = app()->getLocale();
 
-        $pending = PendingRegistration::updateOrCreate([
-            'email' => $request->email,
-        ], [
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $role,
             'locale' => $locale,
+            'email_verified_at' => now(),
             'terms_accepted_at' => now(),
-            'expires_at' => now()->addMinutes(30),
         ]);
 
-        $request->session()->put('register_otp_email', $pending->email);
-        $error = OtpController::sendOtp($pending->email, 'register_pending', __('registration'));
+        event(new Registered($user));
 
-        if ($error) {
-            return back()->withInput($request->only('name', 'email'))
-                ->withErrors(['email' => $error]);
-        }
+        Auth::login($user);
 
-        return redirect()->route('register.otp.form')
-            ->with('status', __('We sent an OTP code to your email.'));
+        $request->session()->regenerate();
+
+        return redirect(route('dashboard', absolute: false));
     }
 }
