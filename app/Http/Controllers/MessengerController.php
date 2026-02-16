@@ -350,6 +350,65 @@ class MessengerController extends Controller
             ->with('status', __('Group nickname updated.'));
     }
 
+    public function updateGroupMembers(Request $request, ChatGroup $chatGroup)
+    {
+        $this->ensureGroupAccess($chatGroup);
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'member_ids' => ['nullable', 'array'],
+            'member_ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        $oldMemberIds = $chatGroup->members()->pluck('users.id')->map(fn ($id) => (int) $id);
+
+        $newMemberIds = collect($data['member_ids'] ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->push((int) $user->id)
+            ->unique()
+            ->values();
+
+        $addedIds = $newMemberIds->diff($oldMemberIds)->values();
+        $removedIds = $oldMemberIds->diff($newMemberIds)->values();
+
+        $chatGroup->members()->sync($newMemberIds->all());
+
+        if ($addedIds->isNotEmpty()) {
+            $addedNames = User::whereIn('id', $addedIds->all())
+                ->orderBy('name')
+                ->pluck('name')
+                ->join(', ');
+
+            $this->createGroupSystemMessage(
+                $chatGroup,
+                __(':user added member(s): :members', [
+                    'user' => $user->name,
+                    'members' => $addedNames,
+                ])
+            );
+        }
+
+        if ($removedIds->isNotEmpty()) {
+            $removedNames = User::whereIn('id', $removedIds->all())
+                ->orderBy('name')
+                ->pluck('name')
+                ->join(', ');
+
+            $this->createGroupSystemMessage(
+                $chatGroup,
+                __(':user removed member(s): :members', [
+                    'user' => $user->name,
+                    'members' => $removedNames,
+                ])
+            );
+        }
+
+        return redirect()->route('messenger.group', $chatGroup)
+            ->with('status', __('Group members updated.'));
+    }
+
     private function buildBasePayload(User $user): array
     {
         $groupsQuery = ChatGroup::withCount('messages')->latest();

@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/messenger/direct/{contact}', [MessengerController::class, 'sendDirect'])->name('messenger.send-direct');
     Route::post('/messenger/group/{chatGroup}', [MessengerController::class, 'sendGroup'])->name('messenger.send-group');
     Route::patch('/messenger/group/{chatGroup}/name', [MessengerController::class, 'updateGroupName'])->name('messenger.group.rename');
+    Route::patch('/messenger/group/{chatGroup}/members', [MessengerController::class, 'updateGroupMembers'])->name('messenger.group.members');
     Route::patch('/messenger/group/{chatGroup}/members/{member}/nickname', [MessengerController::class, 'updateGroupMemberNickname'])->name('messenger.group.member-nickname');
     Route::post('/messenger/direct/{contact}/typing', [MessengerController::class, 'typing'])->name('messenger.typing');
     });

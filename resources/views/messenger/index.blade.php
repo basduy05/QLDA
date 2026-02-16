@@ -43,7 +43,7 @@
                 </div>
             </aside>
 
-            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-0">
+            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-0 relative">
                 @if ($activeType)
                     <div class="relative flex items-center justify-between pb-2 border-b border-slate-100">
                         <div>
@@ -77,9 +77,10 @@
                     </div>
 
                     @if ($activeType === 'group')
-                        <div id="group-settings-backdrop" class="hidden fixed inset-0 z-10 bg-slate-900/10"></div>
+                        @php($groupMemberIds = $groupMembers->pluck('id')->map(fn ($id) => (int) $id)->all())
+                        <div id="group-settings-backdrop" class="hidden absolute inset-0 z-10 bg-slate-900/10 rounded-2xl"></div>
 
-                        <div id="group-settings-panel" class="absolute right-0 top-full mt-2 z-20 w-[min(46rem,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl space-y-3 origin-top-right opacity-0 scale-95 pointer-events-none transition duration-200 ease-out">
+                        <div id="group-settings-panel" class="absolute left-3 right-3 top-[56px] z-20 max-h-[calc(100%-76px)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl space-y-3 origin-top-right opacity-0 scale-95 pointer-events-none transition duration-200 ease-out">
                             <form method="POST" action="{{ route('messenger.group.rename', $activeTarget) }}" class="flex items-end gap-2">
                                 @csrf
                                 @method('PATCH')
@@ -88,6 +89,38 @@
                                     <input id="group-name" type="text" name="name" value="{{ old('name', $activeTarget->name) }}" class="mt-1 w-full rounded-xl border-slate-200 text-sm" maxlength="255" required>
                                 </div>
                                 <button type="submit" class="btn-secondary text-xs">{{ __('Rename group') }}</button>
+                            </form>
+
+                            <form method="POST" action="{{ route('messenger.group.members', $activeTarget) }}" class="space-y-2 rounded-xl border border-slate-200 p-3">
+                                @csrf
+                                @method('PATCH')
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ __('Members') }}</p>
+                                    <p class="text-xs text-slate-500">{{ __('Tick to add / untick to remove') }}</p>
+                                </div>
+
+                                <div class="grid sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
+                                    <label class="flex items-start gap-2 rounded-lg border border-slate-200 px-3 py-2 bg-slate-50">
+                                        <input type="checkbox" checked disabled class="mt-1 rounded border-slate-300 text-slate-900">
+                                        <input type="hidden" name="member_ids[]" value="{{ auth()->id() }}">
+                                        <span>
+                                            <span class="block text-sm font-medium text-slate-800">{{ auth()->user()->name }} {{ __('(You)') }}</span>
+                                            <span class="block text-[11px] text-slate-500">{{ auth()->user()->email }}</span>
+                                        </span>
+                                    </label>
+
+                                    @foreach ($contacts as $contact)
+                                        <label class="flex items-start gap-2 rounded-lg border border-slate-200 px-3 py-2 cursor-pointer hover:border-slate-300">
+                                            <input type="checkbox" name="member_ids[]" value="{{ $contact->id }}" class="mt-1 rounded border-slate-300 text-slate-900" @checked(in_array((int) $contact->id, $groupMemberIds, true))>
+                                            <span>
+                                                <span class="block text-sm font-medium text-slate-800">{{ $contact->name }}</span>
+                                                <span class="block text-[11px] text-slate-500">{{ $contact->email }}</span>
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+
+                                <button type="submit" class="btn-secondary text-xs">{{ __('Save members') }}</button>
                             </form>
 
                             <div class="flex flex-wrap gap-2">
