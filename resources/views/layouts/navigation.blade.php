@@ -15,14 +15,17 @@
             </div>
 
             <div class="hidden md:flex items-center gap-4">
-                <a href="{{ route('notifications.index') }}" class="relative text-sm text-slate-600">
-                    {{ __('Notifications') }}
-                    @php($unreadCount = Auth::user()?->unreadNotifications()->count() ?? 0)
+                <a href="{{ route('notifications.index') }}" class="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300 transition" title="{{ __('Notifications') }}" aria-label="{{ __('Notifications') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                        <path d="M9 17a3 3 0 0 0 6 0" />
+                    </svg>
+                    @php($unreadCount = Auth::user()?->unreadNotificationsCountSafe() ?? 0)
                     <span id="nav-unread-count" class="absolute -top-2 -right-3 text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full {{ $unreadCount > 0 ? '' : 'hidden' }}">{{ $unreadCount }}</span>
                 </a>
-                <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                    <a href="{{ route('lang.switch', 'vi') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'vi' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200' }}">VI</a>
-                    <a href="{{ route('lang.switch', 'en') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'en' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200' }}">EN</a>
+                <div class="flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                    <a href="{{ route('lang.switch', 'vi') }}" class="h-6 min-w-7 px-1.5 inline-flex items-center justify-center rounded-full {{ app()->getLocale() === 'vi' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200' }}">VI</a>
+                    <a href="{{ route('lang.switch', 'en') }}" class="h-6 min-w-7 px-1.5 inline-flex items-center justify-center rounded-full {{ app()->getLocale() === 'en' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200' }}">EN</a>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="inline-flex items-center px-3 py-2 border border-slate-200 text-sm rounded-full bg-white shadow-sm text-slate-700">
@@ -59,8 +62,8 @@
             @endif
             <a class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
             <div class="flex items-center gap-2 pt-2">
-                <a href="{{ route('lang.switch', 'vi') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'vi' ? 'bg-slate-900 text-white' : 'border border-slate-200' }}">VI</a>
-                <a href="{{ route('lang.switch', 'en') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'en' ? 'bg-slate-900 text-white' : 'border border-slate-200' }}">EN</a>
+                <a href="{{ route('lang.switch', 'vi') }}" class="h-6 min-w-7 px-1.5 inline-flex items-center justify-center text-[10px] font-semibold rounded-full {{ app()->getLocale() === 'vi' ? 'bg-slate-900 text-white' : 'border border-slate-200' }}">VI</a>
+                <a href="{{ route('lang.switch', 'en') }}" class="h-6 min-w-7 px-1.5 inline-flex items-center justify-center text-[10px] font-semibold rounded-full {{ app()->getLocale() === 'en' ? 'bg-slate-900 text-white' : 'border border-slate-200' }}">EN</a>
             </div>
             <form method="POST" action="{{ route('logout') }}" class="pt-2">
                 @csrf

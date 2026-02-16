@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class User extends Authenticatable
 {
@@ -112,6 +113,29 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function unreadNotificationsCountSafe(): int
+    {
+        static $hasNotificationsTable;
+
+        if ($hasNotificationsTable === null) {
+            try {
+                $hasNotificationsTable = Schema::hasTable('notifications');
+            } catch (\Throwable) {
+                $hasNotificationsTable = false;
+            }
+        }
+
+        if (! $hasNotificationsTable) {
+            return 0;
+        }
+
+        try {
+            return $this->unreadNotifications()->count();
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 
     public function chatGroupsCreated()
