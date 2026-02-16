@@ -58,7 +58,7 @@ class RegisteredUserController extends Controller
         $welcomeEmail = (string) $user->email;
         $welcomeLocale = (string) ($user->locale ?? app()->getLocale());
 
-        dispatch(function () use ($welcomeUserId, $welcomeEmail, $welcomeLocale) {
+        app()->terminating(function () use ($welcomeUserId, $welcomeEmail, $welcomeLocale) {
             try {
                 $welcomeUser = User::find($welcomeUserId);
                 if (! $welcomeUser) {
@@ -75,7 +75,7 @@ class RegisteredUserController extends Controller
                     'message' => $exception->getMessage(),
                 ]);
             }
-        })->afterResponse();
+        });
 
         Auth::login($user);
 

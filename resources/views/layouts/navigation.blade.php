@@ -17,8 +17,8 @@
             <div class="hidden md:flex items-center gap-2">
                 <a href="{{ route('notifications.index') }}" class="nav-action-btn" title="{{ __('Notifications') }}" aria-label="{{ __('Notifications') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M6.5 8.5a5.5 5.5 0 1 1 11 0v3.1c0 .68.22 1.34.63 1.88L19.5 15H4.5l1.37-1.52c.41-.54.63-1.2.63-1.88z" />
-                        <path d="M9.75 17.25a2.25 2.25 0 0 0 4.5 0" />
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                     </svg>
                     @php($unreadCount = Auth::user()?->unreadNotificationsCountSafe() ?? 0)
                     <span id="nav-unread-count" class="absolute -top-2 -right-3 text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full {{ $unreadCount > 0 ? '' : 'hidden' }}">{{ $unreadCount }}</span>
