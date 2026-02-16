@@ -23,6 +23,8 @@ services:
         value: lax
       - key: SESSION_SECURE_COOKIE
         value: "true"
+      - key: WEBRTC_ICE_SERVERS
+        value: "[]"
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\CallSessionController;
 use App\Http\Controllers\ChatGroupController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\DashboardController;
@@ -61,6 +62,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/messenger/direct/{contact}', [MessengerController::class, 'sendDirect'])->name('messenger.send-direct');
     Route::post('/messenger/group/{chatGroup}', [MessengerController::class, 'sendGroup'])->name('messenger.send-group');
     Route::post('/messenger/direct/{contact}/typing', [MessengerController::class, 'typing'])->name('messenger.typing');
+    Route::post('/calls/start/{contact}', [CallSessionController::class, 'start'])->name('calls.start');
+    Route::get('/calls/poll', [CallSessionController::class, 'poll'])->name('calls.poll');
+    Route::get('/calls/{callSession}', [CallSessionController::class, 'show'])->name('calls.show');
+    Route::post('/calls/{callSession}/accept', [CallSessionController::class, 'accept'])->name('calls.accept');
+    Route::post('/calls/{callSession}/reject', [CallSessionController::class, 'reject'])->name('calls.reject');
+    Route::post('/calls/{callSession}/end', [CallSessionController::class, 'end'])->name('calls.end');
+    Route::post('/calls/{callSession}/signal', [CallSessionController::class, 'signal'])->name('calls.signal');
     Route::get('/messages', [DirectMessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{contact}', [DirectMessageController::class, 'show'])->name('messages.show');
     Route::get('/messages/{contact}/feed', [DirectMessageController::class, 'feed'])->name('messages.feed');

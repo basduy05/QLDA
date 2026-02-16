@@ -7,8 +7,8 @@
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ route('chat-groups.index') }}" class="btn-secondary text-xs">{{ __('Manage Groups') }}</a>
-                @if ($callPrimary)
-                    <button type="button" id="open-call-primary" class="btn-primary text-xs">{{ __('Call (Embedded)') }}</button>
+                @if ($activeType === 'direct')
+                    <button type="button" id="start-call-header" class="btn-primary text-xs">{{ __('Call') }}</button>
                 @endif
             </div>
         </div>
@@ -43,20 +43,13 @@
                 @if ($activeType)
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div>
-                            <p class="font-semibold text-slate-900">
-                                {{ $activeType === 'direct' ? $activeTarget->name : $activeTarget->name }}
-                            </p>
+                            <p class="font-semibold text-slate-900">{{ $activeTarget->name }}</p>
                             <p class="text-xs text-slate-500" id="typing-indicator">
                                 {{ $activeType === 'direct' && $typing ? __('Typing...') : '' }}
                             </p>
                         </div>
-                        @if ($callPrimary)
-                            <div class="flex items-center gap-2">
-                                <button type="button" id="open-call-inline" class="btn-secondary text-xs">{{ __('Start Call') }}</button>
-                                @if ($callBackup)
-                                    <button type="button" id="open-call-backup" class="btn-secondary text-xs">{{ __('Backup Call') }}</button>
-                                @endif
-                            </div>
+                        @if ($activeType === 'direct')
+                            <button type="button" id="start-call-inline" class="btn-secondary text-xs">{{ __('Start Call') }}</button>
                         @endif
                     </div>
 
@@ -88,6 +81,38 @@
         </div>
     </div>
 
+    @if ($activeType === 'direct')
+           <div id="call-data"
+               class="hidden"
+               data-contact-id="{{ $activeTarget->id }}"
+               data-auth-id="{{ auth()->id() }}"
+               data-ice='@json(config("webrtc.ice_servers"))'></div>
+
+        <div id="call-modal" class="fixed inset-0 z-50 hidden bg-slate-900/70 p-4">
+            <div class="mx-auto h-full max-w-6xl rounded-2xl bg-white shadow-xl flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                    <h3 id="call-title" class="font-semibold text-slate-900">{{ __('Call') }}</h3>
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="accept-call" class="btn-primary text-xs hidden">{{ __('Accept') }}</button>
+                        <button type="button" id="reject-call" class="btn-secondary text-xs hidden">{{ __('Reject') }}</button>
+                        <button type="button" id="end-call" class="btn-secondary text-xs hidden">{{ __('End') }}</button>
+                        <button type="button" id="close-call" class="btn-secondary text-xs">{{ __('Close') }}</button>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-3 p-4 bg-slate-50">
+                    <div class="card p-3">
+                        <p class="text-xs text-slate-500 mb-2">{{ __('Remote') }}</p>
+                        <video id="remote-video" class="w-full rounded-xl bg-black" autoplay playsinline></video>
+                    </div>
+                    <div class="card p-3">
+                        <p class="text-xs text-slate-500 mb-2">{{ __('You') }}</p>
+                        <video id="local-video" class="w-full rounded-xl bg-black" autoplay playsinline muted></video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @if ($activeType)
         <script>
             (function () {
@@ -97,9 +122,12 @@
                 const typingEl = document.getElementById('typing-indicator');
                 const type = "{{ $activeType }}";
                 const feedEndpoint = type === 'direct'
-                    ? "{{ $activeType === 'direct' ? route('messenger.direct-feed', $activeTarget) : '' }}"
-                    : "{{ $activeType === 'group' ? route('messenger.group-feed', $activeTarget) : '' }}";
-                const typingEndpoint = "{{ $activeType === 'direct' ? route('messenger.typing', $activeTarget) : '' }}";
+                    ? "{{ route('messenger.direct-feed', $activeTarget) }}"
+                    : "{{ route('messenger.group-feed', $activeTarget) }}";
+                const typingEndpoint = type === 'direct'
+                    ? "{{ route('messenger.typing', $activeTarget) }}"
+                    : '';
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 let loading = false;
                 let typingTick = 0;
 
@@ -140,9 +168,7 @@
                     composer.addEventListener('keydown', function (event) {
                         if (event.key === 'Enter' && !event.ctrlKey) {
                             event.preventDefault();
-                            if (form) {
-                                form.submit();
-                            }
+                            form?.submit();
                         }
                     });
 
@@ -155,13 +181,14 @@
                         if (now - typingTick < 2000) {
                             return;
                         }
+
                         typingTick = now;
 
                         fetch(typingEndpoint, {
                             method: 'POST',
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                'X-CSRF-TOKEN': csrf,
                             },
                             credentials: 'same-origin',
                         });
@@ -176,65 +203,269 @@
         </script>
     @endif
 
-    @if ($callPrimary)
-        <div id="call-config" data-primary="{{ $callPrimary }}" data-backup="{{ $callBackup ?? '' }}" class="hidden"></div>
-
-        <div id="call-modal" class="fixed inset-0 z-50 hidden bg-slate-900/70 p-4">
-            <div class="mx-auto h-full max-w-6xl rounded-2xl bg-white shadow-xl flex flex-col overflow-hidden">
-                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                    <h3 class="font-semibold text-slate-900">{{ __('Embedded Call') }}</h3>
-                    <div class="flex items-center gap-2">
-                        @if ($callBackup)
-                            <button type="button" id="switch-call-backup" class="btn-secondary text-xs">{{ __('Switch Backup') }}</button>
-                        @endif
-                        <button type="button" id="close-call" class="btn-secondary text-xs">{{ __('Close') }}</button>
-                    </div>
-                </div>
-                <iframe id="call-frame" class="w-full flex-1" allow="camera; microphone; fullscreen; display-capture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-            </div>
-        </div>
-
+    @if ($activeType === 'direct')
         <script>
             (function () {
                 const modal = document.getElementById('call-modal');
-                const frame = document.getElementById('call-frame');
-                const openPrimaryHeader = document.getElementById('open-call-primary');
-                const openPrimaryInline = document.getElementById('open-call-inline');
-                const openBackupInline = document.getElementById('open-call-backup');
-                const switchBackup = document.getElementById('switch-call-backup');
-                const closeCall = document.getElementById('close-call');
-                const callConfig = document.getElementById('call-config');
+                const startHeader = document.getElementById('start-call-header');
+                const startInline = document.getElementById('start-call-inline');
+                const acceptBtn = document.getElementById('accept-call');
+                const rejectBtn = document.getElementById('reject-call');
+                const endBtn = document.getElementById('end-call');
+                const closeBtn = document.getElementById('close-call');
+                const titleNode = document.getElementById('call-title');
+                const remoteVideo = document.getElementById('remote-video');
+                const localVideo = document.getElementById('local-video');
+                const callData = document.getElementById('call-data');
 
-                const primaryUrl = callConfig?.dataset.primary || '';
-                const backupUrl = callConfig?.dataset.backup || '';
+                const contactId = Number(callData?.dataset.contactId || 0);
+                const authId = Number(callData?.dataset.authId || 0);
+                const iceServers = JSON.parse(callData?.dataset.ice || '[]');
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-                const openWith = (url) => {
-                    if (!modal || !frame || !url) {
-                        return;
+                let currentCall = null;
+                let pc = null;
+                let localStream = null;
+                let ringingCtx = null;
+                let ringingOsc = null;
+                let locked = false;
+
+                const api = async (url, options = {}) => {
+                    const headers = Object.assign({
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrf,
+                    }, options.headers || {});
+
+                    const response = await fetch(url, Object.assign({
+                        credentials: 'same-origin',
+                        headers,
+                    }, options));
+
+                    if (!response.ok) {
+                        throw new Error('Request failed');
                     }
-                    frame.src = url;
-                    modal.classList.remove('hidden');
+
+                    return response.json();
                 };
 
-                const close = () => {
-                    if (!modal || !frame) {
-                        return;
-                    }
-                    frame.src = '';
-                    modal.classList.add('hidden');
+                const closeModal = () => {
+                    modal?.classList.add('hidden');
                 };
 
-                openPrimaryHeader?.addEventListener('click', () => openWith(primaryUrl));
-                openPrimaryInline?.addEventListener('click', () => openWith(primaryUrl));
-                openBackupInline?.addEventListener('click', () => openWith(backupUrl));
-                switchBackup?.addEventListener('click', () => openWith(backupUrl));
-                closeCall?.addEventListener('click', close);
+                const stopRingtone = () => {
+                    try { ringingOsc?.stop(); } catch (_) {}
+                    ringingOsc = null;
+                    if (ringingCtx) {
+                        ringingCtx.close();
+                        ringingCtx = null;
+                    }
+                };
+
+                const startRingtone = () => {
+                    if (ringingCtx) return;
+                    try {
+                        ringingCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        ringingOsc = ringingCtx.createOscillator();
+                        const gain = ringingCtx.createGain();
+                        ringingOsc.frequency.value = 660;
+                        gain.gain.value = 0.05;
+                        ringingOsc.connect(gain);
+                        gain.connect(ringingCtx.destination);
+                        ringingOsc.start();
+                    } catch (_) {}
+                };
+
+                const resetPeer = () => {
+                    if (pc) {
+                        try { pc.close(); } catch (_) {}
+                    }
+                    pc = null;
+
+                    if (localStream) {
+                        localStream.getTracks().forEach((track) => track.stop());
+                    }
+                    localStream = null;
+
+                    if (localVideo) localVideo.srcObject = null;
+                    if (remoteVideo) remoteVideo.srcObject = null;
+                };
+
+                const ensurePeer = async () => {
+                    if (pc) return pc;
+
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                    if (localVideo) localVideo.srcObject = localStream;
+
+                    pc = new RTCPeerConnection({ iceServers });
+                    localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
+
+                    pc.ontrack = (event) => {
+                        if (remoteVideo) remoteVideo.srcObject = event.streams[0];
+                    };
+
+                    return pc;
+                };
+
+                const waitIceComplete = (peer) => new Promise((resolve) => {
+                    if (peer.iceGatheringState === 'complete') {
+                        resolve();
+                        return;
+                    }
+
+                    const handler = () => {
+                        if (peer.iceGatheringState === 'complete') {
+                            peer.removeEventListener('icegatheringstatechange', handler);
+                            resolve();
+                        }
+                    };
+
+                    peer.addEventListener('icegatheringstatechange', handler);
+                });
+
+                const showIncoming = () => {
+                    modal?.classList.remove('hidden');
+                    if (titleNode) titleNode.textContent = "{{ __('Incoming call') }}";
+                    acceptBtn?.classList.remove('hidden');
+                    rejectBtn?.classList.remove('hidden');
+                    endBtn?.classList.add('hidden');
+                };
+
+                const showActive = (titleText) => {
+                    modal?.classList.remove('hidden');
+                    if (titleNode) titleNode.textContent = titleText;
+                    acceptBtn?.classList.add('hidden');
+                    rejectBtn?.classList.add('hidden');
+                    endBtn?.classList.remove('hidden');
+                };
+
+                const startCall = async () => {
+                    try {
+                        const payload = await api("{{ route('calls.start', $activeTarget) }}", { method: 'POST' });
+                        currentCall = payload.call;
+                        showActive("{{ __('Calling...') }}");
+                    } catch (_) {}
+                };
+
+                const sync = async () => {
+                    if (locked) return;
+                    locked = true;
+
+                    try {
+                        const payload = await api("{{ route('calls.poll') }}");
+                        const call = payload.call;
+
+                        if (!call) {
+                            stopRingtone();
+                            currentCall = null;
+                            return;
+                        }
+
+                        if (![call.caller_id, call.callee_id].includes(contactId)) {
+                            return;
+                        }
+
+                        currentCall = call;
+
+                        if (call.status === 'ringing' && call.callee_id === authId) {
+                            startRingtone();
+                            showIncoming();
+                            return;
+                        }
+
+                        if (call.status === 'active') {
+                            stopRingtone();
+                            showActive("{{ __('In call') }}");
+
+                            if (call.caller_id === authId && !call.offer_sdp) {
+                                const peer = await ensurePeer();
+                                const offer = await peer.createOffer();
+                                await peer.setLocalDescription(offer);
+                                await waitIceComplete(peer);
+
+                                await api("{{ url('/calls') }}/" + call.id + "/signal", {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ type: 'offer', sdp: peer.localDescription.sdp }),
+                                });
+                            }
+
+                            if (call.offer_sdp && call.callee_id === authId) {
+                                const peer = await ensurePeer();
+                                if (!peer.currentRemoteDescription) {
+                                    await peer.setRemoteDescription({ type: 'offer', sdp: call.offer_sdp });
+                                    const answer = await peer.createAnswer();
+                                    await peer.setLocalDescription(answer);
+                                    await waitIceComplete(peer);
+
+                                    await api("{{ url('/calls') }}/" + call.id + "/signal", {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ type: 'answer', sdp: peer.localDescription.sdp }),
+                                    });
+                                }
+                            }
+
+                            if (call.answer_sdp && call.caller_id === authId) {
+                                const peer = await ensurePeer();
+                                if (!peer.currentRemoteDescription) {
+                                    await peer.setRemoteDescription({ type: 'answer', sdp: call.answer_sdp });
+                                }
+                            }
+                        }
+
+                        if (['ended', 'rejected', 'missed'].includes(call.status)) {
+                            stopRingtone();
+                            resetPeer();
+                            closeModal();
+                            currentCall = null;
+                        }
+                    } catch (_) {
+                    } finally {
+                        locked = false;
+                    }
+                };
+
+                const accept = async () => {
+                    if (!currentCall) return;
+                    try {
+                        await api("{{ url('/calls') }}/" + currentCall.id + "/accept", { method: 'POST' });
+                        stopRingtone();
+                        showActive("{{ __('Connecting...') }}");
+                    } catch (_) {}
+                };
+
+                const reject = async () => {
+                    if (!currentCall) return;
+                    try {
+                        await api("{{ url('/calls') }}/" + currentCall.id + "/reject", { method: 'POST' });
+                    } catch (_) {}
+                    stopRingtone();
+                    resetPeer();
+                    closeModal();
+                };
+
+                const end = async () => {
+                    if (!currentCall) return;
+                    try {
+                        await api("{{ url('/calls') }}/" + currentCall.id + "/end", { method: 'POST' });
+                    } catch (_) {}
+                    stopRingtone();
+                    resetPeer();
+                    closeModal();
+                };
+
+                startHeader?.addEventListener('click', startCall);
+                startInline?.addEventListener('click', startCall);
+                acceptBtn?.addEventListener('click', accept);
+                rejectBtn?.addEventListener('click', reject);
+                endBtn?.addEventListener('click', end);
+                closeBtn?.addEventListener('click', closeModal);
 
                 modal?.addEventListener('click', (event) => {
-                    if (event.target === modal) {
-                        close();
-                    }
+                    if (event.target === modal) closeModal();
                 });
+
+                setInterval(sync, 2000);
             })();
         </script>
     @endif
