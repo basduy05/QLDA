@@ -35,10 +35,15 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $role = User::where('role', 'admin')->exists() ? 'user' : 'admin';
+        $locale = app()->getLocale();
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $role,
+            'locale' => $locale,
         ]);
 
         event(new Registered($user));
