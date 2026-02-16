@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class MessageReceivedNotification extends Notification
@@ -19,15 +18,7 @@ class MessageReceivedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject($this->title)
-            ->line($this->message)
-            ->action(__('Open'), url($this->url));
+        return ['database'];
     }
 
     public function toArray(object $notifiable): array

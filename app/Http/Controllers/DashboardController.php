@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -53,14 +54,65 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
+        $projectStatuses = ['planning', 'active', 'on_hold', 'completed'];
+        $projectStatusData = collect($projectStatuses)
+            ->map(function (string $status) use ($projectQuery) {
+                return [
+                    'label' => Str::headline($status),
+                    'value' => (clone $projectQuery)->where('status', $status)->count(),
+                ];
+            })
+            ->values();
+
+        $taskStatuses = ['todo', 'in_progress', 'done'];
+        $taskStatusData = collect($taskStatuses)
+            ->map(function (string $status) use ($taskQuery) {
+                return [
+                    'label' => Str::headline($status),
+                    'value' => (clone $taskQuery)->where('status', $status)->count(),
+                ];
+            })
+            ->values();
+
+        $months = collect(range(5, 0, -1))
+            ->map(fn (int $offset) => now()->startOfMonth()->subMonths($offset))
+            ->push(now()->startOfMonth())
+            ->values();
+
+        $taskTrendData = $months->map(function (Carbon $month) use ($taskQuery) {
+            $start = $month->copy();
+            $end = $month->copy()->endOfMonth();
+
+            return [
+                'label' => $month->translatedFormat('M'),
+                'created' => (clone $taskQuery)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->count(),
+                'completed' => (clone $taskQuery)
+                    ->where('status', 'done')
+                    ->whereBetween('updated_at', [$start, $end])
+                    ->count(),
+            ];
+        })->values();
+
+        $doneTasksCount = (clone $taskQuery)->where('status', 'done')->count();
+        $completionRate = $tasksCount > 0
+            ? (int) round(($doneTasksCount / $tasksCount) * 100)
+            : 0;
+
         return view('dashboard', [
             'projectsCount' => $projectsCount,
             'activeProjectsCount' => $activeProjectsCount,
             'tasksCount' => $tasksCount,
             'openTasksCount' => $openTasksCount,
+            'doneTasksCount' => $doneTasksCount,
+            'completionRate' => $completionRate,
             'recentProjects' => $recentProjects,
             'upcomingTasks' => $upcomingTasks,
             'overdueTasks' => $overdueTasks,
+            'projectStatusData' => $projectStatusData,
+            'taskStatusData' => $taskStatusData,
+            'taskTrendData' => $taskTrendData,
             'isAdmin' => $user->isAdmin(),
         ]);
     }

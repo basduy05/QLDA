@@ -258,6 +258,8 @@
                 let typingTick = 0;
                 let typingTimeout = null;
                 let submitLocked = false;
+                let lastSubmitAt = 0;
+                let unlockGuard = null;
                 let lastFeedHtml = feed ? feed.innerHTML : '';
 
                 if (groupSettingsToggle && groupSettingsPanel) {
@@ -335,6 +337,22 @@
                     }, 120);
                 };
 
+                const fetchWithTimeout = async (url, options = {}, timeoutMs = 9000) => {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+                    try {
+                        return await fetch(url, {
+                            ...options,
+                            signal: controller.signal,
+                        });
+                    } finally {
+                        clearTimeout(timeoutId);
+                    }
+                };
+
+                const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
                 const refresh = async () => {
                     if (loading || !feed) {
                         return;
@@ -375,6 +393,11 @@
                     composer.addEventListener('keydown', function (event) {
                         if (event.key === 'Enter' && !event.ctrlKey) {
                             event.preventDefault();
+
+                            if (submitLocked) {
+                                return;
+                            }
+
                             form?.requestSubmit();
                         }
                     });
@@ -410,6 +433,12 @@
                             return;
                         }
 
+                        const now = Date.now();
+                        if (now - lastSubmitAt < 700) {
+                            return;
+                        }
+                        lastSubmitAt = now;
+
                         const body = (composer.value || '').trim();
                         if (!body) {
                             showComposerError("{{ __('Message cannot be empty.') }}");
@@ -419,20 +448,44 @@
                         showComposerError('');
                         setSubmitState(true);
 
-                        const formData = new FormData(form);
-                        formData.set('body', body);
+                        clearTimeout(unlockGuard);
+                        unlockGuard = setTimeout(() => {
+                            setSubmitState(false);
+                            showComposerError("{{ __('Send request timed out. Please try again.') }}");
+                        }, 15000);
 
                         try {
-                            const response = await fetch(form.action, {
-                                method: 'POST',
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': csrf,
-                                },
-                                credentials: 'same-origin',
-                                body: formData,
-                            });
+                            let response = null;
+
+                            for (let attempt = 0; attempt < 2; attempt += 1) {
+                                try {
+                                    const formData = new FormData(form);
+                                    formData.set('body', body);
+
+                                    response = await fetchWithTimeout(form.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': csrf,
+                                        },
+                                        credentials: 'same-origin',
+                                        body: formData,
+                                    }, 9000);
+                                    break;
+                                } catch (error) {
+                                    if (attempt === 0) {
+                                        await wait(300);
+                                        continue;
+                                    }
+
+                                    throw error;
+                                }
+                            }
+
+                            if (!response) {
+                                throw new Error('send-no-response');
+                            }
 
                             if (response.status === 422) {
                                 const payload = await response.json();
@@ -449,9 +502,9 @@
                             composer.focus();
                             scheduleRefresh();
                         } catch (_) {
-                            form.submit();
-                            return;
+                            showComposerError("{{ __('Network is unstable. Please try sending again.') }}");
                         } finally {
+                            clearTimeout(unlockGuard);
                             setSubmitState(false);
                         }
                     });

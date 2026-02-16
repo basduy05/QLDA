@@ -561,7 +561,7 @@ class MessengerController extends Controller
         }
 
         try {
-            Http::timeout(2)->post(rtrim($endpoint, '/').'/broadcast', [
+            Http::connectTimeout(1)->timeout(1)->post(rtrim($endpoint, '/').'/broadcast', [
                 'secret' => $secret,
                 'channels' => $channels,
                 'event' => $event,
