@@ -18,7 +18,9 @@ class ChatGroup extends Model
 
     public function members()
     {
-        return $this->belongsToMany(User::class, 'chat_group_members')->withTimestamps();
+        return $this->belongsToMany(User::class, 'chat_group_members')
+            ->withPivot('nickname')
+            ->withTimestamps();
     }
 
     public function messages()

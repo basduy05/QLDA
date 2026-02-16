@@ -50,6 +50,8 @@
                             <p class="font-semibold text-slate-900">{{ $activeTarget->name }}</p>
                             @if ($activeType === 'direct')
                                 <p class="text-[11px] text-slate-500">{{ $activeTarget->activityStatusLabel() }}</p>
+                            @elseif ($activeType === 'group')
+                                <p class="text-[11px] text-slate-500">{{ $groupMembers->count() }} {{ __('members') }}</p>
                             @endif
                             <p class="text-xs text-slate-500" id="typing-indicator">
                                 {{ $activeType === 'direct' && $typing ? __('Typing...') : '' }}
@@ -60,11 +62,59 @@
                         @endif
                     </div>
 
+                    @if ($activeType === 'group')
+                        <div class="py-2 border-b border-slate-100 space-y-2">
+                            <form method="POST" action="{{ route('messenger.group.rename', $activeTarget) }}" class="flex items-end gap-2">
+                                @csrf
+                                @method('PATCH')
+                                <div class="flex-1">
+                                    <label for="group-name" class="text-[11px] text-slate-500">{{ __('Group name') }}</label>
+                                    <input id="group-name" type="text" name="name" value="{{ old('name', $activeTarget->name) }}" class="mt-1 w-full rounded-xl border-slate-200 text-sm" maxlength="255" required>
+                                </div>
+                                <button type="submit" class="btn-secondary text-xs">{{ __('Rename group') }}</button>
+                            </form>
+
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($groupMembers as $member)
+                                    @php($memberName = $groupNicknames[$member->id] ?? $member->name)
+                                    <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-700">
+                                        <span class="inline-flex h-2 w-2 rounded-full {{ $member->isOnline() ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>
+                                        <span>{{ $memberName }}</span>
+                                    </span>
+                                @endforeach
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-2">
+                                @foreach ($groupMembers as $member)
+                                    @php($memberName = $groupNicknames[$member->id] ?? $member->name)
+                                    <form method="POST" action="{{ route('messenger.group.member-nickname', [$activeTarget, $member]) }}" class="flex items-end gap-2 rounded-xl border border-slate-200 p-2">
+                                        @csrf
+                                        @method('PATCH')
+                                        <div class="flex-1">
+                                            <p class="text-[11px] text-slate-500">{{ __('Nickname for :name', ['name' => $member->name]) }}</p>
+                                            <input type="text" name="nickname" value="{{ old('nickname_'.$member->id, $member->pivot->nickname ?? '') }}" maxlength="40" class="mt-1 w-full rounded-xl border-slate-200 text-sm" placeholder="{{ __('Current: :nick', ['nick' => $memberName]) }}">
+                                        </div>
+                                        <button type="submit" class="btn-secondary text-xs">{{ __('Save') }}</button>
+                                    </form>
+                                @endforeach
+                            </div>
+
+                                @if ($canDeleteGroup)
+                                    <form method="POST" action="{{ route('chat-groups.destroy', $activeTarget) }}" class="ml-auto">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-secondary text-xs text-red-600 border-red-200 hover:border-red-300">{{ __('Delete group') }}</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
                     <div id="messenger-feed" class="flex-1 overflow-y-auto py-3 space-y-2">
                         @if ($activeType === 'direct')
                             @include('messenger.partials.direct-feed', ['messages' => $messages, 'authUserId' => auth()->id()])
                         @else
-                            @include('messenger.partials.group-feed', ['messages' => $messages, 'authUserId' => auth()->id()])
+                            @include('messenger.partials.group-feed', ['messages' => $messages, 'authUserId' => auth()->id(), 'nicknames' => $groupNicknames])
                         @endif
                     </div>
 

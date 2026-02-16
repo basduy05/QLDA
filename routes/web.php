@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DirectMessageController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\MessengerController;
+use App\Http\Controllers\MessengerTermsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -54,6 +55,14 @@ Route::middleware('auth')->group(function () {
         ->name('notifications.read');
     Route::get('/notifications/pulse', [NotificationController::class, 'pulse'])
         ->name('notifications.pulse');
+    Route::get('/messenger/terms', [MessengerTermsController::class, 'show'])
+        ->name('messenger.terms.show');
+    Route::post('/messenger/terms/accept', [MessengerTermsController::class, 'accept'])
+        ->name('messenger.terms.accept');
+    Route::post('/messenger/terms/decline', [MessengerTermsController::class, 'decline'])
+        ->name('messenger.terms.decline');
+
+    Route::middleware('messenger.terms')->group(function () {
     Route::get('/messenger', [MessengerController::class, 'index'])->name('messenger.index');
     Route::get('/messenger/direct/{contact}', [MessengerController::class, 'direct'])->name('messenger.direct');
     Route::get('/messenger/group/{chatGroup}', [MessengerController::class, 'group'])->name('messenger.group');
@@ -61,7 +70,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/messenger/group/{chatGroup}/feed', [MessengerController::class, 'groupFeed'])->name('messenger.group-feed');
     Route::post('/messenger/direct/{contact}', [MessengerController::class, 'sendDirect'])->name('messenger.send-direct');
     Route::post('/messenger/group/{chatGroup}', [MessengerController::class, 'sendGroup'])->name('messenger.send-group');
+    Route::patch('/messenger/group/{chatGroup}/name', [MessengerController::class, 'updateGroupName'])->name('messenger.group.rename');
+    Route::patch('/messenger/group/{chatGroup}/members/{member}/nickname', [MessengerController::class, 'updateGroupMemberNickname'])->name('messenger.group.member-nickname');
     Route::post('/messenger/direct/{contact}/typing', [MessengerController::class, 'typing'])->name('messenger.typing');
+    });
     Route::post('/calls/start/{contact}', [CallSessionController::class, 'start'])->name('calls.start');
     Route::get('/calls/poll', [CallSessionController::class, 'poll'])->name('calls.poll');
     Route::get('/calls/{callSession}', [CallSessionController::class, 'show'])->name('calls.show');
@@ -76,6 +88,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat-groups', [ChatGroupController::class, 'index'])->name('chat-groups.index');
     Route::post('/chat-groups', [ChatGroupController::class, 'store'])->name('chat-groups.store');
     Route::get('/chat-groups/{chatGroup}', [ChatGroupController::class, 'show'])->name('chat-groups.show');
+    Route::post('/chat-groups/{chatGroup}/nickname', [ChatGroupController::class, 'updateNickname'])
+        ->name('chat-groups.nickname');
+    Route::delete('/chat-groups/{chatGroup}', [ChatGroupController::class, 'destroy'])
+        ->name('chat-groups.destroy');
     Route::get('/chat-groups/{chatGroup}/messages', [ChatGroupController::class, 'messages'])
         ->name('chat-groups.messages.index');
     Route::post('/chat-groups/{chatGroup}/messages', [ChatMessageController::class, 'store'])
@@ -86,6 +102,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/admin/users/{user}', [AdminUserController::class, 'update'])
         ->middleware('admin')
         ->name('admin.users.update');
+    Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])
+        ->middleware('admin')
+        ->name('admin.users.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

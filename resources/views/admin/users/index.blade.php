@@ -13,6 +13,9 @@
         @if ($errors->has('role'))
             <p class="text-sm text-red-600 mb-4">{{ $errors->first('role') }}</p>
         @endif
+        @if ($errors->has('manage'))
+            <p class="text-sm text-red-600 mb-4">{{ $errors->first('manage') }}</p>
+        @endif
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
                 <thead class="text-left table-head">
@@ -27,22 +30,41 @@
                 <tbody class="divide-y divide-slate-100">
                     @foreach ($users as $user)
                         <tr>
-                            <td class="py-4 font-semibold text-slate-900">{{ $user->name }}</td>
-                            <td class="py-4 text-slate-600">{{ $user->email }}</td>
-                            <td class="py-4"><span class="badge bg-slate-100 text-slate-700">{{ __(ucwords($user->role)) }}</span></td>
-                            <td class="py-4 text-slate-600">{{ strtoupper($user->locale) }}</td>
                             <td class="py-4">
-                                <form method="POST" action="{{ route('admin.users.update', $user) }}" class="flex items-center gap-2">
+                                <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-2 min-w-44">
                                     @csrf
                                     @method('patch')
+                                    <input type="text" name="name" value="{{ old('name', $user->name) }}" class="w-full rounded-md border border-slate-200 px-2 py-1 text-xs" required>
+                            </td>
+                            <td class="py-4">
+                                    <input type="email" name="email" value="{{ old('email', $user->email) }}" class="w-full rounded-md border border-slate-200 px-2 py-1 text-xs" required>
+                            </td>
+                            <td class="py-4">
                                     <select name="role" class="rounded-md border border-slate-200 px-2 py-1 text-xs">
                                         <option value="admin" @selected($user->role === 'admin')>{{ __('Admin') }}</option>
                                         <option value="user" @selected($user->role === 'user')>{{ __('User') }}</option>
                                     </select>
-                                    <button type="submit" class="text-xs px-3 py-1 rounded-full bg-slate-900 text-white">
-                                        {{ __('Save') }}
-                                    </button>
+                            </td>
+                            <td class="py-4">
+                                    <select name="locale" class="rounded-md border border-slate-200 px-2 py-1 text-xs">
+                                        <option value="vi" @selected($user->locale === 'vi')>VI</option>
+                                        <option value="en" @selected($user->locale === 'en')>EN</option>
+                                    </select>
+                            </td>
+                            <td class="py-4">
+                                    <div class="flex items-center gap-2">
+                                        <button type="submit" class="text-xs px-3 py-1 rounded-full bg-slate-900 text-white">
+                                            {{ __('Save') }}
+                                        </button>
                                 </form>
+                                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-xs px-3 py-1 rounded-full border border-red-200 text-red-600">
+                                                {{ __('Delete') }}
+                                            </button>
+                                        </form>
+                                    </div>
                             </td>
                         </tr>
                     @endforeach

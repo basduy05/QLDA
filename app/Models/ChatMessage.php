@@ -10,7 +10,15 @@ class ChatMessage extends Model
         'chat_group_id',
         'user_id',
         'body',
+        'is_system',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_system' => 'boolean',
+        ];
+    }
 
     public function group()
     {

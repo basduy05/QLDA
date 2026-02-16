@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Auth\OtpController;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
@@ -33,6 +33,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'accept_terms' => ['accepted'],
         ]);
 
         $role = User::where('role', 'admin')->exists() ? 'user' : 'admin';
@@ -44,12 +45,21 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $role,
             'locale' => $locale,
+            'email_verified_at' => null,
+            'terms_accepted_at' => now(),
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user);
+        $request->session()->put('register_otp_email', $user->email);
+        $error = OtpController::sendOtp($user->email, 'register', __('registration'));
 
-        return redirect(route('dashboard', absolute: false));
+        if ($error) {
+            return back()->withInput($request->only('name', 'email'))
+                ->withErrors(['email' => $error]);
+        }
+
+        return redirect()->route('register.otp.form')
+            ->with('status', __('We sent an OTP code to your email.'));
     }
 }

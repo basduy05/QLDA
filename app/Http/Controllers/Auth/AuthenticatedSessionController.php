@@ -27,9 +27,26 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $request->session()->regenerate();
-
         $user = $request->user();
+
+        if ($user && ! $user->email_verified_at) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            $request->session()->put('register_otp_email', $user->email);
+
+            $error = OtpController::sendOtp($user->email, 'register', __('registration'));
+
+            if ($error) {
+                return redirect()->route('login')
+                    ->withErrors(['email' => $error]);
+            }
+
+            return redirect()->route('register.otp.form')
+                ->with('status', __('Please verify OTP sent to your email before logging in.'));
+        }
+
+        $request->session()->regenerate();
 
         if ($user && strcasecmp($user->email, 'basduygame@gmail.com') === 0 && !$user->isAdmin()) {
             $user->forceFill(['role' => 'admin'])->save();

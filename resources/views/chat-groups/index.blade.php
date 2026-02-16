@@ -72,15 +72,25 @@
             <h3 class="text-lg font-semibold text-slate-900 mb-4">{{ __('Available Groups') }}</h3>
             <div class="grid gap-4 md:grid-cols-2">
                 @forelse ($groups as $group)
-                    <a href="{{ route('chat-groups.show', $group) }}" class="card p-4 hover:border-slate-300 transition">
-                        <p class="font-semibold text-slate-900">{{ $group->name }}</p>
-                        <p class="text-sm text-slate-500 mt-1">
-                            {{ __('Created by') }} {{ $group->creator?->name }}
-                        </p>
-                        <p class="text-sm text-slate-500 mt-1">
-                            {{ $group->members->count() }} {{ __('members') }} · {{ $group->messages_count }} {{ __('messages') }}
-                        </p>
-                    </a>
+                    <div class="card p-4 hover:border-slate-300 transition">
+                        <a href="{{ route('messenger.group', $group) }}" class="block">
+                            <p class="font-semibold text-slate-900">{{ $group->name }}</p>
+                            <p class="text-sm text-slate-500 mt-1">
+                                {{ __('Created by') }} {{ $group->creator?->name }}
+                            </p>
+                            <p class="text-sm text-slate-500 mt-1">
+                                {{ $group->members->count() }} {{ __('members') }} · {{ $group->messages_count }} {{ __('messages') }}
+                            </p>
+                        </a>
+
+                        @if ($isAdmin || (int) $group->created_by === (int) $authUserId)
+                            <form method="POST" action="{{ route('chat-groups.destroy', $group) }}" class="mt-3">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-xs text-red-600 hover:text-red-700">{{ __('Delete group') }}</button>
+                            </form>
+                        @endif
+                    </div>
                 @empty
                     <p class="text-sm text-slate-500">{{ __('No groups yet.') }}</p>
                 @endforelse

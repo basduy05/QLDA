@@ -29,6 +29,11 @@ class MessengerController extends Controller
             'activeTarget' => null,
             'messages' => collect(),
             'typing' => false,
+            'groupMembers' => collect(),
+            'groupNicknames' => [],
+            'myGroupNickname' => null,
+            'canEditNickname' => false,
+            'canDeleteGroup' => false,
         ]);
     }
 
@@ -51,6 +56,11 @@ class MessengerController extends Controller
             'activeTarget' => $contact,
             'messages' => $this->getDirectMessages($conversation->id),
             'typing' => $this->isTyping($contact->id, $user->id),
+            'groupMembers' => collect(),
+            'groupNicknames' => [],
+            'myGroupNickname' => null,
+            'canEditNickname' => false,
+            'canDeleteGroup' => false,
         ]);
     }
 
@@ -62,11 +72,20 @@ class MessengerController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        $chatGroup->load(['members']);
+        $myMember = $chatGroup->members->firstWhere('id', $user->id);
+        $canEditNickname = (bool) $myMember;
+
         return view('messenger.index', $this->buildBasePayload($user) + [
             'activeType' => 'group',
             'activeTarget' => $chatGroup,
             'messages' => $this->getGroupMessages($chatGroup->id),
             'typing' => false,
+            'groupMembers' => $chatGroup->members->sortBy('name')->values(),
+            'groupNicknames' => $this->getGroupNicknames($chatGroup),
+            'myGroupNickname' => $myMember?->pivot?->nickname,
+            'canEditNickname' => $canEditNickname,
+            'canDeleteGroup' => $user->isAdmin() || (int) $chatGroup->created_by === (int) $user->id,
         ]);
     }
 
@@ -102,6 +121,7 @@ class MessengerController extends Controller
             'html' => view('messenger.partials.group-feed', [
                 'messages' => $this->getGroupMessages($chatGroup->id),
                 'authUserId' => Auth::id(),
+                'nicknames' => $this->getGroupNicknames($chatGroup),
             ])->render(),
         ]);
     }
@@ -253,6 +273,81 @@ class MessengerController extends Controller
         );
 
         return response()->json(['ok' => true]);
+    }
+
+    public function updateGroupName(Request $request, ChatGroup $chatGroup)
+    {
+        $this->ensureGroupAccess($chatGroup);
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ]);
+
+        $newName = trim($data['name']);
+        if ($newName === '' || $newName === $chatGroup->name) {
+            return back();
+        }
+
+        $oldName = $chatGroup->name;
+        $chatGroup->forceFill(['name' => $newName])->save();
+
+        $this->createGroupSystemMessage(
+            $chatGroup,
+            __(':user renamed group from ":old" to ":new"', [
+                'user' => $user->name,
+                'old' => $oldName,
+                'new' => $newName,
+            ])
+        );
+
+        return redirect()->route('messenger.group', $chatGroup)
+            ->with('status', __('Group name updated.'));
+    }
+
+    public function updateGroupMemberNickname(Request $request, ChatGroup $chatGroup, User $member)
+    {
+        $this->ensureGroupAccess($chatGroup);
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (! $chatGroup->members()->where('users.id', $member->id)->exists()) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'nickname' => ['nullable', 'string', 'max:40'],
+        ]);
+
+        $oldNickname = trim((string) $chatGroup->members()
+            ->where('users.id', $member->id)
+            ->first()?->pivot?->nickname);
+
+        $newNickname = trim((string) ($data['nickname'] ?? ''));
+        $chatGroup->members()->updateExistingPivot($member->id, [
+            'nickname' => $newNickname !== '' ? $newNickname : null,
+        ]);
+
+        if ($oldNickname !== $newNickname) {
+            $displayOld = $oldNickname !== '' ? $oldNickname : $member->name;
+            $displayNew = $newNickname !== '' ? $newNickname : $member->name;
+
+            $this->createGroupSystemMessage(
+                $chatGroup,
+                __(':user changed nickname of :member from ":old" to ":new"', [
+                    'user' => $user->name,
+                    'member' => $member->name,
+                    'old' => $displayOld,
+                    'new' => $displayNew,
+                ])
+            );
+        }
+
+        return redirect()->route('messenger.group', $chatGroup)
+            ->with('status', __('Group nickname updated.'));
     }
 
     private function buildBasePayload(User $user): array
@@ -419,5 +514,45 @@ class MessengerController extends Controller
                 'message' => $exception->getMessage(),
             ]);
         }
+    }
+
+    private function createGroupSystemMessage(ChatGroup $chatGroup, string $message): void
+    {
+        ChatMessage::create([
+            'chat_group_id' => $chatGroup->id,
+            'user_id' => null,
+            'body' => $message,
+            'is_system' => true,
+        ]);
+
+        $memberIds = $chatGroup->members()->pluck('users.id')->all();
+        $channels = collect($memberIds)
+            ->map(fn ($id) => 'user.'.$id)
+            ->push('group.'.$chatGroup->id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $this->emitRealtime(
+            channels: $channels,
+            event: 'message.group',
+            payload: [
+                'group_id' => $chatGroup->id,
+            ]
+        );
+    }
+
+    private function getGroupNicknames(ChatGroup $chatGroup): array
+    {
+        if (! $chatGroup->relationLoaded('members')) {
+            $chatGroup->load('members');
+        }
+
+        return $chatGroup->members
+            ->mapWithKeys(function (User $member) {
+                $nickname = trim((string) ($member->pivot->nickname ?? ''));
+                return [$member->id => $nickname !== '' ? $nickname : $member->name];
+            })
+            ->all();
     }
 }

@@ -24,6 +24,8 @@ class User extends Authenticatable
         'password',
         'role',
         'locale',
+        'messenger_terms_accepted_at',
+        'terms_accepted_at',
     ];
 
     /**
@@ -47,6 +49,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_seen_at' => 'datetime',
+            'messenger_terms_accepted_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
         ];
     }
 

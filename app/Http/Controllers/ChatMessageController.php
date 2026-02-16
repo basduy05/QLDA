@@ -41,7 +41,7 @@ class ChatMessageController extends Controller
                 ));
             });
 
-        return redirect()->route('chat-groups.show', $chatGroup)
+        return redirect()->route('messenger.group', $chatGroup)
             ->with('status', __('Message sent.'));
     }
 
