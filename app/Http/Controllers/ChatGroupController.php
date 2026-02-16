@@ -87,6 +87,24 @@ class ChatGroupController extends Controller
         ]);
     }
 
+    public function messages(ChatGroup $chatGroup)
+    {
+        $this->purgeExpiredMessages();
+        $this->ensureAccess($chatGroup);
+
+        $messages = $chatGroup->messages()
+            ->with('user')
+            ->latest()
+            ->take(150)
+            ->get()
+            ->reverse()
+            ->values();
+
+        return view('chat-groups.partials.messages', [
+            'messages' => $messages,
+        ]);
+    }
+
     private function ensureAccess(ChatGroup $group): void
     {
         /** @var User $user */

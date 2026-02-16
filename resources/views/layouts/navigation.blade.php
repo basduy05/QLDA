@@ -26,29 +26,16 @@
                     <a href="{{ route('lang.switch', 'vi') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'vi' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200' }}">VI</a>
                     <a href="{{ route('lang.switch', 'en') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'en' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200' }}">EN</a>
                 </div>
-                <details class="relative dropdown">
-                    <summary class="dropdown-summary inline-flex items-center gap-2 px-3 py-2 border border-slate-200 text-sm rounded-full bg-white shadow-sm">
-                        <span>{{ Auth::user()->name }}</span>
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </summary>
-
-                    <div class="dropdown-panel absolute end-0 z-50 mt-2 w-48 rounded-md shadow-lg">
-                        <div class="dropdown-menu rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white">
-                            <a href="{{ route('profile.edit') }}" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out">
-                                {{ __('Profile') }}
-                            </a>
-
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out">
-                                    {{ __('Log Out') }}
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </details>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-3 py-2 border border-slate-200 text-sm rounded-full bg-white shadow-sm text-slate-700">
+                        {{ Auth::user()->name }}
+                    </span>
+                    <a href="{{ route('profile.edit') }}" class="btn-secondary text-xs px-3 py-2">{{ __('Profile') }}</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn-secondary text-xs px-3 py-2">{{ __('Log Out') }}</button>
+                    </form>
+                </div>
             </div>
 
             <div class="md:hidden">

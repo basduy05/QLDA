@@ -28,18 +28,8 @@
 
         <div class="card-strong p-6">
             <h3 class="text-lg font-semibold text-slate-900 mb-4">{{ __('Messages') }}</h3>
-            <div class="max-h-[500px] overflow-y-auto space-y-3 mb-4">
-                @forelse ($messages as $message)
-                    <div class="card p-4">
-                        <div class="flex items-center justify-between gap-3">
-                            <p class="font-semibold text-slate-900">{{ $message->user?->name }}</p>
-                            <p class="text-xs text-slate-500">{{ $message->created_at?->format('d/m/Y H:i') }}</p>
-                        </div>
-                        <p class="text-sm text-slate-700 mt-2 whitespace-pre-wrap">{{ $message->body }}</p>
-                    </div>
-                @empty
-                    <p class="text-sm text-slate-500">{{ __('No messages yet.') }}</p>
-                @endforelse
+            <div id="messages-list" class="max-h-[500px] overflow-y-auto space-y-3 mb-4">
+                @include('chat-groups.partials.messages', ['messages' => $messages])
             </div>
 
             <form method="POST" action="{{ route('chat-groups.messages.store', $group) }}" class="space-y-3">
@@ -56,4 +46,55 @@
             </form>
         </div>
     </div>
+
+    <script>
+        (function () {
+            const list = document.getElementById('messages-list');
+            const textarea = document.querySelector('textarea[name="body"]');
+            if (!list) {
+                return;
+            }
+
+            let isLoading = false;
+            const endpoint = "{{ route('chat-groups.messages.index', $group) }}";
+
+            const refreshMessages = async () => {
+                if (isLoading) {
+                    return;
+                }
+
+                if (textarea && document.activeElement === textarea) {
+                    return;
+                }
+
+                isLoading = true;
+                const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 120;
+
+                try {
+                    const response = await fetch(endpoint, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        credentials: 'same-origin',
+                    });
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const html = await response.text();
+                    list.innerHTML = html;
+
+                    if (nearBottom) {
+                        list.scrollTop = list.scrollHeight;
+                    }
+                } finally {
+                    isLoading = false;
+                }
+            };
+
+            setInterval(refreshMessages, 5000);
+            list.scrollTop = list.scrollHeight;
+        })();
+    </script>
 </x-app-layout>

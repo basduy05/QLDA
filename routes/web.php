@@ -52,6 +52,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat-groups', [ChatGroupController::class, 'index'])->name('chat-groups.index');
     Route::post('/chat-groups', [ChatGroupController::class, 'store'])->name('chat-groups.store');
     Route::get('/chat-groups/{chatGroup}', [ChatGroupController::class, 'show'])->name('chat-groups.show');
+    Route::get('/chat-groups/{chatGroup}/messages', [ChatGroupController::class, 'messages'])
+        ->name('chat-groups.messages.index');
     Route::post('/chat-groups/{chatGroup}/messages', [ChatMessageController::class, 'store'])
         ->name('chat-groups.messages.store');
     Route::get('/admin/users', [AdminUserController::class, 'index'])
