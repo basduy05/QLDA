@@ -72,12 +72,16 @@ Use real SMTP (example: Gmail):
 2. Create an App Password in Google Account security.
 3. Set these env values:
    - `MAIL_MAILER=smtp`
-   - `MAIL_SCHEME=tls`
+   - `MAIL_SCHEME=` (leave empty for port 587)
    - `MAIL_HOST=smtp.gmail.com`
    - `MAIL_PORT=587`
    - `MAIL_USERNAME=your_email@gmail.com`
    - `MAIL_PASSWORD=your_16_char_app_password`
    - `MAIL_FROM_ADDRESS=your_email@gmail.com`
+
+Alternative: use implicit TLS with port 465:
+- `MAIL_SCHEME=smtps`
+- `MAIL_PORT=465`
 4. Clear config cache:
    - `php artisan config:clear`
 

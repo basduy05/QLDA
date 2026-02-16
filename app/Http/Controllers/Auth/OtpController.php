@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -235,7 +236,7 @@ class OtpController extends Controller
             ->whereNull('used_at')
             ->update(['used_at' => now()]);
 
-        EmailOtp::create([
+        $otp = EmailOtp::create([
             'email' => $email,
             'purpose' => $purpose,
             'code_hash' => Hash::make($code),
@@ -245,7 +246,19 @@ class OtpController extends Controller
             'meta' => ['purpose_label' => $purposeLabel],
         ]);
 
-        Mail::to($email)->send(new OtpCodeMail($code, $purposeLabel));
+        try {
+            Mail::to($email)->send(new OtpCodeMail($code, $purposeLabel));
+        } catch (\Throwable $exception) {
+            $otp->delete();
+
+            Log::error('OTP email send failed', [
+                'email' => $email,
+                'purpose' => $purpose,
+                'message' => $exception->getMessage(),
+            ]);
+
+            return __('Unable to send OTP email right now. Please verify your mail configuration and try again.');
+        }
 
         return null;
     }
