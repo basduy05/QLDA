@@ -80,4 +80,12 @@
 	.dropdown-summary::-webkit-details-marker {
 		display: none;
 	}
+
+	.dropdown-panel {
+		display: none;
+	}
+
+	.dropdown[open] > .dropdown-panel {
+		display: block;
+	}
 }

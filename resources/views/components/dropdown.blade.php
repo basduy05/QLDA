@@ -13,13 +13,13 @@ $width = match ($width) {
 };
 @endphp
 
-<details class="relative">
+<details class="relative dropdown">
     <summary class="dropdown-summary">
         {{ $trigger }}
     </summary>
 
-    <div class="absolute z-50 mt-2 {{ $width }} rounded-md shadow-lg {{ $alignmentClasses }}">
-        <div class="rounded-md ring-1 ring-black ring-opacity-5 {{ $contentClasses }}">
+    <div class="dropdown-panel absolute z-50 mt-2 {{ $width }} rounded-md shadow-lg {{ $alignmentClasses }}">
+        <div class="dropdown-menu rounded-md ring-1 ring-black ring-opacity-5 {{ $contentClasses }}">
             {{ $content }}
         </div>
     </div>
