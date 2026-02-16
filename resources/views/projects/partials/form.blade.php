@@ -1,3 +1,5 @@
+@csrf
+
 @if ($errors->any())
     <div class="card p-4 mb-6 text-sm text-rose-700 bg-rose-50">
         <ul class="list-disc list-inside">

@@ -7,6 +7,7 @@
                     <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'text-slate-900' : '' }}">{{ __('Dashboard') }}</a>
                     <a href="{{ route('projects.index') }}" class="{{ request()->routeIs('projects.*') ? 'text-slate-900' : '' }}">{{ __('Projects') }}</a>
                     <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.index') ? 'text-slate-900' : '' }}">{{ __('Tasks') }}</a>
+                    <a href="{{ route('messages.index') }}" class="{{ request()->routeIs('messages.*') ? 'text-slate-900' : '' }}">{{ __('Messages') }}</a>
                     <a href="{{ route('chat-groups.index') }}" class="{{ request()->routeIs('chat-groups.*') ? 'text-slate-900' : '' }}">{{ __('Chats') }}</a>
                     @if (Auth::user()?->isAdmin())
                         <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'text-slate-900' : '' }}">{{ __('Users') }}</a>
@@ -54,6 +55,7 @@
             <a class="block" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
             <a class="block" href="{{ route('projects.index') }}">{{ __('Projects') }}</a>
             <a class="block" href="{{ route('tasks.index') }}">{{ __('Tasks') }}</a>
+            <a class="block" href="{{ route('messages.index') }}">{{ __('Messages') }}</a>
             <a class="block" href="{{ route('chat-groups.index') }}">{{ __('Chats') }}</a>
             <a class="block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
             @if (Auth::user()?->isAdmin())

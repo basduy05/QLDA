@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ChatGroupController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DirectMessageController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -49,6 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read', [NotificationController::class, 'markAllRead'])
         ->name('notifications.read');
+    Route::get('/messages', [DirectMessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{contact}', [DirectMessageController::class, 'show'])->name('messages.show');
+    Route::get('/messages/{contact}/feed', [DirectMessageController::class, 'feed'])->name('messages.feed');
+    Route::post('/messages/{contact}', [DirectMessageController::class, 'store'])->name('messages.store');
     Route::get('/chat-groups', [ChatGroupController::class, 'index'])->name('chat-groups.index');
     Route::post('/chat-groups', [ChatGroupController::class, 'store'])->name('chat-groups.store');
     Route::get('/chat-groups/{chatGroup}', [ChatGroupController::class, 'show'])->name('chat-groups.show');
