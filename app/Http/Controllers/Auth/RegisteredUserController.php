@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WelcomeUserMail;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -50,6 +53,18 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+
+        try {
+            Mail::to($user->email)->send(
+                (new WelcomeUserMail($user))->locale($user->locale ?? app()->getLocale())
+            );
+        } catch (\Throwable $exception) {
+            Log::warning('Welcome email send failed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'message' => $exception->getMessage(),
+            ]);
+        }
 
         Auth::login($user);
 

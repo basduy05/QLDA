@@ -14,14 +14,14 @@
         </div>
     </x-slot>
 
-    <div class="card-strong p-0 overflow-hidden">
+    <div class="card-strong p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50/70">
         <div class="grid md:grid-cols-12 h-[calc(100vh-220px)]">
-            <aside class="md:col-span-4 lg:col-span-3 border-r border-slate-100 p-3 overflow-y-auto min-h-0">
+            <aside class="md:col-span-4 lg:col-span-3 border-r border-slate-100 p-3 overflow-y-auto min-h-0 bg-white/70 backdrop-blur">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">{{ __('Direct') }}</p>
                 <div class="space-y-1 mb-4">
                     @foreach ($contacts as $contact)
                         @php($meta = $directMap->get($contact->id))
-                        <a href="{{ route('messenger.direct', $contact) }}" class="block rounded-xl px-3 py-2 border {{ $activeType === 'direct' && $activeTarget?->id === $contact->id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 bg-white hover:border-slate-300' }}">
+                        <a href="{{ route('messenger.direct', $contact) }}" class="block rounded-xl px-3 py-2 border transition duration-200 hover:-translate-y-0.5 {{ $activeType === 'direct' && $activeTarget?->id === $contact->id ? 'border-slate-900 bg-slate-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm' }}">
                             <div class="flex items-center justify-between gap-2">
                                 <p class="font-semibold text-sm text-slate-900">{{ $contact->name }}</p>
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full {{ $contact->isOnline() ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>
@@ -35,7 +35,7 @@
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">{{ __('Groups') }}</p>
                 <div class="space-y-1">
                     @foreach ($groups as $group)
-                        <a href="{{ route('messenger.group', $group) }}" class="block rounded-xl px-3 py-2 border {{ $activeType === 'group' && $activeTarget?->id === $group->id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 bg-white hover:border-slate-300' }}">
+                        <a href="{{ route('messenger.group', $group) }}" class="block rounded-xl px-3 py-2 border transition duration-200 hover:-translate-y-0.5 {{ $activeType === 'group' && $activeTarget?->id === $group->id ? 'border-slate-900 bg-slate-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm' }}">
                             <p class="font-semibold text-sm text-slate-900">{{ $group->name }}</p>
                             <p class="text-[11px] text-slate-500">{{ $group->messages_count }} {{ __('messages') }}</p>
                         </a>
@@ -43,7 +43,7 @@
                 </div>
             </aside>
 
-            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-0 relative">
+            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-0 relative bg-white/40">
                 @if ($activeType)
                     <div class="relative flex items-center justify-between pb-2 border-b border-slate-100">
                         <div>
@@ -158,7 +158,7 @@
                         </div>
                     @endif
 
-                    <div id="messenger-feed" class="flex-1 overflow-y-auto py-3 space-y-2">
+                    <div id="messenger-feed" class="flex-1 overflow-y-auto py-3 pr-1 space-y-2">
                         @if ($activeType === 'direct')
                             @include('messenger.partials.direct-feed', ['messages' => $messages, 'authUserId' => auth()->id()])
                         @else
@@ -166,7 +166,7 @@
                         @endif
                     </div>
 
-                    <form id="composer-form" method="POST" action="{{ $activeType === 'direct' ? route('messenger.send-direct', $activeTarget) : route('messenger.send-group', $activeTarget) }}" class="pt-2 border-t border-slate-100">
+                    <form id="composer-form" method="POST" action="{{ $activeType === 'direct' ? route('messenger.send-direct', $activeTarget) : route('messenger.send-group', $activeTarget) }}" class="pt-2 border-t border-slate-100 bg-white/70 backdrop-blur rounded-2xl px-2 pb-1">
                         @csrf
                         <div class="flex items-end gap-2">
                             <textarea id="composer" name="body" rows="2" class="w-full rounded-xl border-slate-200" placeholder="{{ __('Type a message...') }}" required>{{ old('body') }}</textarea>
@@ -194,10 +194,13 @@
                data-auth-id="{{ auth()->id() }}"
                data-ice='@json(config("webrtc.ice_servers"))'></div>
 
-        <div id="call-modal" class="fixed inset-0 z-50 hidden bg-slate-900/70 p-4">
-            <div class="mx-auto h-full max-w-6xl rounded-2xl bg-white shadow-xl flex flex-col overflow-hidden">
+        <div id="call-modal" class="fixed inset-0 z-50 hidden bg-slate-900/75 p-4 backdrop-blur-sm">
+            <div class="mx-auto h-full max-w-6xl rounded-2xl bg-white shadow-xl flex flex-col overflow-hidden border border-slate-200">
                 <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                    <h3 id="call-title" class="font-semibold text-slate-900">{{ __('Call') }}</h3>
+                    <div>
+                        <h3 id="call-title" class="font-semibold text-slate-900">{{ __('Call') }}</h3>
+                        <p id="call-status-text" class="text-xs text-slate-500 mt-1"></p>
+                    </div>
                     <div class="flex items-center gap-2">
                         <button type="button" id="accept-call" class="btn-primary text-xs hidden">{{ __('Accept') }}</button>
                         <button type="button" id="reject-call" class="btn-secondary text-xs hidden">{{ __('Reject') }}</button>
@@ -608,6 +611,7 @@
                 const endBtn = document.getElementById('end-call');
                 const closeBtn = document.getElementById('close-call');
                 const titleNode = document.getElementById('call-title');
+                const statusNode = document.getElementById('call-status-text');
                 const remoteVideo = document.getElementById('remote-video');
                 const localVideo = document.getElementById('local-video');
                 const callData = document.getElementById('call-data');
@@ -623,6 +627,29 @@
                 let ringingCtx = null;
                 let ringingOsc = null;
                 let locked = false;
+                let callActionLocked = false;
+
+                const setCallStatus = (message = '', tone = 'normal') => {
+                    if (!statusNode) {
+                        return;
+                    }
+
+                    statusNode.textContent = message;
+                    statusNode.classList.remove('text-slate-500', 'text-red-600', 'text-emerald-600');
+                    statusNode.classList.add(tone === 'error' ? 'text-red-600' : tone === 'success' ? 'text-emerald-600' : 'text-slate-500');
+                };
+
+                const setCallActionBusy = (busy) => {
+                    callActionLocked = busy;
+                    [startHeader, startInline, acceptBtn, rejectBtn, endBtn].forEach((button) => {
+                        if (!button) {
+                            return;
+                        }
+
+                        button.disabled = busy;
+                        button.classList.toggle('opacity-70', busy);
+                    });
+                };
 
                 const api = async (url, options = {}) => {
                     const headers = Object.assign({
@@ -630,20 +657,41 @@
                         'X-CSRF-TOKEN': csrf,
                     }, options.headers || {});
 
-                    const response = await fetch(url, Object.assign({
-                        credentials: 'same-origin',
-                        headers,
-                    }, options));
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-                    if (!response.ok) {
-                        throw new Error('Request failed');
+                    let response;
+                    try {
+                        response = await fetch(url, Object.assign({
+                            credentials: 'same-origin',
+                            headers,
+                            signal: controller.signal,
+                        }, options));
+                    } finally {
+                        clearTimeout(timeoutId);
                     }
 
-                    return response.json();
+                    if (!response.ok) {
+                        let message = 'Request failed';
+                        try {
+                            const payload = await response.json();
+                            message = payload?.message || message;
+                        } catch (_) {
+                        }
+
+                        throw new Error(message);
+                    }
+
+                    try {
+                        return await response.json();
+                    } catch (_) {
+                        throw new Error('Request failed');
+                    }
                 };
 
                 const closeModal = () => {
                     modal?.classList.add('hidden');
+                    setCallStatus('');
                 };
 
                 const stopRingtone = () => {
@@ -687,6 +735,14 @@
                 const ensurePeer = async () => {
                     if (pc) return pc;
 
+                    if (!window.isSecureContext) {
+                        throw new Error("{{ __('Calling requires HTTPS (secure context).') }}");
+                    }
+
+                    if (!navigator.mediaDevices?.getUserMedia) {
+                        throw new Error("{{ __('Camera/Microphone is not supported on this browser.') }}");
+                    }
+
                     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
                     if (localVideo) localVideo.srcObject = localStream;
 
@@ -695,6 +751,16 @@
 
                     pc.ontrack = (event) => {
                         if (remoteVideo) remoteVideo.srcObject = event.streams[0];
+                    };
+
+                    pc.onconnectionstatechange = () => {
+                        if (!pc) {
+                            return;
+                        }
+
+                        if (['failed', 'disconnected'].includes(pc.connectionState) && currentCall?.id) {
+                            end();
+                        }
                     };
 
                     return pc;
@@ -719,6 +785,7 @@
                 const showIncoming = () => {
                     modal?.classList.remove('hidden');
                     if (titleNode) titleNode.textContent = "{{ __('Incoming call') }}";
+                    setCallStatus("{{ __('Someone is calling you.') }}");
                     acceptBtn?.classList.remove('hidden');
                     rejectBtn?.classList.remove('hidden');
                     endBtn?.classList.add('hidden');
@@ -733,11 +800,23 @@
                 };
 
                 const startCall = async () => {
+                    if (callActionLocked) {
+                        return;
+                    }
+
+                    setCallActionBusy(true);
+                    setCallStatus("{{ __('Starting call...') }}");
+
                     try {
                         const payload = await api("{{ route('calls.start', $activeTarget) }}", { method: 'POST' });
                         currentCall = payload.call;
                         showActive("{{ __('Calling...') }}");
-                    } catch (_) {}
+                        setCallStatus("{{ __('Waiting for answer...') }}");
+                    } catch (error) {
+                        setCallStatus(error.message || "{{ __('Unable to start call.') }}", 'error');
+                    } finally {
+                        setCallActionBusy(false);
+                    }
                 };
 
                 const sync = async () => {
@@ -749,6 +828,11 @@
                         const call = payload.call;
 
                         if (!call) {
+                            if (currentCall) {
+                                stopRingtone();
+                                resetPeer();
+                                closeModal();
+                            }
                             stopRingtone();
                             currentCall = null;
                             return;
@@ -766,9 +850,17 @@
                             return;
                         }
 
+                        if (call.status === 'ringing' && call.caller_id === authId) {
+                            modal?.classList.remove('hidden');
+                            if (titleNode) titleNode.textContent = "{{ __('Calling...') }}";
+                            setCallStatus("{{ __('Waiting for answer...') }}");
+                            return;
+                        }
+
                         if (call.status === 'active') {
                             stopRingtone();
                             showActive("{{ __('In call') }}");
+                            setCallStatus("{{ __('Connected') }}", 'success');
 
                             if (call.caller_id === authId && !call.offer_sdp) {
                                 const peer = await ensurePeer();
@@ -810,42 +902,64 @@
                         if (['ended', 'rejected', 'missed'].includes(call.status)) {
                             stopRingtone();
                             resetPeer();
+                            if (call.status === 'rejected') {
+                                setCallStatus("{{ __('Call was rejected.') }}", 'error');
+                            } else if (call.status === 'missed') {
+                                setCallStatus("{{ __('Call was missed.') }}", 'error');
+                            } else {
+                                setCallStatus("{{ __('Call ended.') }}");
+                            }
                             closeModal();
                             currentCall = null;
                         }
-                    } catch (_) {
+                    } catch (error) {
+                        setCallStatus(error.message || "{{ __('Call sync failed.') }}", 'error');
                     } finally {
                         locked = false;
                     }
                 };
 
                 const accept = async () => {
-                    if (!currentCall) return;
+                    if (!currentCall || callActionLocked) return;
+                    setCallActionBusy(true);
                     try {
                         await api("{{ url('/calls') }}/" + currentCall.id + "/accept", { method: 'POST' });
                         stopRingtone();
                         showActive("{{ __('Connecting...') }}");
-                    } catch (_) {}
+                        setCallStatus("{{ __('Connecting media...') }}");
+                    } catch (error) {
+                        setCallStatus(error.message || "{{ __('Unable to accept call.') }}", 'error');
+                    } finally {
+                        setCallActionBusy(false);
+                    }
                 };
 
                 const reject = async () => {
-                    if (!currentCall) return;
+                    if (!currentCall || callActionLocked) return;
+                    setCallActionBusy(true);
                     try {
                         await api("{{ url('/calls') }}/" + currentCall.id + "/reject", { method: 'POST' });
-                    } catch (_) {}
+                    } catch (error) {
+                        setCallStatus(error.message || "{{ __('Unable to reject call.') }}", 'error');
+                    }
                     stopRingtone();
                     resetPeer();
                     closeModal();
+                    setCallActionBusy(false);
                 };
 
                 const end = async () => {
-                    if (!currentCall) return;
+                    if (!currentCall || callActionLocked) return;
+                    setCallActionBusy(true);
                     try {
                         await api("{{ url('/calls') }}/" + currentCall.id + "/end", { method: 'POST' });
-                    } catch (_) {}
+                    } catch (error) {
+                        setCallStatus(error.message || "{{ __('Unable to end call.') }}", 'error');
+                    }
                     stopRingtone();
                     resetPeer();
                     closeModal();
+                    setCallActionBusy(false);
                 };
 
                 startHeader?.addEventListener('click', startCall);
@@ -853,7 +967,14 @@
                 acceptBtn?.addEventListener('click', accept);
                 rejectBtn?.addEventListener('click', reject);
                 endBtn?.addEventListener('click', end);
-                closeBtn?.addEventListener('click', closeModal);
+                closeBtn?.addEventListener('click', () => {
+                    if (currentCall && ['ringing', 'active'].includes(currentCall.status)) {
+                        end();
+                        return;
+                    }
+
+                    closeModal();
+                });
 
                 modal?.addEventListener('click', (event) => {
                     if (event.target === modal) closeModal();

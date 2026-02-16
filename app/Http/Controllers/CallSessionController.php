@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 
 class CallSessionController extends Controller
 {
+    private const RING_TIMEOUT_SECONDS = 45;
+
     public function start(User $contact)
     {
         /** @var User $user */
@@ -29,6 +31,14 @@ class CallSessionController extends Controller
             ->latest()
             ->first();
 
+        if ($existing && $existing->status === 'ringing' && optional($existing->created_at)?->lt(now()->subSeconds(self::RING_TIMEOUT_SECONDS))) {
+            $existing->update([
+                'status' => 'missed',
+                'ended_at' => now(),
+            ]);
+            $existing = null;
+        }
+
         if ($existing) {
             return response()->json(['call' => $this->serialize($existing)], 200);
         }
@@ -47,14 +57,36 @@ class CallSessionController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $call = CallSession::query()
+        CallSession::query()
             ->where(function ($query) use ($user) {
                 $query->where('caller_id', $user->id)
                     ->orWhere('callee_id', $user->id);
             })
+            ->where('status', 'ringing')
+            ->where('created_at', '<', now()->subSeconds(self::RING_TIMEOUT_SECONDS))
+            ->update([
+                'status' => 'missed',
+                'ended_at' => now(),
+            ]);
+
+        $baseQuery = CallSession::query()
+            ->where(function ($query) use ($user) {
+                $query->where('caller_id', $user->id)
+                    ->orWhere('callee_id', $user->id);
+            });
+
+        $call = (clone $baseQuery)
             ->whereIn('status', ['ringing', 'active'])
-            ->latest()
+            ->latest('updated_at')
             ->first();
+
+        if (! $call) {
+            $call = (clone $baseQuery)
+                ->whereIn('status', ['ended', 'rejected', 'missed'])
+                ->where('updated_at', '>=', now()->subSeconds(15))
+                ->latest('updated_at')
+                ->first();
+        }
 
         return response()->json([
             'call' => $call ? $this->serialize($call) : null,
@@ -119,6 +151,10 @@ class CallSessionController extends Controller
     public function signal(Request $request, CallSession $callSession)
     {
         $this->ensureAccess($callSession);
+
+        if (! in_array($callSession->status, ['ringing', 'active'], true)) {
+            return response()->json(['message' => 'Call is no longer active.'], 422);
+        }
 
         $data = $request->validate([
             'type' => ['required', 'in:offer,answer'],

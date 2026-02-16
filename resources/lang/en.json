@@ -121,5 +121,12 @@
     "You were mentioned in a task comment": "You were mentioned in a task comment",
     "Hello :name": "Hello :name",
     ":user commented on task :task": ":user commented on task :task",
-    ":project project": ":project project"
+    ":project project": ":project project",
+    "Welcome to :app": "Welcome to :app",
+    "Your account has been created successfully.": "Your account has been created successfully.",
+    "Hello :name,": "Hello :name,",
+    "Thanks for joining :app. You can now start managing projects, tasks, and team communication from your dashboard.": "Thanks for joining :app. You can now start managing projects, tasks, and team communication from your dashboard.",
+    "If this account was not created by you, please contact support immediately.": "If this account was not created by you, please contact support immediately.",
+    "Open dashboard": "Open dashboard",
+    "This is an automated email from :app.": "This is an automated email from :app."
 }

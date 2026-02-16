@@ -121,5 +121,12 @@
     "You were mentioned in a task comment": "Bạn được nhắc đến trong nhận xét",
     "Hello :name": "Xin chào :name",
     ":user commented on task :task": ":user đã nhận xét ở nhiệm vụ :task",
-    ":project project": "Dự án :project"
+    ":project project": "Dự án :project",
+    "Welcome to :app": "Chào mừng đến với :app",
+    "Your account has been created successfully.": "Tài khoản của bạn đã được tạo thành công.",
+    "Hello :name,": "Xin chào :name,",
+    "Thanks for joining :app. You can now start managing projects, tasks, and team communication from your dashboard.": "Cảm ơn bạn đã tham gia :app. Giờ bạn có thể bắt đầu quản lý dự án, nhiệm vụ và giao tiếp nhóm ngay từ bảng điều khiển.",
+    "If this account was not created by you, please contact support immediately.": "Nếu tài khoản này không phải do bạn tạo, vui lòng liên hệ hỗ trợ ngay lập tức.",
+    "Open dashboard": "Mở bảng điều khiển",
+    "This is an automated email from :app.": "Đây là email tự động từ :app."
 }

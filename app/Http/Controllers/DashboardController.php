@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
 class DashboardController extends Controller
 {
@@ -20,7 +21,13 @@ class DashboardController extends Controller
         $taskQuery = Task::query();
 
         if (!$user->isAdmin()) {
-            $projectQuery->where('owner_id', $user->id);
+            $projectQuery->where(function (Builder $query) use ($user) {
+                $query->where('owner_id', $user->id)
+                    ->orWhereHas('tasks', function (Builder $taskQuery) use ($user) {
+                        $taskQuery->where('assignee_id', $user->id);
+                    });
+            });
+
             $taskQuery->where(function ($query) use ($user) {
                 $query->where('assignee_id', $user->id)
                     ->orWhereHas('project', function ($projectQuery) use ($user) {
@@ -29,10 +36,10 @@ class DashboardController extends Controller
             });
         }
 
-        $projectsCount = (clone $projectQuery)->count();
-        $activeProjectsCount = (clone $projectQuery)->where('status', 'active')->count();
-        $tasksCount = (clone $taskQuery)->count();
-        $openTasksCount = (clone $taskQuery)->where('status', '!=', 'done')->count();
+        $projectsCount = (clone $projectQuery)->distinct('projects.id')->count('projects.id');
+        $activeProjectsCount = (clone $projectQuery)->where('status', 'active')->distinct('projects.id')->count('projects.id');
+        $tasksCount = (clone $taskQuery)->distinct('tasks.id')->count('tasks.id');
+        $openTasksCount = (clone $taskQuery)->where('status', '!=', 'done')->distinct('tasks.id')->count('tasks.id');
 
         $recentProjects = $projectQuery->with('owner')
             ->latest()
@@ -54,25 +61,35 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        $projectStatuses = ['planning', 'active', 'on_hold', 'completed'];
-        $projectStatusData = collect($projectStatuses)
-            ->map(function (string $status) use ($projectQuery) {
-                return [
-                    'label' => Str::headline($status),
-                    'value' => (clone $projectQuery)->where('status', $status)->count(),
-                ];
-            })
-            ->values();
+        $projectStatusRaw = (clone $projectQuery)
+            ->selectRaw("COALESCE(status, 'unknown') as status_key, COUNT(DISTINCT projects.id) as total")
+            ->groupBy('status_key')
+            ->pluck('total', 'status_key');
 
-        $taskStatuses = ['todo', 'in_progress', 'done'];
-        $taskStatusData = collect($taskStatuses)
-            ->map(function (string $status) use ($taskQuery) {
-                return [
-                    'label' => Str::headline($status),
-                    'value' => (clone $taskQuery)->where('status', $status)->count(),
-                ];
-            })
-            ->values();
+        $taskStatusRaw = (clone $taskQuery)
+            ->selectRaw("COALESCE(status, 'unknown') as status_key, COUNT(DISTINCT tasks.id) as total")
+            ->groupBy('status_key')
+            ->pluck('total', 'status_key');
+
+        $projectPreferredOrder = ['planning', 'active', 'on_hold', 'completed'];
+        $projectStatusData = collect($projectPreferredOrder)
+            ->filter(fn (string $status) => $projectStatusRaw->has($status))
+            ->concat($projectStatusRaw->keys()->reject(fn (string $key) => in_array($key, $projectPreferredOrder, true)))
+            ->values()
+            ->map(fn (string $status) => [
+                'label' => Str::headline($status),
+                'value' => (int) ($projectStatusRaw[$status] ?? 0),
+            ]);
+
+        $taskPreferredOrder = ['todo', 'in_progress', 'done'];
+        $taskStatusData = collect($taskPreferredOrder)
+            ->filter(fn (string $status) => $taskStatusRaw->has($status))
+            ->concat($taskStatusRaw->keys()->reject(fn (string $key) => in_array($key, $taskPreferredOrder, true)))
+            ->values()
+            ->map(fn (string $status) => [
+                'label' => Str::headline($status),
+                'value' => (int) ($taskStatusRaw[$status] ?? 0),
+            ]);
 
         $months = collect(range(5, 0, -1))
             ->map(fn (int $offset) => now()->startOfMonth()->subMonths($offset))
@@ -95,7 +112,7 @@ class DashboardController extends Controller
             ];
         })->values();
 
-        $doneTasksCount = (clone $taskQuery)->where('status', 'done')->count();
+        $doneTasksCount = (clone $taskQuery)->where('status', 'done')->distinct('tasks.id')->count('tasks.id');
         $completionRate = $tasksCount > 0
             ? (int) round(($doneTasksCount / $tasksCount) * 100)
             : 0;

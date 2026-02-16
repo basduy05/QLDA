@@ -4,12 +4,12 @@
             <div class="flex items-center gap-6">
                 <a href="{{ route('dashboard') }}" class="text-lg font-semibold text-slate-800">QhorizonPM</a>
                 <div class="hidden md:flex items-center gap-4 text-sm font-medium text-slate-600">
-                    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'text-slate-900' : '' }}">{{ __('Dashboard') }}</a>
-                    <a href="{{ route('projects.index') }}" class="{{ request()->routeIs('projects.*') ? 'text-slate-900' : '' }}">{{ __('Projects') }}</a>
-                    <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.index') ? 'text-slate-900' : '' }}">{{ __('Tasks') }}</a>
-                    <a href="{{ route('messenger.index') }}" class="{{ request()->routeIs('messenger.*') ? 'text-slate-900' : '' }}">{{ __('Messenger') }}</a>
+                    <a href="{{ route('dashboard') }}" class="nav-pill {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}">{{ __('Dashboard') }}</a>
+                    <a href="{{ route('projects.index') }}" class="nav-pill {{ request()->routeIs('projects.*') ? 'nav-pill-active' : '' }}">{{ __('Projects') }}</a>
+                    <a href="{{ route('tasks.index') }}" class="nav-pill {{ request()->routeIs('tasks.index') ? 'nav-pill-active' : '' }}">{{ __('Tasks') }}</a>
+                    <a href="{{ route('messenger.index') }}" class="nav-pill {{ request()->routeIs('messenger.*') ? 'nav-pill-active' : '' }}">{{ __('Messenger') }}</a>
                     @if (Auth::user()?->isAdmin())
-                        <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'text-slate-900' : '' }}">{{ __('Users') }}</a>
+                        <a href="{{ route('admin.users.index') }}" class="nav-pill {{ request()->routeIs('admin.users.*') ? 'nav-pill-active' : '' }}">{{ __('Users') }}</a>
                     @endif
                 </div>
             </div>
@@ -49,15 +49,15 @@
 
     <div :class="{'block': open, 'hidden': ! open}" class="hidden md:hidden border-t border-slate-100 bg-white">
         <div class="px-6 py-4 space-y-2 text-sm text-slate-600">
-            <a class="block" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
-            <a class="block" href="{{ route('projects.index') }}">{{ __('Projects') }}</a>
-            <a class="block" href="{{ route('tasks.index') }}">{{ __('Tasks') }}</a>
-            <a class="block" href="{{ route('messenger.index') }}">{{ __('Messenger') }}</a>
-            <a class="block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
+            <a class="nav-pill block" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
+            <a class="nav-pill block" href="{{ route('projects.index') }}">{{ __('Projects') }}</a>
+            <a class="nav-pill block" href="{{ route('tasks.index') }}">{{ __('Tasks') }}</a>
+            <a class="nav-pill block" href="{{ route('messenger.index') }}">{{ __('Messenger') }}</a>
+            <a class="nav-pill block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
             @if (Auth::user()?->isAdmin())
-                <a class="block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
+                <a class="nav-pill block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
             @endif
-            <a class="block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
+            <a class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
             <div class="flex items-center gap-2 pt-2">
                 <a href="{{ route('lang.switch', 'vi') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'vi' ? 'bg-slate-900 text-white' : 'border border-slate-200' }}">VI</a>
                 <a href="{{ route('lang.switch', 'en') }}" class="px-2 py-1 rounded-full {{ app()->getLocale() === 'en' ? 'bg-slate-900 text-white' : 'border border-slate-200' }}">EN</a>
