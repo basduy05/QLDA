@@ -41,19 +41,19 @@ class DashboardController extends Controller
         $tasksCount = (clone $taskQuery)->distinct('tasks.id')->count('tasks.id');
         $openTasksCount = (clone $taskQuery)->where('status', '!=', 'done')->distinct('tasks.id')->count('tasks.id');
 
-        $recentProjects = $projectQuery->with('owner')
+        $recentProjects = (clone $projectQuery)->with('owner')
             ->latest()
             ->limit(5)
             ->get();
 
-        $upcomingTasks = $taskQuery->with(['project', 'assignee'])
+        $upcomingTasks = (clone $taskQuery)->with(['project', 'assignee'])
             ->whereNotNull('due_date')
             ->where('status', '!=', 'done')
             ->orderBy('due_date')
             ->limit(6)
             ->get();
 
-        $overdueTasks = $taskQuery->with(['project', 'assignee'])
+        $overdueTasks = (clone $taskQuery)->with(['project', 'assignee'])
             ->whereNotNull('due_date')
             ->where('status', '!=', 'done')
             ->whereDate('due_date', '<', Carbon::today())
