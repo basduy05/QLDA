@@ -54,17 +54,28 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        try {
-            Mail::to($user->email)->send(
-                (new WelcomeUserMail($user))->locale($user->locale ?? app()->getLocale())
-            );
-        } catch (\Throwable $exception) {
-            Log::warning('Welcome email send failed', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'message' => $exception->getMessage(),
-            ]);
-        }
+        $welcomeUserId = (int) $user->id;
+        $welcomeEmail = (string) $user->email;
+        $welcomeLocale = (string) ($user->locale ?? app()->getLocale());
+
+        dispatch(function () use ($welcomeUserId, $welcomeEmail, $welcomeLocale) {
+            try {
+                $welcomeUser = User::find($welcomeUserId);
+                if (! $welcomeUser) {
+                    return;
+                }
+
+                Mail::to($welcomeEmail)->send(
+                    (new WelcomeUserMail($welcomeUser))->locale($welcomeLocale)
+                );
+            } catch (\Throwable $exception) {
+                Log::warning('Welcome email send failed', [
+                    'user_id' => $welcomeUserId,
+                    'email' => $welcomeEmail,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        })->afterResponse();
 
         Auth::login($user);
 
