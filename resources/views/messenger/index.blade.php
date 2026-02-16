@@ -15,8 +15,8 @@
     </x-slot>
 
     <div class="card-strong p-0 overflow-hidden">
-        <div class="grid md:grid-cols-12 min-h-[calc(100vh-220px)]">
-            <aside class="md:col-span-4 lg:col-span-3 border-r border-slate-100 p-3 overflow-y-auto">
+        <div class="grid md:grid-cols-12 h-[calc(100vh-220px)]">
+            <aside class="md:col-span-4 lg:col-span-3 border-r border-slate-100 p-3 overflow-y-auto min-h-0">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">{{ __('Direct') }}</p>
                 <div class="space-y-1 mb-4">
                     @foreach ($contacts as $contact)
@@ -39,7 +39,7 @@
                 </div>
             </aside>
 
-            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col">
+            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-0">
                 @if ($activeType)
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div>
@@ -114,12 +114,22 @@
     @endif
 
     @if ($activeType)
+        <div
+            id="messenger-data"
+            class="hidden"
+            data-ws-url="{{ $wsUrl }}"
+            data-ws-channels='@json(array_values(array_filter(array_merge([$wsUserChannel], $wsGroupChannels->all()))))'
+            data-has-typing="{{ $typing ? 1 : 0 }}"
+            data-active-target-id="{{ $activeType === 'direct' ? $activeTarget->id : 0 }}"
+        ></div>
+
         <script>
             (function () {
                 const feed = document.getElementById('messenger-feed');
                 const composer = document.getElementById('composer');
                 const form = document.getElementById('composer-form');
                 const typingEl = document.getElementById('typing-indicator');
+                const runtime = document.getElementById('messenger-data');
                 const type = "{{ $activeType }}";
                 const feedEndpoint = type === 'direct'
                     ? "{{ route('messenger.direct-feed', $activeTarget) }}"
@@ -127,9 +137,14 @@
                 const typingEndpoint = type === 'direct'
                     ? "{{ route('messenger.typing', $activeTarget) }}"
                     : '';
+                const wsUrl = runtime?.dataset.wsUrl || '';
+                const wsChannels = JSON.parse(runtime?.dataset.wsChannels || '[]');
+                const hasInitialTyping = runtime?.dataset.hasTyping === '1';
+                const activeTargetId = Number(runtime?.dataset.activeTargetId || 0);
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 let loading = false;
                 let typingTick = 0;
+                let typingTimeout = null;
 
                 const refresh = async () => {
                     if (loading || !feed) {
@@ -197,7 +212,86 @@
 
                 if (feed) {
                     feed.scrollTop = feed.scrollHeight;
-                    setInterval(refresh, 3500);
+                    setInterval(refresh, 12000);
+                }
+
+                const triggerTyping = () => {
+                    if (!typingEl || type !== 'direct') {
+                        return;
+                    }
+
+                    typingEl.textContent = "{{ __('Typing...') }}";
+                    if (typingTimeout) {
+                        clearTimeout(typingTimeout);
+                    }
+                    typingTimeout = setTimeout(() => {
+                        typingEl.textContent = '';
+                    }, 3000);
+                };
+
+                const bindSocket = () => {
+                    if (!wsUrl || !Array.isArray(wsChannels) || wsChannels.length === 0) {
+                        return;
+                    }
+
+                    let socket;
+
+                    const connect = () => {
+                        try {
+                            const query = wsChannels
+                                .map((channel) => 'channel=' + encodeURIComponent(channel))
+                                .join('&');
+                            const separator = wsUrl.includes('?') ? '&' : '?';
+                            socket = new WebSocket(wsUrl + separator + query);
+                        } catch (_) {
+                            return;
+                        }
+
+                        socket.addEventListener('open', () => {
+                            try {
+                                socket.send(JSON.stringify({ action: 'subscribe', channels: wsChannels }));
+                            } catch (_) {
+                            }
+                        });
+
+                        socket.addEventListener('message', (event) => {
+                            try {
+                                const message = JSON.parse(event.data || '{}');
+                                const eventName = message?.event || '';
+
+                                if (eventName === 'typing.direct' && type === 'direct') {
+                                    const fromId = Number(message?.payload?.from_id || 0);
+                                    if (fromId === activeTargetId) {
+                                        triggerTyping();
+                                    }
+                                    return;
+                                }
+
+                                if (eventName === 'message.direct' || eventName === 'message.group') {
+                                    refresh();
+                                }
+                            } catch (_) {
+                            }
+                        });
+
+                        socket.addEventListener('close', () => {
+                            setTimeout(connect, 1800);
+                        });
+
+                        socket.addEventListener('error', () => {
+                            try {
+                                socket.close();
+                            } catch (_) {
+                            }
+                        });
+                    };
+
+                    connect();
+                };
+
+                bindSocket();
+                if (type === 'direct' && hasInitialTyping) {
+                    triggerTyping();
                 }
             })();
         </script>

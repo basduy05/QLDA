@@ -31,6 +31,18 @@ Project management website built with Laravel MVC for Admin and User roles.
 7. Serve locally:
    - `php artisan serve`
 
+## Realtime Messenger (WebSocket)
+1. Install Node packages:
+   - `npm install`
+2. Set realtime variables in `.env`:
+   - `REALTIME_SERVER_URL=http://127.0.0.1:8081`
+   - `REALTIME_WS_URL=ws://127.0.0.1:8081`
+   - `REALTIME_SECRET=change-this-secret`
+3. Start realtime server:
+   - `npm run realtime`
+
+The messenger keeps periodic polling as fallback, and uses WebSocket updates when `REALTIME_WS_URL` is configured.
+
 ## Demo Accounts
 - Admin: `admin@example.com` / `Admin@123`
 - User: `user@example.com` / `User@123`

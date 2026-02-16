@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'realtime' => [
+        'server_url' => env('REALTIME_SERVER_URL'),
+        'ws_url' => env('REALTIME_WS_URL'),
+        'secret' => env('REALTIME_SECRET'),
+    ],
+
 ];

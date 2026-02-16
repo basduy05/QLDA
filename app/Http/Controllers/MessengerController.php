@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MessengerController extends Controller
 {
@@ -28,8 +30,6 @@ class MessengerController extends Controller
             'activeTarget' => null,
             'messages' => collect(),
             'typing' => false,
-            'callPrimary' => null,
-            'callBackup' => null,
         ]);
     }
 
@@ -52,8 +52,6 @@ class MessengerController extends Controller
             'activeTarget' => $contact,
             'messages' => $this->getDirectMessages($conversation->id),
             'typing' => $this->isTyping($contact->id, $user->id),
-            'callPrimary' => $this->wherebyUrl('dm-'.$conversation->id),
-            'callBackup' => $this->jitsiUrl('dm-'.$conversation->id),
         ]);
     }
 
@@ -70,8 +68,6 @@ class MessengerController extends Controller
             'activeTarget' => $chatGroup,
             'messages' => $this->getGroupMessages($chatGroup->id),
             'typing' => false,
-            'callPrimary' => $this->wherebyUrl('group-'.$chatGroup->id),
-            'callBackup' => $this->jitsiUrl('group-'.$chatGroup->id),
         ]);
     }
 
@@ -135,6 +131,16 @@ class MessengerController extends Controller
             'seen_at' => null,
         ]);
 
+        $this->emitRealtime(
+            channels: ['user.'.$contact->id, 'user.'.$user->id],
+            event: 'message.direct',
+            payload: [
+                'from_id' => $user->id,
+                'to_id' => $contact->id,
+                'conversation_id' => $conversation->id,
+            ]
+        );
+
         $contact->notify(new MessageReceivedNotification(
             __('New message from :name', ['name' => $user->name]),
             trim($data['body']),
@@ -162,6 +168,23 @@ class MessengerController extends Controller
             'body' => trim($data['body']),
         ]);
 
+        $memberIds = $chatGroup->members()->pluck('users.id')->all();
+        $channels = collect($memberIds)
+            ->map(fn ($id) => 'user.'.$id)
+            ->push('group.'.$chatGroup->id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $this->emitRealtime(
+            channels: $channels,
+            event: 'message.group',
+            payload: [
+                'group_id' => $chatGroup->id,
+                'from_id' => $user->id,
+            ]
+        );
+
         $chatGroup->members()
             ->where('users.id', '!=', $user->id)
             ->get()
@@ -187,6 +210,15 @@ class MessengerController extends Controller
 
         Cache::put($this->typingKey($user->id, $contact->id), true, now()->addSeconds(8));
 
+        $this->emitRealtime(
+            channels: ['user.'.$contact->id],
+            event: 'typing.direct',
+            payload: [
+                'from_id' => $user->id,
+                'to_id' => $contact->id,
+            ]
+        );
+
         return response()->json(['ok' => true]);
     }
 
@@ -200,10 +232,15 @@ class MessengerController extends Controller
             });
         }
 
+        $groups = $groupsQuery->get();
+
         return [
             'contacts' => User::where('id', '!=', $user->id)->orderBy('name')->get(),
-            'groups' => $groupsQuery->get(),
+            'groups' => $groups,
             'directMap' => $this->buildDirectMap($user),
+            'wsUrl' => (string) config('services.realtime.ws_url', ''),
+            'wsUserChannel' => 'user.'.$user->id,
+            'wsGroupChannels' => $groups->pluck('id')->map(fn ($id) => 'group.'.$id)->values(),
         ];
     }
 
@@ -302,20 +339,34 @@ class MessengerController extends Controller
         return 'typing:'.$fromUserId.':'.$toUserId;
     }
 
-    private function wherebyUrl(string $room): string
-    {
-        return 'https://whereby.com/qhorizon-'.$room;
-    }
-
-    private function jitsiUrl(string $room): string
-    {
-        return 'https://meet.jit.si/qhorizon-'.$room;
-    }
-
     private function purgeExpiredMessages(): void
     {
         $cutoff = now()->subDay();
         DirectMessage::where('created_at', '<', $cutoff)->delete();
         ChatMessage::where('created_at', '<', $cutoff)->delete();
+    }
+
+    private function emitRealtime(array $channels, string $event, array $payload = []): void
+    {
+        $endpoint = (string) config('services.realtime.server_url', '');
+        $secret = (string) config('services.realtime.secret', '');
+
+        if ($endpoint === '' || $secret === '' || empty($channels)) {
+            return;
+        }
+
+        try {
+            Http::timeout(2)->post(rtrim($endpoint, '/').'/broadcast', [
+                'secret' => $secret,
+                'channels' => $channels,
+                'event' => $event,
+                'payload' => $payload,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::warning('Realtime emit failed', [
+                'event' => $event,
+                'message' => $exception->getMessage(),
+            ]);
+        }
     }
 }

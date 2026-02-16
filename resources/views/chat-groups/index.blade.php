@@ -28,14 +28,25 @@
 
                 <div>
                     <label class="text-sm font-medium text-slate-600">{{ __('Members') }}</label>
-                    <select name="member_ids[]" multiple class="mt-2 w-full rounded-xl border-slate-200 min-h-32">
+                    @php($selectedMembers = collect(old('member_ids', []))->map(fn ($id) => (int) $id)->all())
+                    <div class="mt-2 max-h-56 overflow-y-auto rounded-xl border border-slate-200 p-2 space-y-2">
                         @foreach ($users as $member)
-                            <option value="{{ $member->id }}" @selected(collect(old('member_ids', []))->contains($member->id))>
-                                {{ $member->name }} ({{ $member->email }})
-                            </option>
+                            <label class="flex items-start gap-3 rounded-lg border border-slate-200 px-3 py-2 cursor-pointer hover:border-slate-300">
+                                <input
+                                    type="checkbox"
+                                    name="member_ids[]"
+                                    value="{{ $member->id }}"
+                                    class="mt-1 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+                                    @checked(in_array($member->id, $selectedMembers, true))
+                                >
+                                <span>
+                                    <span class="block text-sm font-medium text-slate-800">{{ $member->name }}</span>
+                                    <span class="block text-xs text-slate-500">{{ $member->email }}</span>
+                                </span>
+                            </label>
                         @endforeach
-                    </select>
-                    <p class="text-xs text-slate-500 mt-2">{{ __('Hold Ctrl / Cmd to select multiple users.') }}</p>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">{{ __('Tick members to include them in this group.') }}</p>
                 </div>
 
                 <div>
