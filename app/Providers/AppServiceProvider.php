@@ -25,10 +25,15 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $appUrl = (string) config('app.url');
+        $forwardedProto = (string) request()->header('x-forwarded-proto');
 
         if ($appUrl === '' || str_contains($appUrl, 'your-domain') || str_contains($appUrl, 'localhost')) {
             $rootUrl = request()->getSchemeAndHttpHost();
             URL::forceRootUrl($rootUrl);
+        }
+
+        if ($forwardedProto === 'https' || request()->isSecure()) {
+            URL::forceScheme('https');
         }
     }
 }

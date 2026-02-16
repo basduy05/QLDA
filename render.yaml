@@ -10,7 +10,7 @@ services:
       - key: APP_DEBUG
         value: "false"
       - key: APP_URL
-        value: https://your-domain
+        value: https://qhorizonpm.onrender.com
       - key: APP_LOCALE
         value: vi
       - key: APP_FALLBACK_LOCALE
