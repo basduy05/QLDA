@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\ChatGroupController;
+use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\NotificationController;
@@ -47,6 +49,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read', [NotificationController::class, 'markAllRead'])
         ->name('notifications.read');
+    Route::get('/chat-groups', [ChatGroupController::class, 'index'])->name('chat-groups.index');
+    Route::post('/chat-groups', [ChatGroupController::class, 'store'])->name('chat-groups.store');
+    Route::get('/chat-groups/{chatGroup}', [ChatGroupController::class, 'show'])->name('chat-groups.show');
+    Route::post('/chat-groups/{chatGroup}/messages', [ChatMessageController::class, 'store'])
+        ->name('chat-groups.messages.store');
     Route::get('/admin/users', [AdminUserController::class, 'index'])
         ->middleware('admin')
         ->name('admin.users.index');

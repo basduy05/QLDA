@@ -67,4 +67,19 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    public function chatGroupsCreated()
+    {
+        return $this->hasMany(ChatGroup::class, 'created_by');
+    }
+
+    public function chatGroups()
+    {
+        return $this->belongsToMany(ChatGroup::class, 'chat_group_members')->withTimestamps();
+    }
+
+    public function chatMessages()
+    {
+        return $this->hasMany(ChatMessage::class);
+    }
 }
