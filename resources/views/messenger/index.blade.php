@@ -64,7 +64,7 @@
                                 type="button"
                                 id="group-settings-toggle"
                                 aria-expanded="false"
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                                class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300 transition"
                                 title="{{ __('Group options') }}"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -77,7 +77,9 @@
                     </div>
 
                     @if ($activeType === 'group')
-                        <div id="group-settings-panel" class="hidden absolute right-0 top-[calc(100%+8px)] z-20 w-full md:w-[42rem] max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl space-y-3">
+                        <div id="group-settings-backdrop" class="hidden fixed inset-0 z-10 bg-slate-900/10"></div>
+
+                        <div id="group-settings-panel" class="absolute right-0 top-full mt-2 z-20 w-[min(46rem,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl space-y-3 origin-top-right opacity-0 scale-95 pointer-events-none transition duration-200 ease-out">
                             <form method="POST" action="{{ route('messenger.group.rename', $activeTarget) }}" class="flex items-end gap-2">
                                 @csrf
                                 @method('PATCH')
@@ -204,6 +206,7 @@
                 const typingEl = document.getElementById('typing-indicator');
                 const groupSettingsToggle = document.getElementById('group-settings-toggle');
                 const groupSettingsPanel = document.getElementById('group-settings-panel');
+                const groupSettingsBackdrop = document.getElementById('group-settings-backdrop');
                 const runtime = document.getElementById('messenger-data');
                 const type = "{{ $activeType }}";
                 const feedEndpoint = type === 'direct'
@@ -225,23 +228,35 @@
                 let lastFeedHtml = feed ? feed.innerHTML : '';
 
                 if (groupSettingsToggle && groupSettingsPanel) {
-                    groupSettingsToggle.addEventListener('click', function () {
-                        const hidden = groupSettingsPanel.classList.contains('hidden');
-                        groupSettingsPanel.classList.toggle('hidden');
-                        groupSettingsToggle.setAttribute('aria-expanded', hidden ? 'true' : 'false');
-                    });
+                    const openGroupSettings = () => {
+                        groupSettingsPanel.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+                        groupSettingsPanel.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+                        groupSettingsBackdrop?.classList.remove('hidden');
+                        groupSettingsToggle.setAttribute('aria-expanded', 'true');
+                    };
 
-                    document.addEventListener('click', function (event) {
-                        const target = event.target;
-                        if (!(target instanceof Node)) {
+                    const closeGroupSettings = () => {
+                        groupSettingsPanel.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                        groupSettingsPanel.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                        groupSettingsBackdrop?.classList.add('hidden');
+                        groupSettingsToggle.setAttribute('aria-expanded', 'false');
+                    };
+
+                    groupSettingsToggle.addEventListener('click', function () {
+                        const expanded = groupSettingsToggle.getAttribute('aria-expanded') === 'true';
+                        if (expanded) {
+                            closeGroupSettings();
                             return;
                         }
 
-                        const clickedInsidePanel = groupSettingsPanel.contains(target);
-                        const clickedToggle = groupSettingsToggle.contains(target);
-                        if (!clickedInsidePanel && !clickedToggle && !groupSettingsPanel.classList.contains('hidden')) {
-                            groupSettingsPanel.classList.add('hidden');
-                            groupSettingsToggle.setAttribute('aria-expanded', 'false');
+                        openGroupSettings();
+                    });
+
+                    groupSettingsBackdrop?.addEventListener('click', closeGroupSettings);
+
+                    document.addEventListener('keydown', function (event) {
+                        if (event.key === 'Escape') {
+                            closeGroupSettings();
                         }
                     });
                 }

@@ -69,7 +69,7 @@ class User extends Authenticatable
             return __('Inactive');
         }
 
-        $minutes = $this->last_seen_at->diffInMinutes(now());
+        $minutes = (int) floor($this->last_seen_at->diffInSeconds(now()) / 60);
 
         if ($minutes < 1) {
             return __('Active now');
