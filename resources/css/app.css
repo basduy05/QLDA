@@ -71,4 +71,13 @@
 	.table-head {
 		@apply text-xs uppercase tracking-widest text-slate-500;
 	}
+
+	.dropdown-summary {
+		list-style: none;
+		cursor: pointer;
+	}
+
+	.dropdown-summary::-webkit-details-marker {
+		display: none;
+	}
 }

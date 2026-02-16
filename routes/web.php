@@ -50,6 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/users', [AdminUserController::class, 'index'])
         ->middleware('admin')
         ->name('admin.users.index');
+    Route::patch('/admin/users/{user}', [AdminUserController::class, 'update'])
+        ->middleware('admin')
+        ->name('admin.users.update');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
