@@ -8,8 +8,7 @@
             <div class="flex items-center gap-2">
                 <a href="{{ route('chat-groups.index') }}" class="btn-secondary text-xs">{{ __('Manage Groups') }}</a>
                 @if ($callPrimary)
-                    <a href="{{ $callPrimary }}" target="_blank" rel="noopener noreferrer" class="btn-primary text-xs">{{ __('Call (Best)') }}</a>
-                    <a href="{{ $callBackup }}" target="_blank" rel="noopener noreferrer" class="btn-secondary text-xs">{{ __('Call (Backup)') }}</a>
+                    <button type="button" id="open-call-primary" class="btn-primary text-xs">{{ __('Call (Embedded)') }}</button>
                 @endif
             </div>
         </div>
@@ -51,6 +50,14 @@
                                 {{ $activeType === 'direct' && $typing ? __('Typing...') : '' }}
                             </p>
                         </div>
+                        @if ($callPrimary)
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="open-call-inline" class="btn-secondary text-xs">{{ __('Start Call') }}</button>
+                                @if ($callBackup)
+                                    <button type="button" id="open-call-backup" class="btn-secondary text-xs">{{ __('Backup Call') }}</button>
+                                @endif
+                            </div>
+                        @endif
                     </div>
 
                     <div id="messenger-feed" class="flex-1 overflow-y-auto py-3 space-y-2">
@@ -165,6 +172,69 @@
                     feed.scrollTop = feed.scrollHeight;
                     setInterval(refresh, 3500);
                 }
+            })();
+        </script>
+    @endif
+
+    @if ($callPrimary)
+        <div id="call-config" data-primary="{{ $callPrimary }}" data-backup="{{ $callBackup ?? '' }}" class="hidden"></div>
+
+        <div id="call-modal" class="fixed inset-0 z-50 hidden bg-slate-900/70 p-4">
+            <div class="mx-auto h-full max-w-6xl rounded-2xl bg-white shadow-xl flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                    <h3 class="font-semibold text-slate-900">{{ __('Embedded Call') }}</h3>
+                    <div class="flex items-center gap-2">
+                        @if ($callBackup)
+                            <button type="button" id="switch-call-backup" class="btn-secondary text-xs">{{ __('Switch Backup') }}</button>
+                        @endif
+                        <button type="button" id="close-call" class="btn-secondary text-xs">{{ __('Close') }}</button>
+                    </div>
+                </div>
+                <iframe id="call-frame" class="w-full flex-1" allow="camera; microphone; fullscreen; display-capture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                const modal = document.getElementById('call-modal');
+                const frame = document.getElementById('call-frame');
+                const openPrimaryHeader = document.getElementById('open-call-primary');
+                const openPrimaryInline = document.getElementById('open-call-inline');
+                const openBackupInline = document.getElementById('open-call-backup');
+                const switchBackup = document.getElementById('switch-call-backup');
+                const closeCall = document.getElementById('close-call');
+                const callConfig = document.getElementById('call-config');
+
+                const primaryUrl = callConfig?.dataset.primary || '';
+                const backupUrl = callConfig?.dataset.backup || '';
+
+                const openWith = (url) => {
+                    if (!modal || !frame || !url) {
+                        return;
+                    }
+                    frame.src = url;
+                    modal.classList.remove('hidden');
+                };
+
+                const close = () => {
+                    if (!modal || !frame) {
+                        return;
+                    }
+                    frame.src = '';
+                    modal.classList.add('hidden');
+                };
+
+                openPrimaryHeader?.addEventListener('click', () => openWith(primaryUrl));
+                openPrimaryInline?.addEventListener('click', () => openWith(primaryUrl));
+                openBackupInline?.addEventListener('click', () => openWith(backupUrl));
+                switchBackup?.addEventListener('click', () => openWith(backupUrl));
+                closeCall?.addEventListener('click', close);
+
+                modal?.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        close();
+                    }
+                });
             })();
         </script>
     @endif
