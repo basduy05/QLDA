@@ -10,6 +10,11 @@ class DirectMessage extends Model
         'direct_conversation_id',
         'user_id',
         'body',
+        'seen_at',
+    ];
+
+    protected $casts = [
+        'seen_at' => 'datetime',
     ];
 
     public function conversation()

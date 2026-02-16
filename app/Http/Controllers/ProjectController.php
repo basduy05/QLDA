@@ -21,7 +21,12 @@ class ProjectController extends Controller
         $query = Project::with('owner')->withCount('tasks')->latest();
 
         if (!$user->isAdmin()) {
-            $query->where('owner_id', $user->id);
+            $query->where(function ($projectQuery) use ($user) {
+                $projectQuery->where('owner_id', $user->id)
+                    ->orWhereHas('tasks', function ($taskQuery) use ($user) {
+                        $taskQuery->where('assignee_id', $user->id);
+                    });
+            });
         }
 
         return view('projects.index', [
@@ -168,6 +173,18 @@ class ProjectController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        if ($project->owner_id === $user->id) {
+            return;
+        }
+
+        if ($project->tasks()->where('assignee_id', $user->id)->exists()) {
+            return;
+        }
 
         if (!$user->isAdmin() && $project->owner_id !== $user->id) {
             abort(403);

@@ -6,6 +6,7 @@ use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DirectMessageController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -50,6 +51,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read', [NotificationController::class, 'markAllRead'])
         ->name('notifications.read');
+    Route::get('/notifications/pulse', [NotificationController::class, 'pulse'])
+        ->name('notifications.pulse');
+    Route::get('/messenger', [MessengerController::class, 'index'])->name('messenger.index');
+    Route::get('/messenger/direct/{contact}', [MessengerController::class, 'direct'])->name('messenger.direct');
+    Route::get('/messenger/group/{chatGroup}', [MessengerController::class, 'group'])->name('messenger.group');
+    Route::get('/messenger/direct/{contact}/feed', [MessengerController::class, 'directFeed'])->name('messenger.direct-feed');
+    Route::get('/messenger/group/{chatGroup}/feed', [MessengerController::class, 'groupFeed'])->name('messenger.group-feed');
+    Route::post('/messenger/direct/{contact}', [MessengerController::class, 'sendDirect'])->name('messenger.send-direct');
+    Route::post('/messenger/group/{chatGroup}', [MessengerController::class, 'sendGroup'])->name('messenger.send-group');
+    Route::post('/messenger/direct/{contact}/typing', [MessengerController::class, 'typing'])->name('messenger.typing');
     Route::get('/messages', [DirectMessageController::class, 'index'])->name('messages.index');
     Route::get('/messages/{contact}', [DirectMessageController::class, 'show'])->name('messages.show');
     Route::get('/messages/{contact}/feed', [DirectMessageController::class, 'feed'])->name('messages.feed');

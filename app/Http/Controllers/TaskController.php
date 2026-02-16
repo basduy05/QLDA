@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Notifications\TaskAssignedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -73,6 +74,13 @@ class TaskController extends Controller
 
         $task = Task::create($data);
 
+        if ($task->assignee_id) {
+            $assignee = User::find($task->assignee_id);
+            if ($assignee && $assignee->id !== Auth::id()) {
+                $assignee->notify(new TaskAssignedNotification($task));
+            }
+        }
+
         return redirect()
             ->route('projects.show', $project)
             ->with('status', __('Task created successfully.'));
@@ -119,6 +127,8 @@ class TaskController extends Controller
     {
         $this->ensureProjectOwnerAccess($task->project);
 
+        $originalAssigneeId = $task->assignee_id;
+
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -129,6 +139,13 @@ class TaskController extends Controller
         ]);
 
         $task->update($data);
+
+        if ($task->assignee_id && $task->assignee_id !== $originalAssigneeId) {
+            $assignee = User::find($task->assignee_id);
+            if ($assignee && $assignee->id !== Auth::id()) {
+                $assignee->notify(new TaskAssignedNotification($task));
+            }
+        }
 
         return redirect()
             ->route('projects.show', $task->project)

@@ -42,6 +42,15 @@ class TaskCommented extends Notification
 
     public function toArray(object $notifiable): array
     {
+        $title = $this->isMention
+            ? __('You were mentioned in a task comment')
+            : __('New task comment');
+
+        $message = __(':user commented on task :task', [
+            'user' => $this->comment->user->name,
+            'task' => $this->comment->task->title,
+        ]);
+
         return [
             'task_id' => $this->comment->task_id,
             'task_title' => $this->comment->task->title,
@@ -49,6 +58,10 @@ class TaskCommented extends Notification
             'commenter' => $this->comment->user->name,
             'body' => $this->comment->body,
             'is_mention' => $this->isMention,
+            'title' => $title,
+            'message' => $message,
+            'url' => route('tasks.show', $this->comment->task),
+            'type' => 'task-comment',
         ];
     }
 }

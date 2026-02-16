@@ -32,5 +32,60 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <script>
+            (function () {
+                const countNode = document.getElementById('nav-unread-count');
+                if (!countNode) {
+                    return;
+                }
+
+                let lastCount = parseInt((countNode.textContent || '0').trim(), 10) || 0;
+
+                const playSound = () => {
+                    try {
+                        const context = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = context.createOscillator();
+                        const gain = context.createGain();
+                        oscillator.type = 'sine';
+                        oscillator.frequency.value = 880;
+                        gain.gain.value = 0.04;
+                        oscillator.connect(gain);
+                        gain.connect(context.destination);
+                        oscillator.start();
+                        oscillator.stop(context.currentTime + 0.12);
+                    } catch (_) {
+                    }
+                };
+
+                const syncNotifications = async () => {
+                    try {
+                        const response = await fetch("{{ route('notifications.pulse') }}", {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            credentials: 'same-origin',
+                        });
+
+                        if (!response.ok) {
+                            return;
+                        }
+
+                        const payload = await response.json();
+                        const currentCount = Number(payload.unreadCount || 0);
+
+                        countNode.textContent = String(currentCount);
+                        countNode.classList.toggle('hidden', currentCount < 1);
+
+                        if (currentCount > lastCount) {
+                            playSound();
+                        }
+
+                        lastCount = currentCount;
+                    } catch (_) {
+                    }
+                };
+
+                setInterval(syncNotifications, 7000);
+            })();
+        </script>
     </body>
 </html>
