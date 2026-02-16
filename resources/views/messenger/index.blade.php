@@ -22,8 +22,12 @@
                     @foreach ($contacts as $contact)
                         @php($meta = $directMap->get($contact->id))
                         <a href="{{ route('messenger.direct', $contact) }}" class="block rounded-xl px-3 py-2 border {{ $activeType === 'direct' && $activeTarget?->id === $contact->id ? 'border-slate-900 bg-slate-50' : 'border-slate-200 bg-white hover:border-slate-300' }}">
-                            <p class="font-semibold text-sm text-slate-900">{{ $contact->name }}</p>
+                            <div class="flex items-center justify-between gap-2">
+                                <p class="font-semibold text-sm text-slate-900">{{ $contact->name }}</p>
+                                <span class="inline-flex h-2.5 w-2.5 rounded-full {{ $contact->isOnline() ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>
+                            </div>
                             <p class="text-[11px] text-slate-500">{{ \Illuminate\Support\Str::limit($meta['last_message'] ?? '', 34) }}</p>
+                            <p class="text-[10px] text-slate-400">{{ $contact->activityStatusLabel() }}</p>
                         </a>
                     @endforeach
                 </div>
@@ -44,6 +48,9 @@
                     <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                         <div>
                             <p class="font-semibold text-slate-900">{{ $activeTarget->name }}</p>
+                            @if ($activeType === 'direct')
+                                <p class="text-[11px] text-slate-500">{{ $activeTarget->activityStatusLabel() }}</p>
+                            @endif
                             <p class="text-xs text-slate-500" id="typing-indicator">
                                 {{ $activeType === 'direct' && $typing ? __('Typing...') : '' }}
                             </p>
@@ -65,11 +72,12 @@
                         @csrf
                         <div class="flex items-end gap-2">
                             <textarea id="composer" name="body" rows="2" class="w-full rounded-xl border-slate-200" placeholder="{{ __('Type a message...') }}" required>{{ old('body') }}</textarea>
-                            <button type="submit" class="btn-primary">{{ __('Send') }}</button>
+                            <button id="composer-submit" type="submit" class="btn-primary">{{ __('Send') }}</button>
                         </div>
                         @error('body')
                             <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                         @enderror
+                        <p id="composer-error" class="text-sm text-red-600 mt-2 hidden"></p>
                         <p class="text-[11px] text-slate-400 mt-1">{{ __('Enter to send · Ctrl+Enter for new line') }}</p>
                     </form>
                 @else
@@ -128,6 +136,8 @@
                 const feed = document.getElementById('messenger-feed');
                 const composer = document.getElementById('composer');
                 const form = document.getElementById('composer-form');
+                const submitBtn = document.getElementById('composer-submit');
+                const composerError = document.getElementById('composer-error');
                 const typingEl = document.getElementById('typing-indicator');
                 const runtime = document.getElementById('messenger-data');
                 const type = "{{ $activeType }}";
@@ -143,8 +153,52 @@
                 const activeTargetId = Number(runtime?.dataset.activeTargetId || 0);
                 const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
                 let loading = false;
+                let queuedRefresh = false;
                 let typingTick = 0;
                 let typingTimeout = null;
+                let submitLocked = false;
+                let lastFeedHtml = feed ? feed.innerHTML : '';
+
+                const setSubmitState = (busy) => {
+                    submitLocked = busy;
+
+                    if (submitBtn) {
+                        submitBtn.disabled = busy;
+                        submitBtn.classList.toggle('opacity-70', busy);
+                        submitBtn.textContent = busy ? "{{ __('Sending...') }}" : "{{ __('Send') }}";
+                    }
+
+                    if (composer) {
+                        composer.readOnly = busy;
+                    }
+                };
+
+                const showComposerError = (message) => {
+                    if (!composerError) {
+                        return;
+                    }
+
+                    if (!message) {
+                        composerError.classList.add('hidden');
+                        composerError.textContent = '';
+                        return;
+                    }
+
+                    composerError.classList.remove('hidden');
+                    composerError.textContent = message;
+                };
+
+                const scheduleRefresh = () => {
+                    if (queuedRefresh) {
+                        return;
+                    }
+
+                    queuedRefresh = true;
+                    setTimeout(() => {
+                        queuedRefresh = false;
+                        refresh();
+                    }, 120);
+                };
 
                 const refresh = async () => {
                     if (loading || !feed) {
@@ -165,7 +219,10 @@
                         }
 
                         const payload = await response.json();
-                        feed.innerHTML = payload.html;
+                        if (payload.html !== lastFeedHtml) {
+                            feed.innerHTML = payload.html;
+                            lastFeedHtml = payload.html;
+                        }
 
                         if (type === 'direct' && typingEl) {
                             typingEl.textContent = payload.typing ? "{{ __('Typing...') }}" : '';
@@ -183,7 +240,7 @@
                     composer.addEventListener('keydown', function (event) {
                         if (event.key === 'Enter' && !event.ctrlKey) {
                             event.preventDefault();
-                            form?.submit();
+                            form?.requestSubmit();
                         }
                     });
 
@@ -210,9 +267,64 @@
                     });
                 }
 
+                if (form && composer) {
+                    form.addEventListener('submit', async function (event) {
+                        event.preventDefault();
+
+                        if (submitLocked) {
+                            return;
+                        }
+
+                        const body = (composer.value || '').trim();
+                        if (!body) {
+                            showComposerError("{{ __('Message cannot be empty.') }}");
+                            return;
+                        }
+
+                        showComposerError('');
+                        setSubmitState(true);
+
+                        const formData = new FormData(form);
+                        formData.set('body', body);
+
+                        try {
+                            const response = await fetch(form.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': csrf,
+                                },
+                                credentials: 'same-origin',
+                                body: formData,
+                            });
+
+                            if (response.status === 422) {
+                                const payload = await response.json();
+                                const message = payload?.errors?.body?.[0] || "{{ __('Unable to send message.') }}";
+                                showComposerError(message);
+                                return;
+                            }
+
+                            if (!response.ok) {
+                                throw new Error('send-failed');
+                            }
+
+                            composer.value = '';
+                            composer.focus();
+                            scheduleRefresh();
+                        } catch (_) {
+                            form.submit();
+                            return;
+                        } finally {
+                            setSubmitState(false);
+                        }
+                    });
+                }
+
                 if (feed) {
                     feed.scrollTop = feed.scrollHeight;
-                    setInterval(refresh, 12000);
+                    setInterval(scheduleRefresh, 12000);
                 }
 
                 const triggerTyping = () => {
@@ -268,7 +380,7 @@
                                 }
 
                                 if (eventName === 'message.direct' || eventName === 'message.group') {
-                                    refresh();
+                                    scheduleRefresh();
                                 }
                             } catch (_) {
                             }

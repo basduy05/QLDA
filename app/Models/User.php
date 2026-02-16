@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
@@ -45,7 +46,48 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_seen_at' => 'datetime',
         ];
+    }
+
+    public function isOnline(): bool
+    {
+        return Cache::has($this->onlineCacheKey());
+    }
+
+    public function activityStatusLabel(): string
+    {
+        if ($this->isOnline()) {
+            return __('Active now');
+        }
+
+        if (! $this->last_seen_at) {
+            return __('Inactive');
+        }
+
+        $minutes = $this->last_seen_at->diffInMinutes(now());
+
+        if ($minutes < 1) {
+            return __('Active now');
+        }
+
+        if ($minutes < 60) {
+            return __('Inactive :value minute(s) ago', ['value' => $minutes]);
+        }
+
+        $hours = (int) floor($minutes / 60);
+        if ($hours < 24) {
+            return __('Inactive :value hour(s) ago', ['value' => $hours]);
+        }
+
+        $days = (int) floor($hours / 24);
+
+        return __('Inactive :value day(s) ago', ['value' => $days]);
+    }
+
+    public function onlineCacheKey(): string
+    {
+        return 'presence:user:'.$this->id;
     }
 
     public function projectsOwned()

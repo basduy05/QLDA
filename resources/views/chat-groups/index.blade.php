@@ -27,14 +27,26 @@
                 </div>
 
                 <div>
-                    <label class="text-sm font-medium text-slate-600">{{ __('Members') }}</label>
+                    <div class="flex items-center justify-between gap-3">
+                        <label class="text-sm font-medium text-slate-600">{{ __('Members') }}</label>
+                        <p class="text-xs text-slate-500">
+                            <span id="selected-members-count">0</span> {{ __('selected') }}
+                        </p>
+                    </div>
                     @php($selectedMembers = collect(old('member_ids', []))->map(fn ($id) => (int) $id)->all())
-                    <div class="mt-2 max-h-56 overflow-y-auto rounded-xl border border-slate-200 p-2 space-y-2">
+                    <input
+                        id="member-search"
+                        type="text"
+                        class="mt-2 w-full rounded-xl border-slate-200"
+                        placeholder="{{ __('Search by name or email...') }}"
+                    >
+                    <div id="member-list" class="mt-2 max-h-64 overflow-y-auto rounded-xl border border-slate-200 p-2 grid sm:grid-cols-2 gap-2">
                         @foreach ($users as $member)
-                            <label class="flex items-start gap-3 rounded-lg border border-slate-200 px-3 py-2 cursor-pointer hover:border-slate-300">
+                            <label data-member-text="{{ \Illuminate\Support\Str::lower($member->name.' '.$member->email) }}" class="flex items-start gap-3 rounded-lg border border-slate-200 px-3 py-2 cursor-pointer hover:border-slate-300">
                                 <input
                                     type="checkbox"
                                     name="member_ids[]"
+                                    data-member-checkbox="1"
                                     value="{{ $member->id }}"
                                     class="mt-1 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
                                     @checked(in_array($member->id, $selectedMembers, true))
@@ -42,6 +54,7 @@
                                 <span>
                                     <span class="block text-sm font-medium text-slate-800">{{ $member->name }}</span>
                                     <span class="block text-xs text-slate-500">{{ $member->email }}</span>
+                                    <span class="block text-[11px] text-slate-400">{{ $member->activityStatusLabel() }}</span>
                                 </span>
                             </label>
                         @endforeach
@@ -78,4 +91,52 @@
             </div>
         </div>
     </div>
+
+    <script>
+        (function () {
+            const searchInput = document.getElementById('member-search');
+            const memberList = document.getElementById('member-list');
+            const countNode = document.getElementById('selected-members-count');
+            if (!memberList) {
+                return;
+            }
+
+            const items = Array.from(memberList.querySelectorAll('label[data-member-text]'));
+
+            const refreshCount = () => {
+                if (!countNode) {
+                    return;
+                }
+
+                const checked = memberList.querySelectorAll('input[data-member-checkbox]:checked').length;
+                countNode.textContent = String(checked);
+            };
+
+            const applyFilter = () => {
+                const keyword = (searchInput?.value || '').trim().toLowerCase();
+
+                items.forEach((item) => {
+                    const text = item.getAttribute('data-member-text') || '';
+                    const visible = keyword === '' || text.includes(keyword);
+                    item.classList.toggle('hidden', !visible);
+                });
+            };
+
+            memberList.addEventListener('change', (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) {
+                    return;
+                }
+
+                if (target.matches('input[data-member-checkbox]')) {
+                    refreshCount();
+                }
+            });
+
+            searchInput?.addEventListener('input', applyFilter);
+
+            refreshCount();
+            applyFilter();
+        })();
+    </script>
 </x-app-layout>

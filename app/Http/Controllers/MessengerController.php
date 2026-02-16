@@ -8,7 +8,6 @@ use App\Models\DirectConversation;
 use App\Models\DirectMessage;
 use App\Models\User;
 use App\Notifications\MessageReceivedNotification;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -107,7 +106,7 @@ class MessengerController extends Controller
         ]);
     }
 
-    public function sendDirect(Request $request, User $contact): RedirectResponse
+    public function sendDirect(Request $request, User $contact)
     {
         $this->purgeExpiredMessages();
 
@@ -122,12 +121,25 @@ class MessengerController extends Controller
             'body' => ['required', 'string', 'max:2000'],
         ]);
 
+        $body = trim($data['body']);
+        if ($body === '') {
+            return back()->withErrors(['body' => __('Message cannot be empty.')]);
+        }
+
         $conversation = $this->findOrCreateConversation($user->id, $contact->id);
+
+        if ($this->hasRecentDuplicateDirectMessage($conversation->id, $user->id, $body)) {
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => true, 'duplicate' => true]);
+            }
+
+            return redirect()->route('messenger.direct', $contact);
+        }
 
         DirectMessage::create([
             'direct_conversation_id' => $conversation->id,
             'user_id' => $user->id,
-            'body' => trim($data['body']),
+            'body' => $body,
             'seen_at' => null,
         ]);
 
@@ -143,14 +155,18 @@ class MessengerController extends Controller
 
         $contact->notify(new MessageReceivedNotification(
             __('New message from :name', ['name' => $user->name]),
-            trim($data['body']),
+            $body,
             route('messenger.direct', $user)
         ));
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
 
         return redirect()->route('messenger.direct', $contact);
     }
 
-    public function sendGroup(Request $request, ChatGroup $chatGroup): RedirectResponse
+    public function sendGroup(Request $request, ChatGroup $chatGroup)
     {
         $this->purgeExpiredMessages();
         $this->ensureGroupAccess($chatGroup);
@@ -162,10 +178,23 @@ class MessengerController extends Controller
             'body' => ['required', 'string', 'max:2000'],
         ]);
 
+        $body = trim($data['body']);
+        if ($body === '') {
+            return back()->withErrors(['body' => __('Message cannot be empty.')]);
+        }
+
+        if ($this->hasRecentDuplicateGroupMessage($chatGroup->id, $user->id, $body)) {
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => true, 'duplicate' => true]);
+            }
+
+            return redirect()->route('messenger.group', $chatGroup);
+        }
+
         ChatMessage::create([
             'chat_group_id' => $chatGroup->id,
             'user_id' => $user->id,
-            'body' => trim($data['body']),
+            'body' => $body,
         ]);
 
         $memberIds = $chatGroup->members()->pluck('users.id')->all();
@@ -188,13 +217,17 @@ class MessengerController extends Controller
         $chatGroup->members()
             ->where('users.id', '!=', $user->id)
             ->get()
-            ->each(function (User $member) use ($chatGroup, $user, $data) {
+            ->each(function (User $member) use ($chatGroup, $user, $body) {
                 $member->notify(new MessageReceivedNotification(
                     __('New group message in :group', ['group' => $chatGroup->name]),
-                    __(':name: :message', ['name' => $user->name, 'message' => trim($data['body'])]),
+                    __(':name: :message', ['name' => $user->name, 'message' => $body]),
                     route('messenger.group', $chatGroup)
                 ));
             });
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
 
         return redirect()->route('messenger.group', $chatGroup);
     }
@@ -344,6 +377,24 @@ class MessengerController extends Controller
         $cutoff = now()->subDay();
         DirectMessage::where('created_at', '<', $cutoff)->delete();
         ChatMessage::where('created_at', '<', $cutoff)->delete();
+    }
+
+    private function hasRecentDuplicateDirectMessage(int $conversationId, int $userId, string $body): bool
+    {
+        return DirectMessage::where('direct_conversation_id', $conversationId)
+            ->where('user_id', $userId)
+            ->where('body', $body)
+            ->where('created_at', '>=', now()->subSeconds(3))
+            ->exists();
+    }
+
+    private function hasRecentDuplicateGroupMessage(int $groupId, int $userId, string $body): bool
+    {
+        return ChatMessage::where('chat_group_id', $groupId)
+            ->where('user_id', $userId)
+            ->where('body', $body)
+            ->where('created_at', '>=', now()->subSeconds(3))
+            ->exists();
     }
 
     private function emitRealtime(array $channels, string $event, array $payload = []): void
