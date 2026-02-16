@@ -45,7 +45,7 @@
 
             <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-0">
                 @if ($activeType)
-                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div class="relative flex items-center justify-between pb-2 border-b border-slate-100">
                         <div>
                             <p class="font-semibold text-slate-900">{{ $activeTarget->name }}</p>
                             @if ($activeType === 'direct')
@@ -59,11 +59,25 @@
                         </div>
                         @if ($activeType === 'direct')
                             <button type="button" id="start-call-inline" class="btn-secondary text-xs">{{ __('Start Call') }}</button>
+                        @elseif ($activeType === 'group')
+                            <button
+                                type="button"
+                                id="group-settings-toggle"
+                                aria-expanded="false"
+                                class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                                title="{{ __('Group options') }}"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="4" y1="7" x2="20" y2="7"></line>
+                                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                                    <line x1="4" y1="17" x2="20" y2="17"></line>
+                                </svg>
+                            </button>
                         @endif
                     </div>
 
                     @if ($activeType === 'group')
-                        <div class="py-2 border-b border-slate-100 space-y-2">
+                        <div id="group-settings-panel" class="hidden absolute right-0 top-[calc(100%+8px)] z-20 w-full md:w-[42rem] max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl space-y-3">
                             <form method="POST" action="{{ route('messenger.group.rename', $activeTarget) }}" class="flex items-end gap-2">
                                 @csrf
                                 @method('PATCH')
@@ -99,14 +113,13 @@
                                 @endforeach
                             </div>
 
-                                @if ($canDeleteGroup)
-                                    <form method="POST" action="{{ route('chat-groups.destroy', $activeTarget) }}" class="ml-auto">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-secondary text-xs text-red-600 border-red-200 hover:border-red-300">{{ __('Delete group') }}</button>
-                                    </form>
-                                @endif
-                            </div>
+                            @if ($canDeleteGroup)
+                                <form method="POST" action="{{ route('chat-groups.destroy', $activeTarget) }}" class="pt-1">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-secondary text-xs text-red-600 border-red-200 hover:border-red-300">{{ __('Delete group') }}</button>
+                                </form>
+                            @endif
                         </div>
                     @endif
 
@@ -189,6 +202,8 @@
                 const submitBtn = document.getElementById('composer-submit');
                 const composerError = document.getElementById('composer-error');
                 const typingEl = document.getElementById('typing-indicator');
+                const groupSettingsToggle = document.getElementById('group-settings-toggle');
+                const groupSettingsPanel = document.getElementById('group-settings-panel');
                 const runtime = document.getElementById('messenger-data');
                 const type = "{{ $activeType }}";
                 const feedEndpoint = type === 'direct'
@@ -208,6 +223,28 @@
                 let typingTimeout = null;
                 let submitLocked = false;
                 let lastFeedHtml = feed ? feed.innerHTML : '';
+
+                if (groupSettingsToggle && groupSettingsPanel) {
+                    groupSettingsToggle.addEventListener('click', function () {
+                        const hidden = groupSettingsPanel.classList.contains('hidden');
+                        groupSettingsPanel.classList.toggle('hidden');
+                        groupSettingsToggle.setAttribute('aria-expanded', hidden ? 'true' : 'false');
+                    });
+
+                    document.addEventListener('click', function (event) {
+                        const target = event.target;
+                        if (!(target instanceof Node)) {
+                            return;
+                        }
+
+                        const clickedInsidePanel = groupSettingsPanel.contains(target);
+                        const clickedToggle = groupSettingsToggle.contains(target);
+                        if (!clickedInsidePanel && !clickedToggle && !groupSettingsPanel.classList.contains('hidden')) {
+                            groupSettingsPanel.classList.add('hidden');
+                            groupSettingsToggle.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                }
 
                 const setSubmitState = (busy) => {
                     submitLocked = busy;

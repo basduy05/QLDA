@@ -64,6 +64,27 @@ The messenger keeps periodic polling as fallback, and uses WebSocket updates whe
 - Change demo passwords in production.
 - Configure mail and queue as needed in `.env`.
 
+## Email Delivery (OTP / Verification)
+If you do not receive emails, your app is likely using `MAIL_MAILER=log` (log-only mode).
+
+Use real SMTP (example: Gmail):
+1. Enable 2-Step Verification on your Gmail account.
+2. Create an App Password in Google Account security.
+3. Set these env values:
+   - `MAIL_MAILER=smtp`
+   - `MAIL_SCHEME=tls`
+   - `MAIL_HOST=smtp.gmail.com`
+   - `MAIL_PORT=587`
+   - `MAIL_USERNAME=your_email@gmail.com`
+   - `MAIL_PASSWORD=your_16_char_app_password`
+   - `MAIL_FROM_ADDRESS=your_email@gmail.com`
+4. Clear config cache:
+   - `php artisan config:clear`
+
+Quick test via Tinker:
+- `php artisan tinker`
+- `Mail::raw('SMTP test', fn($m) => $m->to('your_receiver@gmail.com')->subject('Test Mail'));`
+
 ## Free Deployment (Render + PostgreSQL)
 1. Push this repo to Git.
 2. Create a new Render Blueprint service and select this repo.

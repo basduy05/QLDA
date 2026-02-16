@@ -25,6 +25,22 @@ services:
         value: "true"
       - key: WEBRTC_ICE_SERVERS
         value: "[]"
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_SCHEME
+        value: tls
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        value: ""
+      - key: MAIL_PASSWORD
+        value: ""
+      - key: MAIL_FROM_ADDRESS
+        value: ""
+      - key: MAIL_FROM_NAME
+        value: QhorizonPM
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST

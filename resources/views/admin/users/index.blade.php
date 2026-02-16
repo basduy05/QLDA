@@ -29,42 +29,55 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach ($users as $user)
+                        @php($updateFormId = 'user-update-'.$user->id)
+                        @php($deleteFormId = 'user-delete-'.$user->id)
                         <tr>
                             <td class="py-4">
-                                <form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-2 min-w-44">
-                                    @csrf
-                                    @method('patch')
-                                    <input type="text" name="name" value="{{ old('name', $user->name) }}" class="w-full rounded-md border border-slate-200 px-2 py-1 text-xs" required>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    form="{{ $updateFormId }}"
+                                    value="{{ old('name', $user->name) }}"
+                                    class="w-full rounded-md border border-slate-200 px-2 py-1 text-xs"
+                                    required
+                                >
                             </td>
                             <td class="py-4">
-                                    <input type="email" name="email" value="{{ old('email', $user->email) }}" class="w-full rounded-md border border-slate-200 px-2 py-1 text-xs" required>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    form="{{ $updateFormId }}"
+                                    value="{{ old('email', $user->email) }}"
+                                    class="w-full rounded-md border border-slate-200 px-2 py-1 text-xs"
+                                    required
+                                >
                             </td>
                             <td class="py-4">
-                                    <select name="role" class="rounded-md border border-slate-200 px-2 py-1 text-xs">
-                                        <option value="admin" @selected($user->role === 'admin')>{{ __('Admin') }}</option>
-                                        <option value="user" @selected($user->role === 'user')>{{ __('User') }}</option>
-                                    </select>
+                                <select name="role" form="{{ $updateFormId }}" class="rounded-md border border-slate-200 px-2 py-1 text-xs">
+                                    <option value="admin" @selected($user->role === 'admin')>{{ __('Admin') }}</option>
+                                    <option value="user" @selected($user->role === 'user')>{{ __('User') }}</option>
+                                </select>
                             </td>
                             <td class="py-4">
-                                    <select name="locale" class="rounded-md border border-slate-200 px-2 py-1 text-xs">
-                                        <option value="vi" @selected($user->locale === 'vi')>VI</option>
-                                        <option value="en" @selected($user->locale === 'en')>EN</option>
-                                    </select>
+                                <select name="locale" form="{{ $updateFormId }}" class="rounded-md border border-slate-200 px-2 py-1 text-xs">
+                                    <option value="vi" @selected($user->locale === 'vi')>VI</option>
+                                    <option value="en" @selected($user->locale === 'en')>EN</option>
+                                </select>
                             </td>
                             <td class="py-4">
-                                    <div class="flex items-center gap-2">
-                                        <button type="submit" class="text-xs px-3 py-1 rounded-full bg-slate-900 text-white">
-                                            {{ __('Save') }}
-                                        </button>
-                                </form>
-                                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-xs px-3 py-1 rounded-full border border-red-200 text-red-600">
-                                                {{ __('Delete') }}
-                                            </button>
-                                        </form>
-                                    </div>
+                                <div class="flex items-center gap-2">
+                                    <form id="{{ $updateFormId }}" method="POST" action="{{ route('admin.users.update', $user) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-xs px-3 py-1 rounded-full bg-slate-900 text-white">{{ __('Save') }}</button>
+                                    </form>
+
+                                    <form id="{{ $deleteFormId }}" method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-xs px-3 py-1 rounded-full border border-red-200 text-red-600">{{ __('Delete') }}</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
