@@ -10,6 +10,10 @@ class ChatMessage extends Model
         'chat_group_id',
         'user_id',
         'body',
+        'attachment_path',
+        'attachment_name',
+        'attachment_size',
+        'attachment_mime',
         'is_system',
     ];
 
@@ -17,6 +21,7 @@ class ChatMessage extends Model
     {
         return [
             'is_system' => 'boolean',
+            'attachment_size' => 'integer',
         ];
     }
 

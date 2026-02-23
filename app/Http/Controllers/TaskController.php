@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\TaskAssignedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
@@ -21,13 +22,16 @@ class TaskController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $query = Task::with(['project', 'assignee'])->latest();
+        $query = Task::with(['project.owner', 'project.members', 'assignee'])->latest();
 
         if (!$user->isAdmin()) {
             $query->where(function ($taskQuery) use ($user) {
                 $taskQuery->where('assignee_id', $user->id)
                     ->orWhereHas('project', function ($projectQuery) use ($user) {
-                        $projectQuery->where('owner_id', $user->id);
+                        $projectQuery->where('owner_id', $user->id)
+                            ->orWhereHas('members', function ($memberQuery) use ($user) {
+                                $memberQuery->where('users.id', $user->id);
+                            });
                     });
             });
         }
@@ -43,11 +47,11 @@ class TaskController extends Controller
      */
     public function create(Project $project)
     {
-        $this->ensureProjectOwnerAccess($project);
+        $this->ensureTaskManageAccess($project);
 
         return view('tasks.create', [
             'project' => $project,
-            'users' => User::orderBy('name')->get(),
+            'users' => $this->projectAssignableUsers($project),
             'statuses' => $this->statuses,
             'priorities' => $this->priorities,
         ]);
@@ -58,7 +62,9 @@ class TaskController extends Controller
      */
     public function store(Request $request, Project $project)
     {
-        $this->ensureProjectOwnerAccess($project);
+        $this->ensureTaskManageAccess($project);
+
+        $assignableIds = $this->projectAssignableUserIds($project);
 
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
@@ -66,7 +72,7 @@ class TaskController extends Controller
             'status' => ['required', 'in:' . implode(',', $this->statuses)],
             'priority' => ['required', 'in:' . implode(',', $this->priorities)],
             'due_date' => ['nullable', 'date'],
-            'assignee_id' => ['nullable', 'exists:users,id'],
+            'assignee_id' => ['nullable', Rule::in($assignableIds)],
         ]);
 
         $data['project_id'] = $project->id;
@@ -109,12 +115,12 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        $this->ensureProjectOwnerAccess($task->project);
+        $this->ensureTaskManageAccess($task->project);
 
         return view('tasks.edit', [
             'task' => $task,
             'project' => $task->project,
-            'users' => User::orderBy('name')->get(),
+            'users' => $this->projectAssignableUsers($task->project),
             'statuses' => $this->statuses,
             'priorities' => $this->priorities,
         ]);
@@ -125,7 +131,9 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        $this->ensureProjectOwnerAccess($task->project);
+        $this->ensureTaskManageAccess($task->project);
+
+        $assignableIds = $this->projectAssignableUserIds($task->project);
 
         $originalAssigneeId = $task->assignee_id;
 
@@ -135,7 +143,7 @@ class TaskController extends Controller
             'status' => ['required', 'in:' . implode(',', $this->statuses)],
             'priority' => ['required', 'in:' . implode(',', $this->priorities)],
             'due_date' => ['nullable', 'date'],
-            'assignee_id' => ['nullable', 'exists:users,id'],
+            'assignee_id' => ['nullable', Rule::in($assignableIds)],
         ]);
 
         $task->update($data);
@@ -157,7 +165,7 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        $this->ensureProjectOwnerAccess($task->project);
+        $this->ensureTaskManageAccess($task->project);
 
         $task->delete();
 
@@ -166,14 +174,20 @@ class TaskController extends Controller
             ->with('status', __('Task deleted successfully.'));
     }
 
-    private function ensureProjectOwnerAccess(Project $project): void
+    private function ensureTaskManageAccess(Project $project): void
     {
         /** @var User $user */
         $user = Auth::user();
 
-        if (!$user->isAdmin() && $project->owner_id !== $user->id) {
-            abort(403);
+        if ($user->isAdmin()) {
+            return;
         }
+
+        if ($project->userHasRole($user, [Project::ROLE_LEAD, Project::ROLE_DEPUTY])) {
+            return;
+        }
+
+        abort(403);
     }
 
     private function ensureTaskViewAccess(Task $task): void
@@ -189,10 +203,32 @@ class TaskController extends Controller
             return;
         }
 
+        if ($task->project->members()->where('users.id', $user->id)->exists()) {
+            return;
+        }
+
         if ($task->assignee_id === $user->id) {
             return;
         }
 
         abort(403);
+    }
+
+    private function projectAssignableUserIds(Project $project): array
+    {
+        $memberIds = $project->members()->pluck('users.id')->map(fn ($id) => (int) $id)->all();
+
+        return collect($memberIds)
+            ->push((int) $project->owner_id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function projectAssignableUsers(Project $project)
+    {
+        return User::whereIn('id', $this->projectAssignableUserIds($project))
+            ->orderBy('name')
+            ->get();
     }
 }

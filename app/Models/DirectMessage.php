@@ -10,11 +10,16 @@ class DirectMessage extends Model
         'direct_conversation_id',
         'user_id',
         'body',
+        'attachment_path',
+        'attachment_name',
+        'attachment_size',
+        'attachment_mime',
         'seen_at',
     ];
 
     protected $casts = [
         'seen_at' => 'datetime',
+        'attachment_size' => 'integer',
     ];
 
     public function conversation()

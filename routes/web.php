@@ -43,6 +43,12 @@ Route::get('/dashboard', DashboardController::class)
 
 Route::middleware('auth')->group(function () {
     Route::resource('projects', ProjectController::class);
+    Route::post('/projects/{project}/members', [ProjectController::class, 'addMember'])
+        ->name('projects.members.add');
+    Route::patch('/projects/{project}/members/{member}', [ProjectController::class, 'updateMemberRole'])
+        ->name('projects.members.update');
+    Route::delete('/projects/{project}/members/{member}', [ProjectController::class, 'removeMember'])
+        ->name('projects.members.remove');
     Route::resource('projects.tasks', TaskController::class)->shallow();
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])

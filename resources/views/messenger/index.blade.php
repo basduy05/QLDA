@@ -16,7 +16,7 @@
 
     <div class="card-strong p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50/70">
         <div class="grid md:grid-cols-12 h-[calc(100vh-220px)]">
-            <aside class="md:col-span-4 lg:col-span-3 border-r border-slate-100 p-3 overflow-y-auto min-h-0 bg-white/70 backdrop-blur">
+            <aside class="md:col-span-4 lg:col-span-3 border-b md:border-b-0 md:border-r border-slate-100 p-3 overflow-y-auto min-h-0 max-h-64 md:max-h-none bg-white/70 backdrop-blur">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">{{ __('Direct') }}</p>
                 <div class="space-y-1 mb-4">
                     @foreach ($contacts as $contact)
@@ -43,7 +43,7 @@
                 </div>
             </aside>
 
-            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-0 relative bg-white/40">
+            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-[45vh] md:min-h-0 relative bg-white/40">
                 @if ($activeType)
                     <div class="relative flex items-center justify-between pb-2 border-b border-slate-100">
                         <div>
@@ -166,13 +166,19 @@
                         @endif
                     </div>
 
-                    <form id="composer-form" method="POST" action="{{ $activeType === 'direct' ? route('messenger.send-direct', $activeTarget) : route('messenger.send-group', $activeTarget) }}" class="pt-2 border-t border-slate-100 bg-white/70 backdrop-blur rounded-2xl px-2 pb-1">
+                    <form id="composer-form" method="POST" enctype="multipart/form-data" action="{{ $activeType === 'direct' ? route('messenger.send-direct', $activeTarget) : route('messenger.send-group', $activeTarget) }}" class="pt-2 border-t border-slate-100 bg-white/70 backdrop-blur rounded-2xl px-2 pb-2">
                         @csrf
                         <div class="flex items-end gap-2">
-                            <textarea id="composer" name="body" rows="2" class="w-full rounded-xl border-slate-200" placeholder="{{ __('Type a message...') }}" required>{{ old('body') }}</textarea>
+                            <textarea id="composer" name="body" rows="2" class="w-full rounded-xl border-slate-200" placeholder="{{ __('Type a message...') }}">{{ old('body') }}</textarea>
                             <button id="composer-submit" type="submit" class="btn-primary">{{ __('Send') }}</button>
                         </div>
+                        <div class="mt-2 flex items-center gap-2">
+                            <input id="composer-attachment" type="file" name="attachment" class="w-full text-xs text-slate-500 file:mr-2 file:rounded-full file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-slate-700">
+                        </div>
                         @error('body')
+                            <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                        @enderror
+                        @error('attachment')
                             <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                         @enderror
                         <p id="composer-error" class="text-sm text-red-600 mt-2 hidden"></p>
@@ -238,6 +244,7 @@
                 const composer = document.getElementById('composer');
                 const form = document.getElementById('composer-form');
                 const submitBtn = document.getElementById('composer-submit');
+                const attachmentInput = document.getElementById('composer-attachment');
                 const composerError = document.getElementById('composer-error');
                 const typingEl = document.getElementById('typing-indicator');
                 const groupSettingsToggle = document.getElementById('group-settings-toggle');
@@ -443,7 +450,9 @@
                         lastSubmitAt = now;
 
                         const body = (composer.value || '').trim();
-                        if (!body) {
+                        const hasAttachment = !!attachmentInput?.files?.length;
+
+                        if (!body && !hasAttachment) {
                             showComposerError("{{ __('Message cannot be empty.') }}");
                             return;
                         }
@@ -502,6 +511,9 @@
                             }
 
                             composer.value = '';
+                            if (attachmentInput) {
+                                attachmentInput.value = '';
+                            }
                             composer.focus();
                             scheduleRefresh();
                         } catch (_) {

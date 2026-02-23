@@ -8,12 +8,14 @@ use App\Models\DirectConversation;
 use App\Models\DirectMessage;
 use App\Models\User;
 use App\Notifications\MessageReceivedNotification;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class MessengerController extends Controller
 {
@@ -138,17 +140,22 @@ class MessengerController extends Controller
         }
 
         $data = $request->validate([
-            'body' => ['required', 'string', 'max:2000'],
+            'body' => ['nullable', 'string', 'max:2000'],
+            'attachment' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xlsx,xls,ppt,pptx,txt,zip,rar'],
         ]);
 
-        $body = trim($data['body']);
-        if ($body === '') {
+        $body = trim((string) ($data['body'] ?? ''));
+        $attachment = $request->file('attachment');
+
+        if ($body === '' && ! $attachment) {
             return back()->withErrors(['body' => __('Message cannot be empty.')]);
         }
 
+        $attachmentPayload = $attachment ? $this->storeAttachment($attachment) : [];
+
         $conversation = $this->findOrCreateConversation($user->id, $contact->id);
 
-        if ($this->hasRecentDuplicateDirectMessage($conversation->id, $user->id, $body)) {
+        if ($body !== '' && ! $attachment && $this->hasRecentDuplicateDirectMessage($conversation->id, $user->id, $body)) {
             if ($request->expectsJson()) {
                 return response()->json(['ok' => true, 'duplicate' => true]);
             }
@@ -160,6 +167,10 @@ class MessengerController extends Controller
             'direct_conversation_id' => $conversation->id,
             'user_id' => $user->id,
             'body' => $body,
+            'attachment_path' => $attachmentPayload['attachment_path'] ?? null,
+            'attachment_name' => $attachmentPayload['attachment_name'] ?? null,
+            'attachment_size' => $attachmentPayload['attachment_size'] ?? null,
+            'attachment_mime' => $attachmentPayload['attachment_mime'] ?? null,
             'seen_at' => null,
         ]);
 
@@ -175,7 +186,7 @@ class MessengerController extends Controller
 
         $contact->notify(new MessageReceivedNotification(
             __('New message from :name', ['name' => $user->name]),
-            $body,
+            $this->notificationPreview($body, ! empty($attachmentPayload)),
             route('messenger.direct', $user)
         ));
 
@@ -195,15 +206,20 @@ class MessengerController extends Controller
         $user = Auth::user();
 
         $data = $request->validate([
-            'body' => ['required', 'string', 'max:2000'],
+            'body' => ['nullable', 'string', 'max:2000'],
+            'attachment' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xlsx,xls,ppt,pptx,txt,zip,rar'],
         ]);
 
-        $body = trim($data['body']);
-        if ($body === '') {
+        $body = trim((string) ($data['body'] ?? ''));
+        $attachment = $request->file('attachment');
+
+        if ($body === '' && ! $attachment) {
             return back()->withErrors(['body' => __('Message cannot be empty.')]);
         }
 
-        if ($this->hasRecentDuplicateGroupMessage($chatGroup->id, $user->id, $body)) {
+        $attachmentPayload = $attachment ? $this->storeAttachment($attachment) : [];
+
+        if ($body !== '' && ! $attachment && $this->hasRecentDuplicateGroupMessage($chatGroup->id, $user->id, $body)) {
             if ($request->expectsJson()) {
                 return response()->json(['ok' => true, 'duplicate' => true]);
             }
@@ -215,6 +231,10 @@ class MessengerController extends Controller
             'chat_group_id' => $chatGroup->id,
             'user_id' => $user->id,
             'body' => $body,
+            'attachment_path' => $attachmentPayload['attachment_path'] ?? null,
+            'attachment_name' => $attachmentPayload['attachment_name'] ?? null,
+            'attachment_size' => $attachmentPayload['attachment_size'] ?? null,
+            'attachment_mime' => $attachmentPayload['attachment_mime'] ?? null,
         ]);
 
         $memberIds = $chatGroup->members()->pluck('users.id')->all();
@@ -237,10 +257,10 @@ class MessengerController extends Controller
         $chatGroup->members()
             ->where('users.id', '!=', $user->id)
             ->get()
-            ->each(function (User $member) use ($chatGroup, $user, $body) {
+            ->each(function (User $member) use ($chatGroup, $user, $body, $attachmentPayload) {
                 $member->notify(new MessageReceivedNotification(
                     __('New group message in :group', ['group' => $chatGroup->name]),
-                    __(':name: :message', ['name' => $user->name, 'message' => $body]),
+                    __(':name: :message', ['name' => $user->name, 'message' => $this->notificationPreview($body, ! empty($attachmentPayload))]),
                     route('messenger.group', $chatGroup)
                 ));
             });
@@ -452,7 +472,7 @@ class MessengerController extends Controller
 
             $map->put($otherUserId, [
                 'conversation_id' => $conversation->id,
-                'last_message' => $last?->body,
+                'last_message' => $last ? $this->notificationPreview((string) $last->body, ! empty($last->attachment_path)) : null,
                 'last_at' => $last?->created_at,
             ]);
         }
@@ -613,5 +633,36 @@ class MessengerController extends Controller
                 return [$member->id => $nickname !== '' ? $nickname : $member->name];
             })
             ->all();
+    }
+
+    private function storeAttachment(UploadedFile $attachment): array
+    {
+        $original = trim((string) $attachment->getClientOriginalName());
+
+        return [
+            'attachment_path' => $attachment->store('messenger-attachments', 'public'),
+            'attachment_name' => $original !== '' ? Str::limit($original, 180, '') : 'file',
+            'attachment_size' => $attachment->getSize(),
+            'attachment_mime' => (string) $attachment->getClientMimeType(),
+        ];
+    }
+
+    private function notificationPreview(string $body, bool $hasAttachment): string
+    {
+        $trimmed = trim($body);
+
+        if ($trimmed !== '') {
+            if ($hasAttachment) {
+                return __(':message · [File]', ['message' => Str::limit($trimmed, 120)]);
+            }
+
+            return Str::limit($trimmed, 120);
+        }
+
+        if ($hasAttachment) {
+            return __('[File]');
+        }
+
+        return '';
     }
 }

@@ -209,7 +209,7 @@
 	}
 
 	.nav-pill {
-		@apply inline-flex h-9 items-center rounded-full px-3 text-sm font-medium text-slate-600 border border-transparent;
+		@apply inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-slate-600 border border-transparent;
 		transition: all 160ms ease;
 	}
 

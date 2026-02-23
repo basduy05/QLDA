@@ -18,11 +18,14 @@ class ProjectController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $query = Project::with('owner')->withCount('tasks')->latest();
+        $query = Project::with(['owner', 'members'])->withCount('tasks')->latest();
 
         if (!$user->isAdmin()) {
             $query->where(function ($projectQuery) use ($user) {
                 $projectQuery->where('owner_id', $user->id)
+                    ->orWhereHas('members', function ($memberQuery) use ($user) {
+                        $memberQuery->where('users.id', $user->id);
+                    })
                     ->orWhereHas('tasks', function ($taskQuery) use ($user) {
                         $taskQuery->where('assignee_id', $user->id);
                     });
@@ -77,6 +80,7 @@ class ProjectController extends Controller
         }
 
         $project = Project::create($data);
+        $this->synchronizeOwnerLeadRole($project);
 
         return redirect()
             ->route('projects.show', $project)
@@ -90,15 +94,27 @@ class ProjectController extends Controller
     {
         $this->ensureAccess($project);
 
-        $project->load(['owner', 'tasks.assignee']);
+        $project->load(['owner', 'members', 'tasks.assignee']);
 
         /** @var User $user */
         $user = Auth::user();
+        $role = $project->roleForUser($user);
+        $canUpdateProject = $this->canUpdateProject($project, $user);
+        $canManageMembers = $this->canManageMembers($project, $user);
+        $canManageTasks = $this->canManageTasks($project, $user);
+        $memberIds = $project->members->pluck('id')->push((int) $project->owner_id)->unique()->all();
+        $availableUsers = User::whereNotIn('id', $memberIds)->orderBy('name')->get();
 
         return view('projects.show', [
             'project' => $project,
             'tasks' => $project->tasks()->latest()->get(),
             'isAdmin' => $user->isAdmin(),
+            'viewerRole' => $role,
+            'canUpdateProject' => $canUpdateProject,
+            'canManageMembers' => $canManageMembers,
+            'canManageTasks' => $canManageTasks,
+            'availableUsers' => $availableUsers,
+            'projectRoles' => Project::roles(),
         ]);
     }
 
@@ -107,7 +123,7 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        $this->ensureAccess($project);
+        $this->ensureProjectUpdateAccess($project);
 
         /** @var User $user */
         $user = Auth::user();
@@ -125,7 +141,7 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        $this->ensureAccess($project);
+        $this->ensureProjectUpdateAccess($project);
 
         /** @var User $user */
         $user = Auth::user();
@@ -149,6 +165,7 @@ class ProjectController extends Controller
         }
 
         $project->update($data);
+        $this->synchronizeOwnerLeadRole($project);
 
         return redirect()
             ->route('projects.show', $project)
@@ -160,13 +177,145 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        $this->ensureAccess($project);
+        $this->ensureLeadAccess($project);
 
         $project->delete();
 
         return redirect()
             ->route('projects.index')
             ->with('status', __('Project deleted successfully.'));
+    }
+
+    public function addMember(Request $request, Project $project)
+    {
+        $this->ensureLeadAccess($project);
+
+        $data = $request->validate([
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'role' => ['required', 'in:' . implode(',', [Project::ROLE_DEPUTY, Project::ROLE_MEMBER])],
+        ]);
+
+        $userId = (int) $data['user_id'];
+        if ((int) $project->owner_id === $userId) {
+            return back()->withErrors(['user_id' => __('Project owner is already lead.')]);
+        }
+
+        $project->members()->syncWithoutDetaching([
+            $userId => ['role' => $data['role']],
+        ]);
+
+        return redirect()
+            ->route('projects.show', $project)
+            ->with('status', __('Project member added successfully.'));
+    }
+
+    public function updateMemberRole(Request $request, Project $project, User $member)
+    {
+        $this->ensureLeadAccess($project);
+
+        if ((int) $project->owner_id === (int) $member->id) {
+            return back()->withErrors(['member' => __('Project owner must remain lead.')]);
+        }
+
+        if (! $project->members()->where('users.id', $member->id)->exists()) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'role' => ['required', 'in:' . implode(',', [Project::ROLE_DEPUTY, Project::ROLE_MEMBER])],
+        ]);
+
+        $project->members()->updateExistingPivot($member->id, [
+            'role' => $data['role'],
+        ]);
+
+        return redirect()
+            ->route('projects.show', $project)
+            ->with('status', __('Project member role updated.'));
+    }
+
+    public function removeMember(Project $project, User $member)
+    {
+        $this->ensureLeadAccess($project);
+
+        if ((int) $project->owner_id === (int) $member->id) {
+            return back()->withErrors(['member' => __('Project owner cannot be removed.')]);
+        }
+
+        $project->members()->detach($member->id);
+
+        return redirect()
+            ->route('projects.show', $project)
+            ->with('status', __('Project member removed.'));
+    }
+
+    private function synchronizeOwnerLeadRole(Project $project): void
+    {
+        $project->members()->syncWithoutDetaching([
+            $project->owner_id => ['role' => Project::ROLE_LEAD],
+        ]);
+
+        $otherLeads = $project->members()
+            ->wherePivot('role', Project::ROLE_LEAD)
+            ->where('users.id', '!=', $project->owner_id)
+            ->pluck('users.id');
+
+        foreach ($otherLeads as $otherLeadId) {
+            $project->members()->updateExistingPivot($otherLeadId, [
+                'role' => Project::ROLE_DEPUTY,
+            ]);
+        }
+    }
+
+    private function canUpdateProject(Project $project, User $user): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $project->userHasRole($user, [Project::ROLE_LEAD, Project::ROLE_DEPUTY]);
+    }
+
+    private function canManageMembers(Project $project, User $user): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $project->userHasRole($user, [Project::ROLE_LEAD]);
+    }
+
+    private function canManageTasks(Project $project, User $user): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $project->userHasRole($user, [Project::ROLE_LEAD, Project::ROLE_DEPUTY]);
+    }
+
+    private function ensureProjectUpdateAccess(Project $project): void
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($this->canUpdateProject($project, $user)) {
+            return;
+        }
+
+        abort(403);
+    }
+
+    private function ensureLeadAccess(Project $project): void
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($this->canManageMembers($project, $user)) {
+            return;
+        }
+
+        abort(403);
     }
 
     private function ensureAccess(Project $project): void
@@ -182,12 +331,14 @@ class ProjectController extends Controller
             return;
         }
 
+        if ($project->members()->where('users.id', $user->id)->exists()) {
+            return;
+        }
+
         if ($project->tasks()->where('assignee_id', $user->id)->exists()) {
             return;
         }
 
-        if (!$user->isAdmin() && $project->owner_id !== $user->id) {
-            abort(403);
-        }
+        abort(403);
     }
 }
