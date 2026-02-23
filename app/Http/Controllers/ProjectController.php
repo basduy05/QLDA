@@ -14,15 +14,23 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
         $query = Project::with(['owner', 'members'])->withCount('tasks')->latest();
 
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
         if (!$user->isAdmin()) {
             $query->where(function ($projectQuery) use ($user) {
-                $projectQuery->where('owner_id', $user->id)
+                $projectQuery->where('owner_id', '>=', $user->id)
                     ->orWhereHas('members', function ($memberQuery) use ($user) {
                         $memberQuery->where('users.id', $user->id);
                     })
@@ -33,7 +41,7 @@ class ProjectController extends Controller
         }
 
         return view('projects.index', [
-            'projects' => $query->paginate(10),
+            'projects' => $query->paginate(10)->withQueryString(),
             'isAdmin' => $user->isAdmin(),
         ]);
     }

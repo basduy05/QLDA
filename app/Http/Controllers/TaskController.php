@@ -18,11 +18,22 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
         $query = Task::with(['project.owner', 'project.members', 'assignee'])->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('project', function ($projectQuery) use ($search) {
+                      $projectQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
 
         if (!$user->isAdmin()) {
             $query->where(function ($taskQuery) use ($user) {
@@ -37,7 +48,7 @@ class TaskController extends Controller
         }
 
         return view('tasks.index', [
-            'tasks' => $query->paginate(10),
+            'tasks' => $query->paginate(15)->withQueryString(),
             'isAdmin' => $user->isAdmin(),
         ]);
     }
