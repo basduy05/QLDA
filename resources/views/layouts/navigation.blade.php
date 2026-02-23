@@ -20,6 +20,9 @@
                         <a href="{{ route('admin.users.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.users.*') ? 'nav-pill-active' : '' }}" title="{{ __('Users') }}" aria-label="{{ __('Users') }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
                         </a>
+                        <a href="{{ route('admin.settings.ai.edit') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.settings.ai.*') ? 'nav-pill-active' : '' }}" title="{{ __('AI Settings') }}" aria-label="{{ __('AI Settings') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4"/><path d="m16.24 7.76 2.83-2.83"/><path d="M18 12h4"/><path d="m16.24 16.24 2.83 2.83"/><path d="M12 18v4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M2 12h4"/><path d="m4.93 4.93 2.83 2.83"/><circle cx="12" cy="12" r="4"/></svg>
+                        </a>
                     @endif
                 </div>
             </div>
@@ -69,6 +72,7 @@
             <a class="nav-pill block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
             @if (Auth::user()?->isAdmin())
                 <a class="nav-pill block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
+                <a class="nav-pill block" href="{{ route('admin.settings.ai.edit') }}">{{ __('AI Settings') }}</a>
             @endif
             <a class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
             <div class="pt-2">

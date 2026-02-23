@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div>
-            <p class="text-sm text-slate-500">{{ __('Admin') }}</p>
-            <h2 class="text-3xl font-semibold text-slate-900">{{ __('Users') }}</h2>
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <p class="text-sm text-slate-500">{{ __('Admin') }}</p>
+                <h2 class="text-3xl font-semibold text-slate-900">{{ __('Users') }}</h2>
+            </div>
+            <a href="{{ route('admin.settings.ai.edit') }}" class="btn-secondary">{{ __('AI Settings') }}</a>
         </div>
     </x-slot>
 

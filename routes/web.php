@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminSettingController;
 use App\Http\Controllers\CallSessionController;
 use App\Http\Controllers\ChatGroupController;
 use App\Http\Controllers\ChatMessageController;
@@ -112,6 +113,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/users/{user}', [AdminUserController::class, 'destroy'])
         ->middleware('admin')
         ->name('admin.users.destroy');
+    Route::get('/admin/settings/ai', [AdminSettingController::class, 'editAi'])
+        ->middleware('admin')
+        ->name('admin.settings.ai.edit');
+    Route::patch('/admin/settings/ai', [AdminSettingController::class, 'updateAi'])
+        ->middleware('admin')
+        ->name('admin.settings.ai.update');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
