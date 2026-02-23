@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminSettingController;
+use App\Http\Controllers\AiAssistantController;
 use App\Http\Controllers\CallSessionController;
 use App\Http\Controllers\ChatGroupController;
 use App\Http\Controllers\ChatMessageController;
@@ -71,6 +72,8 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('messenger.terms')->group(function () {
     Route::get('/messenger', [MessengerController::class, 'index'])->name('messenger.index');
+    Route::get('/messenger/ai', [AiAssistantController::class, 'index'])->name('ai.chat.index');
+    Route::post('/messenger/ai/chat', [AiAssistantController::class, 'chat'])->name('ai.chat');
     Route::get('/messenger/direct/{contact}', [MessengerController::class, 'direct'])->name('messenger.direct');
     Route::get('/messenger/group/{chatGroup}', [MessengerController::class, 'group'])->name('messenger.group');
     Route::get('/messenger/direct/{contact}/feed', [MessengerController::class, 'directFeed'])->name('messenger.direct-feed');

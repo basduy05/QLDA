@@ -7,6 +7,7 @@
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ route('chat-groups.index') }}" class="btn-secondary text-xs">{{ __('Manage Groups') }}</a>
+                <a href="{{ route('ai.chat.index') }}" class="btn-secondary text-xs">{{ __('AI Assistant') }}</a>
                 @if ($activeType === 'direct')
                     <button type="button" id="start-call-header" class="btn-primary text-xs">{{ __('Call') }}</button>
                 @endif
