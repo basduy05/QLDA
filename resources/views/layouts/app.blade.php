@@ -21,14 +21,14 @@
             <!-- Page Heading -->
             @isset($header)
                 <header class="bg-white/80 backdrop-blur border-b border-slate-100">
-                    <div class="max-w-6xl mx-auto py-6 px-6">
+                    <div class="w-full py-6 px-4 md:px-6 xl:px-10">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
             <!-- Page Content -->
-            <main class="max-w-6xl mx-auto px-6 py-10">
+            <main class="w-full px-4 md:px-6 xl:px-10 py-8 md:py-10">
                 {{ $slot }}
             </main>
         </div>

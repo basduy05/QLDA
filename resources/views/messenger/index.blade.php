@@ -158,7 +158,7 @@
                         </div>
                     @endif
 
-                    <div id="messenger-feed" class="flex-1 overflow-y-auto py-3 pr-1 space-y-2">
+                    <div id="messenger-feed" class="flex-1 overflow-y-auto py-3 pr-1 space-y-2 scroll-smooth">
                         @if ($activeType === 'direct')
                             @include('messenger.partials.direct-feed', ['messages' => $messages, 'authUserId' => auth()->id()])
                         @else
@@ -166,13 +166,13 @@
                         @endif
                     </div>
 
-                    <form id="composer-form" method="POST" enctype="multipart/form-data" action="{{ $activeType === 'direct' ? route('messenger.send-direct', $activeTarget) : route('messenger.send-group', $activeTarget) }}" class="pt-2 border-t border-slate-100 bg-white/70 backdrop-blur rounded-2xl px-2 pb-2">
+                    <form id="composer-form" method="POST" enctype="multipart/form-data" action="{{ $activeType === 'direct' ? route('messenger.send-direct', $activeTarget) : route('messenger.send-group', $activeTarget) }}" class="pt-2 border-t border-slate-100 bg-white/70 backdrop-blur rounded-2xl px-2 pb-2 space-y-2">
                         @csrf
-                        <div class="flex items-end gap-2">
-                            <textarea id="composer" name="body" rows="2" class="w-full rounded-xl border-slate-200" placeholder="{{ __('Type a message...') }}">{{ old('body') }}</textarea>
-                            <button id="composer-submit" type="submit" class="btn-primary">{{ __('Send') }}</button>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
+                            <textarea id="composer" name="body" rows="2" class="w-full rounded-xl border-slate-200 text-sm" placeholder="{{ __('Type a message...') }}">{{ old('body') }}</textarea>
+                            <button id="composer-submit" type="submit" class="btn-primary sm:shrink-0">{{ __('Send') }}</button>
                         </div>
-                        <div class="mt-2 flex items-center gap-2">
+                        <div class="flex items-center gap-2">
                             <input id="composer-attachment" type="file" name="attachment" class="w-full text-xs text-slate-500 file:mr-2 file:rounded-full file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-slate-700">
                         </div>
                         @error('body')

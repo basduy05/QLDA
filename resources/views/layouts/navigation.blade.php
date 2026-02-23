@@ -1,29 +1,24 @@
 <nav x-data="{ open: false }" class="bg-white/80 backdrop-blur border-b border-slate-100">
-    <div class="max-w-6xl mx-auto px-6">
+    <div class="w-full px-4 md:px-6 xl:px-10">
         <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-4">
                 <a href="{{ route('dashboard') }}" class="text-lg font-semibold text-slate-800">QhorizonPM</a>
                 <div class="hidden md:flex items-center gap-2 text-sm font-medium text-slate-600">
-                    <a href="{{ route('dashboard') }}" class="nav-pill {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}" title="{{ __('Dashboard') }}" aria-label="{{ __('Dashboard') }}">
+                    <a href="{{ route('dashboard') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}" title="{{ __('Dashboard') }}" aria-label="{{ __('Dashboard') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
-                        <span class="hidden lg:inline">{{ __('Dashboard') }}</span>
                     </a>
-                    <a href="{{ route('projects.index') }}" class="nav-pill {{ request()->routeIs('projects.*') ? 'nav-pill-active' : '' }}" title="{{ __('Projects') }}" aria-label="{{ __('Projects') }}">
+                    <a href="{{ route('projects.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('projects.*') ? 'nav-pill-active' : '' }}" title="{{ __('Projects') }}" aria-label="{{ __('Projects') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
-                        <span class="hidden lg:inline">{{ __('Projects') }}</span>
                     </a>
-                    <a href="{{ route('tasks.index') }}" class="nav-pill {{ request()->routeIs('tasks.index') ? 'nav-pill-active' : '' }}" title="{{ __('Tasks') }}" aria-label="{{ __('Tasks') }}">
+                    <a href="{{ route('tasks.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('tasks.index') ? 'nav-pill-active' : '' }}" title="{{ __('Tasks') }}" aria-label="{{ __('Tasks') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                        <span class="hidden lg:inline">{{ __('Tasks') }}</span>
                     </a>
-                    <a href="{{ route('messenger.index') }}" class="nav-pill {{ request()->routeIs('messenger.*') ? 'nav-pill-active' : '' }}" title="{{ __('Messenger') }}" aria-label="{{ __('Messenger') }}">
+                    <a href="{{ route('messenger.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('messenger.*') ? 'nav-pill-active' : '' }}" title="{{ __('Messenger') }}" aria-label="{{ __('Messenger') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z"/></svg>
-                        <span class="hidden lg:inline">{{ __('Messenger') }}</span>
                     </a>
                     @if (Auth::user()?->isAdmin())
-                        <a href="{{ route('admin.users.index') }}" class="nav-pill {{ request()->routeIs('admin.users.*') ? 'nav-pill-active' : '' }}" title="{{ __('Users') }}" aria-label="{{ __('Users') }}">
+                        <a href="{{ route('admin.users.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.users.*') ? 'nav-pill-active' : '' }}" title="{{ __('Users') }}" aria-label="{{ __('Users') }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
-                            <span class="hidden lg:inline">{{ __('Users') }}</span>
                         </a>
                     @endif
                 </div>
@@ -31,7 +26,7 @@
 
             <div class="hidden md:flex items-center gap-2">
                 <a href="{{ route('notifications.index') }}" class="nav-action-btn" title="{{ __('Notifications') }}" aria-label="{{ __('Notifications') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
                         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                     </svg>
