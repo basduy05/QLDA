@@ -6,7 +6,7 @@
                 <a href="{{ route('tasks.edit', $task) }}" class="px-3 py-2 text-sm border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50">
                     {{ __('Edit') }}
                 </a>
-                <form method="POST" action="{{ route('tasks.destroy', $task) }}" onsubmit="return confirm('{{ __('Are you sure?') }}');" style="display:inline;">
+                <form method="POST" action="{{ route('tasks.destroy', $task) }}" data-confirm="{{ __('Are you sure?') }}" style="display:inline;">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="px-3 py-2 text-sm border border-slate-300 rounded-lg text-rose-600 hover:bg-rose-50">

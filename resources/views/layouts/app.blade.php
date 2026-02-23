@@ -137,5 +137,16 @@
                 setInterval(syncNotifications, 7000);
             })();
         </script>
-    </body>
+
+        <!-- Confirm Dialog Handler -->
+        <script>
+            document.addEventListener('submit', function(e) {
+                const form = e.target;
+                if (form.dataset.confirm) {
+                    if (!confirm(form.dataset.confirm)) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        </script>    </body>
 </html>

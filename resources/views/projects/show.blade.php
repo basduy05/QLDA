@@ -1,4 +1,10 @@
 <x-app-layout>
+    <style>
+        .progress-bar {
+            width: var(--progress);
+        }
+    </style>
+
     @php
         $roleLabels = [
             'lead' => __('Lead'),
@@ -33,7 +39,7 @@
                     </a>
                 @endif
                 @if ($canManageMembers)
-                    <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="return confirm('{{ __('Delete this project?') }}');" style="display:inline;">
+                    <form method="POST" action="{{ route('projects.destroy', $project) }}" data-confirm="{{ __('Delete this project?') }}" style="display:inline;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="px-3 py-2 text-sm border border-slate-300 rounded-lg text-rose-600 hover:bg-rose-50">
@@ -91,14 +97,18 @@
                     @endif
                     
                     <div>
+                        @php
+                            $completedTasks = $project->tasks()->where('status', 'done')->count();
+                            $progressPercentage = $project->tasks_count > 0 ? round(($completedTasks / $project->tasks_count) * 100) : 0;
+                        @endphp
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-sm font-medium text-slate-700">{{ __('Progress') }}</span>
-                            <span class="text-sm font-bold text-slate-900">{{ $project->tasks_count > 0 ? round(($project->tasks()->where('status', 'done')->count() / $project->tasks_count) * 100) : 0 }}%</span>
+                            <span class="text-sm font-bold text-slate-900">{{ $progressPercentage }}%</span>
                         </div>
                         <div class="w-full bg-slate-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $project->tasks_count > 0 ? ($project->tasks()->where('status', 'done')->count() / $project->tasks_count) * 100 : 0 }}%"></div>
+                            <div class="bg-blue-600 h-2 rounded-full progress-bar" style="--progress: {{ $progressPercentage }}%"></div>
                         </div>
-                        <p class="text-xs text-slate-500 mt-2">{{ $project->tasks()->where('status', 'done')->count() }} / {{ $project->tasks_count }} {{ __('tasks completed') }}</p>
+                        <p class="text-xs text-slate-500 mt-2">{{ $completedTasks }} / {{ $project->tasks_count }} {{ __('tasks completed') }}</p>
                     </div>
 
                     <a href="{{ route('projects.index') }}" class="block w-full text-center px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium">
@@ -158,7 +168,7 @@
                                         </select>
                                     </form>
 
-                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" onsubmit="return confirm('{{ __('Remove this member?') }}')" style="display:inline;">
+                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" data-confirm="{{ __('Remove this member?') }}" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-slate-400 hover:text-rose-600 text-sm">✕</button>

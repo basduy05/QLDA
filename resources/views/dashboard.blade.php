@@ -83,6 +83,11 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script>
+        // Store data as window variables
+        window.tasksTrendData = <?php echo json_encode($tasksTrend); ?>;
+        window.taskStatusData = <?php echo json_encode($taskStatusDistribution); ?>;
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Tasks Trend Chart
             const trendCtx = document.getElementById('tasks-trend-chart');
@@ -90,11 +95,11 @@
                 new Chart(trendCtx, {
                     type: 'line',
                     data: {
-                        labels: @json($tasksTrend['labels']),
+                        labels: window.tasksTrendData.labels,
                         datasets: [
                             {
                                 label: '{{ __("Created") }}',
-                                data: @json($tasksTrend['created']),
+                                data: window.tasksTrendData.created,
                                 borderColor: '#3b82f6',
                                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                                 tension: 0.4,
@@ -102,7 +107,7 @@
                             },
                             {
                                 label: '{{ __("Completed") }}',
-                                data: @json($tasksTrend['completed']),
+                                data: window.tasksTrendData.completed,
                                 borderColor: '#10b981',
                                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                                 tension: 0.4,
@@ -136,9 +141,9 @@
                 new Chart(statusCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: @json($taskStatusDistribution['labels']),
+                        labels: window.taskStatusData.labels,
                         datasets: [{
-                            data: @json($taskStatusDistribution['values']),
+                            data: window.taskStatusData.values,
                             backgroundColor: ['#94a3b8', '#3b82f6', '#10b981'],
                             borderColor: '#ffffff',
                             borderWidth: 2,

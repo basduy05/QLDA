@@ -77,7 +77,7 @@
                                     </button>
                                 </form>
 
-                                <form id="{{ $deleteFormId }}" method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('{{ __('Delete this user?') }}')" style="display:inline;">
+                                <form id="{{ $deleteFormId }}" method="POST" action="{{ route('admin.users.destroy', $user) }}" data-confirm="{{ __('Delete this user?') }}" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="px-3 py-1 text-xs border border-slate-300 text-slate-700 rounded hover:bg-slate-50">
