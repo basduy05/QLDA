@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class AiAssistantController extends Controller
 {
@@ -16,11 +17,47 @@ class AiAssistantController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        $hasApiKey = filled(AppSetting::getValue('ai.gemini_api_key'));
 
         return view('ai.chat', [
             'projects' => $this->availableProjects($user),
+            'quickPrompts' => $this->quickPrompts(app()->getLocale()),
             'defaultModel' => AppSetting::getValue('ai.gemini_model', 'gemini-3.0-flash'),
-            'hasApiKey' => filled(AppSetting::getValue('ai.gemini_api_key')),
+            'hasApiKey' => $hasApiKey,
+            'isAdmin' => $user->isAdmin(),
+            'taskSuggestions' => $this->buildGeneralTaskSuggestions(),
+        ]);
+    }
+
+    public function suggestions(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $data = $request->validate([
+            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+        ]);
+
+        if (empty($data['project_id'])) {
+            return response()->json([
+                'ok' => true,
+                'suggestions' => $this->buildGeneralTaskSuggestions(),
+                'context' => null,
+            ]);
+        }
+
+        $project = Project::query()->with(['tasks.assignee'])->findOrFail((int) $data['project_id']);
+        if (! $this->canAccessProject($project, $user)) {
+            abort(403);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'suggestions' => $this->buildProjectTaskSuggestions($project),
+            'context' => [
+                'project' => $project->name,
+                'status' => $project->status,
+            ],
         ]);
     }
 
@@ -48,13 +85,13 @@ class AiAssistantController extends Controller
         if (! filled($apiKey)) {
             return response()->json([
                 'ok' => false,
-                'message' => __('AI is not configured yet. Please contact admin.'),
+                'message' => __('AI assistant is currently unavailable.'),
             ], 422);
         }
 
         $projectContext = null;
         if (! empty($data['project_id'])) {
-            $project = Project::query()->with('tasks')->findOrFail((int) $data['project_id']);
+            $project = Project::query()->with(['tasks.assignee'])->findOrFail((int) $data['project_id']);
             if (! $this->canAccessProject($project, $user)) {
                 abort(403);
             }
@@ -158,8 +195,30 @@ class AiAssistantController extends Controller
         $done = $tasks->where('status', 'done')->count();
         $inProgress = $tasks->where('status', 'in_progress')->count();
         $todo = $tasks->where('status', 'todo')->count();
+        $overdue = $tasks->filter(function ($task) {
+            return $task->due_date && $task->due_date->isPast() && $task->status !== 'done';
+        })->count();
 
-        return "Project: {$project->name}\nStatus: {$project->status}\nTask summary: total={$total}, done={$done}, in_progress={$inProgress}, todo={$todo}";
+        $taskLines = $tasks
+            ->sortBy(function ($task) {
+                return $task->due_date?->timestamp ?? PHP_INT_MAX;
+            })
+            ->take(15)
+            ->map(function ($task) {
+                $due = $task->due_date?->format('Y-m-d') ?? 'none';
+                $assignee = $task->assignee?->name ?? 'unassigned';
+                return sprintf(
+                    '- %s | status=%s | priority=%s | due=%s | assignee=%s',
+                    Str::limit((string) $task->title, 70),
+                    $task->status,
+                    $task->priority,
+                    $due,
+                    $assignee
+                );
+            })
+            ->implode("\n");
+
+        return "Project: {$project->name}\nStatus: {$project->status}\nTask summary: total={$total}, done={$done}, in_progress={$inProgress}, todo={$todo}, overdue={$overdue}\nKey tasks:\n{$taskLines}";
     }
 
     private function buildPrompt(string $userMessage, ?string $projectContext, string $locale): string
@@ -168,6 +227,57 @@ class AiAssistantController extends Controller
 
         $context = $projectContext ? "\n\nProject context:\n{$projectContext}" : '';
 
-        return "You are an assistant for a project management platform. Reply in {$language}. Keep answers concise, actionable, and safe. If asked for unavailable data, clearly say so and suggest next steps.{$context}\n\nUser message:\n{$userMessage}";
+        return "You are an assistant for a project management platform. Reply in {$language}. Keep answers practical and concise. If possible, return:\n1) Quick summary\n2) Recommended next actions (3-5 bullets)\n3) Risks and mitigations\n4) Suggested message template for team communication when relevant.\nIf asked for unavailable data, clearly say so and suggest next steps.{$context}\n\nUser message:\n{$userMessage}";
+    }
+
+    private function buildGeneralTaskSuggestions(): array
+    {
+        return [
+            __('Ưu tiên 3 việc quan trọng nhất hôm nay cho tôi.'),
+            __('Kiểm tra rủi ro deadline trong tuần này.'),
+            __('Gợi ý cách chia nhỏ một task lớn thành các bước thực thi.'),
+            __('Viết mẫu nhắn tin cập nhật tiến độ cho nhóm.'),
+        ];
+    }
+
+    private function buildProjectTaskSuggestions(Project $project): array
+    {
+        $tasks = $project->tasks;
+        $overdueCount = $tasks->filter(function ($task) {
+            return $task->due_date && $task->due_date->isPast() && $task->status !== 'done';
+        })->count();
+
+        $highPriorityOpen = $tasks->where('priority', 'high')->where('status', '!=', 'done')->count();
+        $unassigned = $tasks->whereNull('assignee_id')->where('status', '!=', 'done')->count();
+
+        return [
+            __('Tóm tắt nhanh tình trạng dự án này và đề xuất 3 hành động kế tiếp.'),
+            __('Dựa trên deadline hiện tại, task nào cần ưu tiên trước trong 3 ngày tới?'),
+            __('Gợi ý phương án phân công lại task để giảm tắc nghẽn tiến độ.'),
+            __('Có :overdue task quá hạn, :high task ưu tiên cao chưa xong, :unassigned task chưa phân công. Hãy đề xuất kế hoạch xử lý.', [
+                'overdue' => $overdueCount,
+                'high' => $highPriorityOpen,
+                'unassigned' => $unassigned,
+            ]),
+        ];
+    }
+
+    private function quickPrompts(string $locale): array
+    {
+        if ($locale === 'vi') {
+            return [
+                __('Tóm tắt tiến độ dự án'),
+                __('Gợi ý ưu tiên công việc hôm nay'),
+                __('Phát hiện rủi ro deadline'),
+                __('Soạn tin nhắn cập nhật cho nhóm'),
+            ];
+        }
+
+        return [
+            'Summarize project progress',
+            'Suggest today priorities',
+            'Detect deadline risks',
+            'Draft a team update message',
+        ];
     }
 }

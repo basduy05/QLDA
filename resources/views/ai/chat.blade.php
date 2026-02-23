@@ -22,12 +22,34 @@
                     </select>
                 </div>
 
-                <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 space-y-1">
-                    <p><span class="font-semibold">{{ __('Model') }}:</span> {{ $defaultModel }}</p>
-                    <p><span class="font-semibold">{{ __('API status') }}:</span> {{ $hasApiKey ? __('Configured') : __('Not configured') }}</p>
-                    @unless($hasApiKey)
-                        <p class="text-rose-600">{{ __('Please ask admin to add Gemini API key in AI Settings.') }}</p>
-                    @endunless
+                @if ($isAdmin)
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 space-y-1">
+                        <p><span class="font-semibold">{{ __('Model') }}:</span> {{ $defaultModel }}</p>
+                        <p><span class="font-semibold">{{ __('API status') }}:</span> {{ $hasApiKey ? __('Configured') : __('Not configured') }}</p>
+                        @unless($hasApiKey)
+                            <p class="text-rose-600">{{ __('Please ask admin to add Gemini API key in AI Settings.') }}</p>
+                        @endunless
+                    </div>
+                @endif
+
+                <div class="rounded-xl border border-slate-200 bg-white p-3">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">{{ __('Quick prompts') }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($quickPrompts as $prompt)
+                            <button type="button" class="ai-prompt-btn rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 hover:border-slate-300" data-prompt="{{ $prompt }}">{{ $prompt }}</button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-slate-200 bg-white p-3">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">{{ __('Task suggestions') }}</p>
+                    <ul id="ai-suggestion-list" class="space-y-2 text-sm text-slate-700">
+                        @foreach ($taskSuggestions as $suggestion)
+                            <li>
+                                <button type="button" class="ai-suggestion-btn w-full text-left rounded-lg border border-slate-200 px-3 py-2 hover:border-slate-300" data-prompt="{{ $suggestion }}">{{ $suggestion }}</button>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </aside>
 
@@ -57,6 +79,8 @@
             const feed = document.getElementById('ai-feed');
             const errorNode = document.getElementById('ai-error');
             const projectNode = document.getElementById('ai-project');
+            const quickPromptButtons = Array.from(document.querySelectorAll('.ai-prompt-btn, .ai-suggestion-btn'));
+            const suggestionList = document.getElementById('ai-suggestion-list');
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             let locked = false;
 
@@ -85,6 +109,55 @@
                 errorNode.textContent = message;
                 errorNode.classList.remove('hidden');
             };
+
+            const fetchSuggestions = async () => {
+                try {
+                    const response = await fetch("{{ route('ai.suggestions') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrf,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({
+                            project_id: projectNode?.value || null,
+                        }),
+                    });
+
+                    const payload = await response.json().catch(() => ({}));
+                    if (!response.ok || !payload?.ok || !Array.isArray(payload?.suggestions) || !suggestionList) {
+                        return;
+                    }
+
+                    suggestionList.innerHTML = '';
+                    payload.suggestions.forEach((suggestion) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<button type="button" class="ai-suggestion-btn w-full text-left rounded-lg border border-slate-200 px-3 py-2 hover:border-slate-300" data-prompt="${String(suggestion).replace(/"/g, '&quot;')}">${suggestion}</button>`;
+                        suggestionList.appendChild(li);
+                    });
+
+                    suggestionList.querySelectorAll('.ai-suggestion-btn').forEach((button) => {
+                        button.addEventListener('click', () => {
+                            if (!input) return;
+                            input.value = button.dataset.prompt || '';
+                            input.focus();
+                        });
+                    });
+                } catch (_) {
+                }
+            };
+
+            projectNode?.addEventListener('change', fetchSuggestions);
+
+            quickPromptButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    if (!input) return;
+                    input.value = button.dataset.prompt || '';
+                    input.focus();
+                });
+            });
 
             form?.addEventListener('submit', async function (event) {
                 event.preventDefault();
