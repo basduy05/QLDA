@@ -65,12 +65,6 @@
     </x-slot>
 
     <div class="space-y-6">
-        @if (session('status'))
-            <div class="card p-4 text-sm text-emerald-700 bg-emerald-50 border-emerald-200 flex items-center gap-3 animate-[softFadeUp_0.3s_ease-out]">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                {{ session('status') }}
-            </div>
-        @endif
 
         <div class="grid gap-6 lg:grid-cols-3">
             <div class="card-strong p-6 lg:col-span-2 flex flex-col">
@@ -165,150 +159,164 @@
                 @endif
             </div>
 
-            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                <div class="rounded-xl border border-accent/20 p-4 bg-accent/5 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-accent/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
-                    <div class="flex items-start justify-between gap-3 relative z-10">
-                        <div class="flex items-center gap-3">
-                            <div class="h-10 w-10 rounded-full bg-white border border-accent/20 flex items-center justify-center text-accent font-bold shadow-sm">
-                                {{ strtoupper(substr($project->owner?->name ?? '?', 0, 2)) }}
-                            </div>
-                            <div>
-                                <p class="font-bold text-slate-900">{{ $project->owner?->name }}</p>
-                                <p class="text-xs text-slate-500">{{ $project->owner?->email }}</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-accent text-white shadow-sm">
-                            {{ $roleLabels['lead'] }}
+        <div class="grid lg:grid-cols-3 gap-6 items-start">
+            <!-- Team Members -->
+            <div class="card-strong p-4 flex flex-col h-full max-h-[500px] lg:col-span-1">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 shrink-0">
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        <span class="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
+                            {{ $project->members->count() }}
                         </span>
-                    </div>
+                    </h3>
                 </div>
 
-                @foreach ($project->members->where('id', '!=', $project->owner_id)->sortBy('name') as $member)
-                    <div class="rounded-xl border border-slate-200 p-4 bg-white hover:border-slate-300 hover:shadow-sm transition-all group">
-                        <div class="flex flex-col h-full justify-between gap-4">
-                            <div class="flex items-start gap-3">
-                                <div class="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold">
-                                    {{ strtoupper(substr($member->name, 0, 2)) }}
+                <div class="overflow-y-auto pr-1 space-y-2 flex-grow custom-scrollbar">
+                    <div class="rounded-lg border border-accent/20 p-2 bg-accent/5 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-8 h-8 bg-accent/10 rounded-bl-full -mr-4 -mt-4"></div>
+                        <div class="flex items-center justify-between gap-2 relative z-10">
+                            <div class="flex items-center gap-2">
+                                <div class="h-8 w-8 rounded-full bg-white border border-accent/20 flex items-center justify-center text-accent font-bold shadow-sm shrink-0 text-xs">
+                                    {{ strtoupper(substr($project->owner?->name ?? '?', 0, 2)) }}
                                 </div>
-                                <div>
-                                    <p class="font-semibold text-slate-900 group-hover:text-accent transition-colors">{{ $member->name }}</p>
-                                    <p class="text-xs text-slate-500">{{ $member->email }}</p>
+                                <div class="min-w-0">
+                                    <p class="font-bold text-slate-900 text-xs truncate max-w-[100px]">{{ $project->owner?->name }}</p>
+                                    <p class="text-[10px] text-slate-500 truncate max-w-[100px]">{{ $project->owner?->email }}</p>
                                 </div>
                             </div>
-
-                            <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-50">
-                                <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider {{ $member->pivot->role === 'deputy' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600' }}">
-                                    {{ $roleLabels[$member->pivot->role] ?? $member->pivot->role }}
-                                </span>
-
-                            @if ($canManageMembers)
-                                <div class="flex items-center gap-2">
-                                    <form method="POST" action="{{ route('projects.members.update', [$project, $member]) }}" class="flex items-center gap-2">
-                                        @csrf
-                                        @method('PATCH')
-                                        <select name="role" class="rounded-xl border-slate-200 text-sm" onchange="this.form.requestSubmit()">
-                                            @foreach (['deputy', 'member'] as $role)
-                                                <option value="{{ $role }}" @selected(($member->pivot->role ?? 'member') === $role)>{{ $roleLabels[$role] }}</option>
-                                            @endforeach
-                                        </select>
-                                    </form>
-
-                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" data-confirm="{{ __('Remove this member?') }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors" title="{{ __('Remove') }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
-                            </div>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-accent text-white shadow-sm shrink-0">
+                                {{ $roleLabels['lead'] }}
+                            </span>
                         </div>
                     </div>
-                @endforeach
-            </div>
 
-            @if ($canManageMembers)
-                <div class="mt-6 pt-6 border-t border-slate-100">
-                    <h4 class="text-sm font-bold text-slate-900 mb-3">{{ __('Add new member') }}</h4>
-                    <form method="POST" action="{{ route('projects.members.add', $project) }}" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        @csrf
-                        <div class="w-full sm:max-w-xs">
-                            <select name="user_id" required class="w-full rounded-lg border-slate-200 text-sm focus:ring-accent focus:border-accent">
-                                <option value="">{{ __('Select user...') }}</option>
-                                @foreach ($availableUsers as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
-                                @endforeach
-                            </select>
+                    @foreach ($project->members->where('id', '!=', $project->owner_id)->sortBy('name') as $member)
+                        <div class="rounded-lg border border-slate-200 p-2 bg-white hover:border-slate-300 transition-all group">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <div class="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold shrink-0 text-xs">
+                                        {{ strtoupper(substr($member->name, 0, 2)) }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="font-semibold text-slate-900 text-xs truncate max-w-[90px] group-hover:text-accent transition-colors">{{ $member->name }}</p>
+                                        <div class="flex items-center gap-1">
+                                            <span class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider {{ $member->pivot->role === 'deputy' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600' }}">
+                                                {{ $roleLabels[$member->pivot->role] ?? $member->pivot->role }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-1 shrink-0">
+                                    @if ($canManageMembers)
+                                        <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <form method="POST" action="{{ route('projects.members.update', [$project, $member]) }}" class="inline-block">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" name="role" value="{{ $member->pivot->role === 'member' ? 'deputy' : 'member' }}" class="p-1 text-slate-400 hover:text-accent hover:bg-accent/5 rounded transition-colors" title="{{ __('Toggle Role') }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" data-confirm="{{ __('Remove this member?') }}" class="inline-block">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="{{ __('Remove') }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
-                        <div class="w-full sm:w-auto">
-                            <select name="role" required class="w-full rounded-lg border-slate-200 text-sm focus:ring-accent focus:border-accent">
-                                <option value="member">{{ $roleLabels['member'] }}</option>
-                                <option value="deputy">{{ $roleLabels['deputy'] }}</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn-secondary w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                            {{ __('Add member') }}
+                    @endforeach
+                </div>
+
+                @if ($canManageMembers)
+                    <div class="mt-3 pt-3 border-t border-slate-100 shrink-0">
+                        <button x-data @click="$refs.addMemberDetails.classList.toggle('hidden')" class="btn-secondary w-full justify-center gap-1.5 text-xs !py-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                            {{ __('Add') }}
                         </button>
-                    </form>
-                </div>
-            @endif
-        </div>
-
-        <div class="card-strong p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                    {{ __('Member Contribution') }}
-                </h3>
-                <a href="{{ route('projects.export', $project) }}" class="btn-secondary text-sm py-1.5 px-3 inline-flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                    {{ __('Export Report') }}
-                </a>
+                        <div x-ref="addMemberDetails" class="hidden mt-2">
+                            <form method="POST" action="{{ route('projects.members.add', $project) }}" class="space-y-2">
+                                @csrf
+                                <select name="user_id" required class="block w-full rounded-md border-slate-200 text-xs py-1.5 focus:ring-accent focus:border-accent">
+                                    <option value="">{{ __('User...') }}</option>
+                                    @foreach ($availableUsers as $user)
+                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="flex gap-2">
+                                    <select name="role" required class="block w-1/3 rounded-md border-slate-200 text-xs py-1.5 focus:ring-accent focus:border-accent">
+                                        <option value="member">{{ $roleLabels['member'] }}</option>
+                                        <option value="deputy">{{ $roleLabels['deputy'] }}</option>
+                                    </select>
+                                    <button type="submit" class="btn-primary w-2/3 justify-center text-xs !py-1.5">
+                                        {{ __('OK') }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @endif
             </div>
-            <div class="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
-                <table class="min-w-full text-sm whitespace-nowrap">
-                    <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold">
-                        <tr>
-                            <th class="px-4 py-3 text-left rounded-tl-lg">{{ __('Member') }}</th>
-                            <th class="px-4 py-3 text-center">{{ __('Total Tasks') }}</th>
-                            <th class="px-4 py-3 text-center">{{ __('On Time') }}</th>
-                            <th class="px-4 py-3 text-center">{{ __('Late') }}</th>
-                            <th class="px-4 py-3 text-center">{{ __('In Progress') }}</th>
-                            <th class="px-4 py-3 text-center">{{ __('Overdue') }}</th>
-                            <th class="px-4 py-3 text-right rounded-tr-lg">{{ __('Contribution') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 bg-white">
-                        @foreach ($memberStats as $stat)
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-accent to-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                                            {{ strtoupper(substr($stat['user']->name, 0, 1)) }}
-                                        </div>
-                                        <span class="font-medium text-slate-900">{{ $stat['user']->name }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center font-medium">{{ $stat['total_tasks'] }}</td>
-                                <td class="px-4 py-3 text-center text-emerald-600 font-medium">{{ $stat['completed_on_time'] }}</td>
-                                <td class="px-4 py-3 text-center text-amber-600 font-medium">{{ $stat['completed_late'] }}</td>
-                                <td class="px-4 py-3 text-center text-sky-600 font-medium">{{ $stat['in_progress'] }}</td>
-                                <td class="px-4 py-3 text-center text-rose-600 font-medium">{{ $stat['overdue'] }}</td>
-                                <td class="px-4 py-3 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <div class="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
-                                            <div class="bg-accent h-2 rounded-full" style="width: {{ $stat['contribution_percentage'] }}%"></div>
-                                        </div>
-                                        <span class="font-bold text-slate-900 w-10">{{ $stat['contribution_percentage'] }}%</span>
-                                    </div>
-                                </td>
+
+            <!-- Member Contribution -->
+            <div class="card-strong p-6 flex flex-col h-full max-h-[500px] lg:col-span-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 shrink-0">
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        {{ __('Member Contribution') }}
+                    </h3>
+                    <a href="{{ route('projects.export', $project) }}" class="btn-secondary text-xs !py-1 !px-2 inline-flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        {{ __('Export') }}
+                    </a>
+                </div>
+                <!-- Add scrollable container for table -->
+                <div class="overflow-y-auto custom-scrollbar flex-grow -mx-6 px-6 sm:mx-0 sm:px-0">
+                    <table class="min-w-full text-sm whitespace-nowrap relative">
+                        <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold sticky top-0 z-10 shadow-sm">
+                            <tr>
+                                <th class="px-4 py-3 text-left bg-slate-50">{{ __('Member') }}</th>
+                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('Total Tasks') }}</th>
+                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('On Time') }}</th>
+                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('Late') }}</th>
+                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('In Progress') }}</th>
+                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('Overdue') }}</th>
+                                <th class="px-4 py-3 text-right bg-slate-50 rounded-tr-lg">{{ __('Contribution') }}</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            @foreach ($memberStats as $stat)
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-accent to-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
+                                                {{ strtoupper(substr($stat['user']->name, 0, 1)) }}
+                                            </div>
+                                            <span class="font-medium text-slate-900">{{ $stat['user']->name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-medium">{{ $stat['total_tasks'] }}</td>
+                                    <td class="px-4 py-3 text-center text-emerald-600 font-medium">{{ $stat['completed_on_time'] }}</td>
+                                    <td class="px-4 py-3 text-center text-amber-600 font-medium">{{ $stat['completed_late'] }}</td>
+                                    <td class="px-4 py-3 text-center text-sky-600 font-medium">{{ $stat['in_progress'] }}</td>
+                                    <td class="px-4 py-3 text-center text-rose-600 font-medium">{{ $stat['overdue'] }}</td>
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <div class="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
+                                                <div class="bg-accent h-2 rounded-full" style="width: {{ $stat['contribution_percentage'] }}%"></div>
+                                            </div>
+                                            <span class="font-bold text-slate-900 w-10">{{ $stat['contribution_percentage'] }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
