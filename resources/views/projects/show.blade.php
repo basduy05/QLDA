@@ -298,37 +298,37 @@
             </div>
 
             <!-- Member Contribution -->
-            <div class="card-strong p-6 flex flex-col h-full max-h-[500px] lg:col-span-2">
+            <div class="card-strong p-4 flex flex-col h-full max-h-[500px] lg:col-span-2">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 shrink-0">
-                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                         {{ __('Member Contribution') }}
                     </h3>
-                    <a href="{{ route('projects.export', $project) }}" class="btn-secondary text-xs !py-1 !px-2 inline-flex items-center gap-1.5">
+                    <a href="{{ route('projects.export', $project) }}" class="btn-secondary text-xs !py-1 !px-2 inline-flex items-center gap-1.5 shink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                         {{ __('Export') }}
                     </a>
                 </div>
                 <!-- Add scrollable container for table -->
-                <div class="overflow-y-auto custom-scrollbar flex-grow -mx-6 px-6 sm:mx-0 sm:px-0">
-                    <table class="min-w-full text-sm whitespace-nowrap relative">
-                        <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold sticky top-0 z-10 shadow-sm">
+                <div class="overflow-y-auto custom-scrollbar flex-grow -mx-4 px-4 sm:mx-0 sm:px-0">
+                    <table class="w-full text-xs relative table-fixed">
+                        <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold sticky top-0 z-10 shadow-sm">
                             <tr>
-                                <th class="px-4 py-3 text-left bg-slate-50">{{ __('Member') }}</th>
-                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('Total Tasks') }}</th>
-                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('On Time') }}</th>
-                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('Late') }}</th>
-                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('In Progress') }}</th>
-                                <th class="px-4 py-3 text-center bg-slate-50">{{ __('Overdue') }}</th>
-                                <th class="px-4 py-3 text-right bg-slate-50 rounded-tr-lg">{{ __('Contribution') }}</th>
+                                <th class="px-2 py-2 text-left bg-slate-50 w-1/4">{{ __('Member') }}</th>
+                                <th class="px-1 py-2 text-center bg-slate-50 w-[10%]">{{ __('Total') }}</th>
+                                <th class="px-1 py-2 text-center bg-slate-50 w-[10%]">{{ __('Ok') }}</th>
+                                <th class="px-1 py-2 text-center bg-slate-50 w-[10%]">{{ __('Late') }}</th>
+                                <th class="px-1 py-2 text-center bg-slate-50 w-[10%]">{{ __('Prog') }}</th>
+                                <th class="px-1 py-2 text-center bg-slate-50 w-[10%]">{{ __('Due') }}</th>
+                                <th class="px-2 py-2 text-right bg-slate-50 rounded-tr-lg w-1/4">{{ __('Contrib') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white">
                             @foreach ($memberStats as $stat)
                                 <tr class="hover:bg-slate-50/80 transition-colors">
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center gap-3 overflow-hidden max-w-[200px]">
-                                            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-accent to-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
+                                    <td class="px-2 py-2 tooltip-container relative">
+                                        <div class="flex items-center gap-2 overflow-hidden">
+                                            <div class="h-6 w-6 rounded-full bg-gradient-to-br from-accent to-blue-600 text-white flex items-center justify-center font-bold text-[10px] shadow-sm shrink-0">
                                                 {{ strtoupper(substr($stat['user']->name, 0, 1)) }}
                                             </div>
                                             <div class="overflow-hidden w-full relative group/text">
@@ -343,17 +343,17 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3 text-center font-medium">{{ $stat['total_tasks'] }}</td>
-                                    <td class="px-4 py-3 text-center text-emerald-600 font-medium">{{ $stat['completed_on_time'] }}</td>
-                                    <td class="px-4 py-3 text-center text-amber-600 font-medium">{{ $stat['completed_late'] }}</td>
-                                    <td class="px-4 py-3 text-center text-sky-600 font-medium">{{ $stat['in_progress'] }}</td>
-                                    <td class="px-4 py-3 text-center text-rose-600 font-medium">{{ $stat['overdue'] }}</td>
-                                    <td class="px-4 py-3 text-right">
+                                    <td class="px-1 py-2 text-center font-medium">{{ $stat['total_tasks'] }}</td>
+                                    <td class="px-1 py-2 text-center text-emerald-600 font-medium">{{ $stat['completed_on_time'] }}</td>
+                                    <td class="px-1 py-2 text-center text-amber-600 font-medium">{{ $stat['completed_late'] }}</td>
+                                    <td class="px-1 py-2 text-center text-sky-600 font-medium">{{ $stat['in_progress'] }}</td>
+                                    <td class="px-1 py-2 text-center text-rose-600 font-medium">{{ $stat['overdue'] }}</td>
+                                    <td class="px-2 py-2 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            <div class="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
-                                                <div class="bg-accent h-2 rounded-full" style="width: {{ $stat['contribution_percentage'] }}%"></div>
+                                            <div class="w-16 bg-slate-200 rounded-full h-1.5 overflow-hidden hidden sm:block">
+                                                <div class="bg-accent h-1.5 rounded-full" style="width: {{ $stat['contribution_percentage'] }}%"></div>
                                             </div>
-                                            <span class="font-bold text-slate-900 w-10">{{ $stat['contribution_percentage'] }}%</span>
+                                            <span class="font-bold text-slate-900 w-8 text-right">{{ $stat['contribution_percentage'] }}%</span>
                                         </div>
                                     </td>
                                 </tr>
@@ -367,64 +367,64 @@
         <div class="card-strong p-6 mt-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                     {{ __('Project tasks') }}
-                    <span class="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium ml-1">
+                    <span class="inline-flex items-center justify-center h-6 min-w-[1.5rem] px-2 rounded-full bg-slate-100 text-slate-600 text-xs font-medium ml-1">
                         {{ $project->tasks->count() }}
                     </span>
                 </h3>
                 @if ($canManageTasks)
-                    <a href="{{ route('projects.tasks.create', $project) }}" class="btn-primary text-sm py-1.5 px-3 inline-flex items-center gap-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                    <a href="{{ route('projects.tasks.create', $project) }}" class="btn-primary bg-emerald-700 hover:bg-emerald-800 border-emerald-700 text-sm py-2 px-4 rounded-full inline-flex items-center gap-1.5 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
                         {{ __('New task') }}
                     </a>
                 @endif
             </div>
 
-            <div class="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+            <div class="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0 custom-scrollbar pb-2">
                 <table class="min-w-full text-sm whitespace-nowrap">
-                    <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold">
+                    <thead class="bg-slate-50/50 text-slate-500 uppercase tracking-wider text-[11px] font-bold border-b border-slate-100">
                         <tr>
-                            <th class="px-4 py-3 text-left rounded-tl-lg">{{ __('Task') }}</th>
-                            <th class="px-4 py-3 text-left">{{ __('Assignee') }}</th>
-                            <th class="px-4 py-3 text-left">{{ __('Status') }}</th>
-                            <th class="px-4 py-3 text-left">{{ __('Priority') }}</th>
-                            <th class="px-4 py-3 text-left">{{ __('Due date') }}</th>
-                            <th class="px-4 py-3 text-right rounded-tr-lg"></th>
+                            <th class="px-4 py-4 text-left pl-6">{{ __('Task') }}</th>
+                            <th class="px-4 py-4 text-left">{{ __('Assignee') }}</th>
+                            <th class="px-4 py-4 text-left">{{ __('Status') }}</th>
+                            <th class="px-4 py-4 text-left">{{ __('Priority') }}</th>
+                            <th class="px-4 py-4 text-center">{{ __('Due date') }}</th>
+                            <th class="px-4 py-4 text-right pr-6"></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 bg-white">
+                    <tbody class="divide-y divide-slate-50 bg-white">
                         @forelse ($project->tasks as $task)
-                            <tr class="hover:bg-slate-50/80 transition-colors group">
-                                <td class="px-4 py-3 whitespace-normal min-w-[200px]">
-                                    <div class="flex items-start gap-2.5">
-                                        <div class="mt-0.5">
-                                            @if($task->status === 'done')
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                            @elseif($task->status === 'in_progress')
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                                <td class="px-4 py-4 whitespace-normal min-w-[250px] pl-6">
+                                    <div class="flex items-start gap-3">
+                                        <div class="mt-0.5 shrink-0 text-emerald-500">
+                                            @if($task->status == 'completed')
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-emerald-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                                             @else
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300 hover:text-emerald-500 transition-colors cursor-pointer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
                                             @endif
                                         </div>
-                                        <div>
-                                            <a href="{{ route('tasks.show', $task) }}" class="font-semibold text-slate-900 hover:text-accent transition-colors {{ $task->status === 'done' ? 'line-through text-slate-500' : '' }}">{{ $task->title }}</a>
+                                        <div class="min-w-0">
+                                            <a href="{{ route('tasks.show', $task) }}" class="text-sm font-bold text-slate-800 hover:text-accent transition-colors block mb-0.5 {{ $task->status == 'completed' ? 'line-through text-slate-400' : '' }}">
+                                                {{ $task->title }}
+                                            </a>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-4">
                                     @if($task->assignee)
                                         <div class="flex items-center gap-2">
-                                            <div class="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center text-[9px] font-medium text-slate-600 shrink-0">
+                                            <div class="h-6 w-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 shrink-0">
                                                 {{ strtoupper(substr($task->assignee->name, 0, 2)) }}
                                             </div>
-                                            <span class="text-slate-700 text-xs font-medium">{{ $task->assignee->name }}</span>
+                                            <span class="text-slate-700 font-medium text-xs">{{ $task->assignee->name }}</span>
                                         </div>
                                     @else
                                         <span class="text-slate-400 text-xs italic">{{ __('Unassigned') }}</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-4">
                                     @php
                                         $statusColors = [
                                             'todo' => 'bg-slate-100 text-slate-700 border-slate-200',
@@ -433,22 +433,55 @@
                                         ];
                                         $colorClass = $statusColors[$task->status] ?? 'bg-slate-100 text-slate-700 border-slate-200';
                                     @endphp
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border {{ $colorClass }}">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border {{ $colorClass }}">
                                         {{ __(ucwords(str_replace('_', ' ', $task->status))) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3">
-                                    @php
-                                        $priorityColors = [
-                                            'low' => 'text-slate-500 bg-slate-50 border-slate-200',
-                                            'medium' => 'text-amber-600 bg-amber-50 border-amber-200',
-                                            'high' => 'text-rose-600 bg-rose-50 border-rose-200',
-                                        ];
-                                        $pColorClass = $priorityColors[$task->priority] ?? 'text-slate-500 bg-slate-50 border-slate-200';
-                                    @endphp
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium border {{ $pColorClass }}">
-                                        {{ __(ucwords($task->priority)) }}
-                                    </span>
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center gap-1.5">
+                                        @if($task->priority == 'high')
+                                            <div class="w-2 h-2 rounded-full bg-rose-500"></div>
+                                            <span class="text-rose-700 font-medium text-xs">{{ __('High') }}</span>
+                                        @elseif($task->priority == 'medium')
+                                            <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                                            <span class="text-amber-700 font-medium text-xs">{{ __('Medium') }}</span>
+                                        @else
+                                            <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                            <span class="text-emerald-700 font-medium text-xs">{{ __('Low') }}</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    @if($task->due_date)
+                                        <span class="text-xs font-medium {{ $task->due_date < now() && $task->status != 'completed' ? 'text-rose-600 bg-rose-50 px-2 py-1 rounded' : 'text-slate-600' }}">
+                                            {{ $task->due_date->format('M d') }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400 text-xs">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-4 text-right pr-6">
+                                    <a href="{{ route('tasks.show', $task) }}" class="text-slate-400 hover:text-accent p-1 rounded-full hover:bg-slate-50 transition-colors inline-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                        <p>{{ __('No tasks found') }}</p>
+                                        @if ($canManageTasks)
+                                            <a href="{{ route('projects.tasks.create', $project) }}" class="text-accent hover:underline text-sm font-medium mt-1">{{ __('Create your first task') }}</a>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>                                    </span>
                                 </td>
                                 <td class="px-4 py-3 text-slate-500 text-xs">
                                     {{ $task->due_date?->format('d/m/Y') ?? '—' }}
