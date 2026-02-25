@@ -11,7 +11,23 @@
 
     <div class="card-strong p-0 overflow-hidden {{ request()->query('popup') ? 'h-screen rounded-none border-0 flex flex-col' : '' }}">
         <div class="grid lg:grid-cols-12 {{ request()->query('popup') ? 'flex-1 overflow-hidden' : 'min-h-[70vh]' }}">
-            <aside class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-slate-100 p-4 space-y-3 bg-white/80 {{ request()->query('popup') ? 'overflow-y-auto max-h-[30vh] lg:max-h-none' : '' }}">
+            <section class="lg:col-span-8 p-4 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-100 {{ request()->query('popup') ? 'flex-1 min-h-0' : 'min-h-[55vh]' }}">
+                <div id="ai-feed" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                        {{ __('Xin chào! Bạn có thể hỏi về kế hoạch công việc, phân chia task, rủi ro deadline, hoặc gợi ý nội dung trao đổi trong nhóm.') }}
+                    </div>
+                </div>
+
+                <form id="ai-form" class="mt-3 border-t border-slate-100 pt-3">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
+                        <textarea id="ai-input" rows="3" class="w-full rounded-xl border-slate-200 text-sm" placeholder="{{ __('Ask AI assistant...') }}"></textarea>
+                        <button id="ai-submit" type="submit" class="btn-primary sm:shrink-0">{{ __('Send') }}</button>
+                    </div>
+                    <p id="ai-error" class="mt-2 text-sm text-red-600 hidden"></p>
+                </form>
+            </section>
+
+            <aside class="lg:col-span-4 p-4 space-y-3 bg-white/80 {{ request()->query('popup') ? 'overflow-y-auto max-h-[30vh] lg:max-h-none' : '' }}">
                 <div>
                     <label for="ai-project" class="text-sm font-medium text-slate-700">{{ __('Project context') }}</label>
                     <select id="ai-project" class="mt-2 w-full rounded-xl border-slate-200 text-sm">
@@ -52,22 +68,6 @@
                     </ul>
                 </div>
             </aside>
-
-            <section class="lg:col-span-8 p-4 flex flex-col {{ request()->query('popup') ? 'flex-1 min-h-0' : 'min-h-[55vh]' }}">
-                <div id="ai-feed" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                        {{ __('Xin chào! Bạn có thể hỏi về kế hoạch công việc, phân chia task, rủi ro deadline, hoặc gợi ý nội dung trao đổi trong nhóm.') }}
-                    </div>
-                </div>
-
-                <form id="ai-form" class="mt-3 border-t border-slate-100 pt-3">
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
-                        <textarea id="ai-input" rows="3" class="w-full rounded-xl border-slate-200 text-sm" placeholder="{{ __('Ask AI assistant...') }}"></textarea>
-                        <button id="ai-submit" type="submit" class="btn-primary sm:shrink-0">{{ __('Send') }}</button>
-                    </div>
-                    <p id="ai-error" class="mt-2 text-sm text-red-600 hidden"></p>
-                </form>
-            </section>
         </div>
     </div>
 

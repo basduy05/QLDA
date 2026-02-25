@@ -123,6 +123,7 @@ class ProjectController extends Controller
             'canManageTasks' => $canManageTasks,
             'availableUsers' => $availableUsers,
             'projectRoles' => Project::roles(),
+            'memberStats' => $project->getMemberStatistics(),
         ]);
     }
 
@@ -274,7 +275,15 @@ class ProjectController extends Controller
             ]);
         }
     }
-
+    public function exportReport(Project $project)
+    {
+        $this->ensureAccess($project);
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ProjectReportExport($project),
+            'project_report_' . $project->id . '_' . now()->format('Ymd_His') . '.xlsx'
+        );
+    }
     private function canUpdateProject(Project $project, User $user): bool
     {
         if ($user->isAdmin()) {

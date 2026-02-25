@@ -51,6 +51,8 @@ Route::middleware('auth')->group(function () {
         ->name('projects.members.update');
     Route::delete('/projects/{project}/members/{member}', [ProjectController::class, 'removeMember'])
         ->name('projects.members.remove');
+    Route::get('/projects/{project}/export', [ProjectController::class, 'exportReport'])
+        ->name('projects.export');
     Route::resource('projects.tasks', TaskController::class)->shallow();
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
     Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])

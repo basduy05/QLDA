@@ -260,6 +260,61 @@
         <div class="card-strong p-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    {{ __('Member Contribution') }}
+                </h3>
+                <a href="{{ route('projects.export', $project) }}" class="btn-secondary text-sm py-1.5 px-3 inline-flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    {{ __('Export Report') }}
+                </a>
+            </div>
+            <div class="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+                <table class="min-w-full text-sm whitespace-nowrap">
+                    <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold">
+                        <tr>
+                            <th class="px-4 py-3 text-left rounded-tl-lg">{{ __('Member') }}</th>
+                            <th class="px-4 py-3 text-center">{{ __('Total Tasks') }}</th>
+                            <th class="px-4 py-3 text-center">{{ __('On Time') }}</th>
+                            <th class="px-4 py-3 text-center">{{ __('Late') }}</th>
+                            <th class="px-4 py-3 text-center">{{ __('In Progress') }}</th>
+                            <th class="px-4 py-3 text-center">{{ __('Overdue') }}</th>
+                            <th class="px-4 py-3 text-right rounded-tr-lg">{{ __('Contribution') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                        @foreach ($memberStats as $stat)
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-accent to-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                                            {{ strtoupper(substr($stat['user']->name, 0, 1)) }}
+                                        </div>
+                                        <span class="font-medium text-slate-900">{{ $stat['user']->name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-center font-medium">{{ $stat['total_tasks'] }}</td>
+                                <td class="px-4 py-3 text-center text-emerald-600 font-medium">{{ $stat['completed_on_time'] }}</td>
+                                <td class="px-4 py-3 text-center text-amber-600 font-medium">{{ $stat['completed_late'] }}</td>
+                                <td class="px-4 py-3 text-center text-sky-600 font-medium">{{ $stat['in_progress'] }}</td>
+                                <td class="px-4 py-3 text-center text-rose-600 font-medium">{{ $stat['overdue'] }}</td>
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <div class="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
+                                            <div class="bg-accent h-2 rounded-full" style="width: {{ $stat['contribution_percentage'] }}%"></div>
+                                        </div>
+                                        <span class="font-bold text-slate-900 w-10">{{ $stat['contribution_percentage'] }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-strong p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                     {{ __('Project tasks') }}
                     <span class="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium ml-1">

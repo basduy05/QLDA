@@ -111,7 +111,7 @@
         <div x-data="{ activePopup: null }" class="fixed bottom-6 right-6 flex flex-col gap-4 z-50 items-end">
             
             <!-- AI Popup -->
-            <div x-show="activePopup === 'ai'" x-transition.opacity.duration.300ms class="fixed bottom-24 right-6 w-[600px] h-[700px] max-w-[calc(100vw-3rem)] max-h-[calc(100vh-8rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-50" style="display: none;">
+            <div x-show="activePopup === 'ai'" x-transition.opacity.duration.300ms class="fixed bottom-24 right-6 h-[700px] max-h-[calc(100vh-8rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-50" style="width: 1000px; max-width: calc(100vw - 3rem); display: none;">
                 <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
                     <h3 class="font-semibold flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="m16.24 7.76 2.83-2.83"/><path d="M18 12h4"/><path d="m16.24 16.24 2.83 2.83"/><path d="M12 18v4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M2 12h4"/><path d="m4.93 4.93 2.83 2.83"/><circle cx="12" cy="12" r="4"/></svg>
@@ -125,8 +125,8 @@
             </div>
 
             <!-- Messenger Popup -->
-            <div x-show="activePopup === 'messenger'" x-transition.opacity.duration.300ms class="fixed bottom-24 right-6 w-[600px] h-[700px] max-w-[calc(100vw-3rem)] max-h-[calc(100vh-8rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-50" style="display: none;">
-                <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-accent to-blue-600 text-white">
+            <div x-show="activePopup === 'messenger'" x-transition.opacity.duration.300ms class="fixed bottom-24 right-6 h-[700px] max-h-[calc(100vh-8rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-50" style="width: 1000px; max-width: calc(100vw - 3rem); display: none;">
+                <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white">
                     <h3 class="font-semibold flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         {{ __('Messenger') }}
@@ -148,7 +148,7 @@
             </button>
 
             <!-- Messenger Bubble -->
-            <button @click="activePopup = activePopup === 'messenger' ? null : 'messenger'" class="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-br from-accent to-blue-600 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent" aria-label="{{ __('Messenger') }}">
+            <button @click="activePopup = activePopup === 'messenger' ? null : 'messenger'" class="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500" aria-label="{{ __('Messenger') }}">
                 <svg x-show="activePopup !== 'messenger'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 <svg x-show="activePopup === 'messenger'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 <span class="absolute right-full mr-4 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none shadow-md">
