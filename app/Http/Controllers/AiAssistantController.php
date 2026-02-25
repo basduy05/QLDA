@@ -108,9 +108,11 @@ class AiAssistantController extends Controller
             }
 
             $projectContext = $this->buildProjectContext($project);
+        } else {
+            $projectContext = $this->buildGeneralContext($user);
         }
 
-        $prompt = $this->buildPrompt($message, $projectContext, app()->getLocale());
+        $prompt = $this->buildPrompt($user, $message, $projectContext, app()->getLocale());
 
         $url = sprintf(
             'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s',
@@ -240,13 +242,54 @@ class AiAssistantController extends Controller
         return "Project: {$project->name}\nStatus: {$project->status}\nTask summary: total={$total}, done={$done}, in_progress={$inProgress}, todo={$todo}, overdue={$overdue}\nKey tasks:\n{$taskLines}";
     }
 
-    private function buildPrompt(string $userMessage, ?string $projectContext, string $locale): string
+    private function buildGeneralContext(User $user): string
+    {
+        // Get all projects user has access to
+        $projectsQuery = Project::query();
+        if (! $user->isAdmin()) {
+            $projectsQuery->where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', function ($mq) use ($user) {
+                      $mq->where('users.id', $user->id);
+                  });
+            });
+        }
+        
+        $projects = $projectsQuery->withCount(['tasks', 'members'])->limit(10)->get();
+
+        $projectSummary = $projects->map(function ($p) {
+            return "- {$p->name} ({$p->status}): {$p->tasks_count} tasks, {$p->members_count} members.";
+        })->implode("\n");
+
+        // Get urgent tasks assigned to user across all projects
+        $urgentTasks = \App\Models\Task::where('assignee_id', $user->id)
+            ->whereIn('status', ['todo', 'in_progress'])
+            ->where(function ($q) {
+                $q->where('priority', 'high')
+                  ->orWhere('due_date', '<=', now()->addDays(3));
+            })
+            ->with('project')
+            ->orderBy('due_date')
+            ->limit(5)
+            ->get();
+            
+        $taskSummary = $urgentTasks->map(function ($t) {
+            $due = $t->due_date?->format('Y-m-d') ?? 'none';
+            return "- [{$t->project->name}] {$t->title} (Priority: {$t->priority}, Due: {$due})";
+        })->implode("\n");
+
+        return "User: {$user->name} (Role: {$user->role})\n\nActive Projects Summary:\n{$projectSummary}\n\nUrgent Tasks for User:\n{$taskSummary}";
+    }
+
+    private function buildPrompt(User $user, string $userMessage, ?string $contextData, string $locale): string
     {
         $language = $locale === 'vi' ? 'Vietnamese' : 'English';
+        
+        $system = "You are an AI project assistant. The user is named '{$user->name}' (ID: {$user->id}). You have access to their project data. Reply in {$language}. Keep answers practical and concise.";
+        
+        $contextSection = $contextData ? "\n\nAvailable Context:\n{$contextData}" : '';
 
-        $context = $projectContext ? "\n\nProject context:\n{$projectContext}" : '';
-
-        return "You are an assistant for a project management platform. Reply in {$language}. Keep answers practical and concise. If possible, return:\n1) Quick summary\n2) Recommended next actions (3-5 bullets)\n3) Risks and mitigations\n4) Suggested message template for team communication when relevant.\nIf asked for unavailable data, clearly say so and suggest next steps.{$context}\n\nUser message:\n{$userMessage}";
+        return "{$system}\nIf possible, offer:\n1) Quick summary\n2) Recommended next actions\n3) Risks/mitigations\nIf asked for unavailable data, clarify what is missing.{$contextSection}\n\nUser message:\n{$userMessage}";
     }
 
     private function buildGeneralTaskSuggestions(): array

@@ -481,26 +481,6 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-slate-500 text-xs">
-                                    {{ $task->due_date?->format('d/m/Y') ?? '—' }}
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    <a href="{{ route('tasks.show', $task) }}" class="inline-flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-accent hover:bg-accent/5 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100" title="{{ __('Open') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-4 py-8 text-center">
-                                    <p class="text-sm text-slate-500">{{ __('No tasks created yet.') }}</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
