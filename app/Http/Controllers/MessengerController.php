@@ -431,7 +431,8 @@ class MessengerController extends Controller
 
     private function buildBasePayload(User $user): array
     {
-        $groupsQuery = ChatGroup::withCount('messages')->latest();
+        // Eager load creator and count members to avoid N+1 in the group manager modal
+        $groupsQuery = ChatGroup::with(['creator'])->withCount(['messages', 'members'])->latest();
 
         if (! $user->isAdmin()) {
             $groupsQuery->whereHas('members', function ($query) use ($user) {

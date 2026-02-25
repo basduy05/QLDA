@@ -3,6 +3,16 @@
         .project-progress-bar {
             width: var(--project-progress);
         }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            animation: marquee 10s linear infinite;
+        }
+        .group\/text:hover .group-hover\/text\:pause {
+            animation-play-state: paused;
+        }
     </style>
 
     @php
@@ -142,33 +152,23 @@
             </div>
         </div>
 
-        <div class="card-strong p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                    {{ __('Team members') }}
-                    <span class="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium ml-1">
-                        {{ $project->members->count() }}
-                    </span>
-                </h3>
-                @if ($canManageMembers)
-                    <span class="text-xs font-medium text-slate-500 bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100 flex items-center gap-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        {{ __('Lead can assign deputy/member roles.') }}
-                    </span>
-                @endif
-            </div>
-
         <div class="grid lg:grid-cols-3 gap-6 items-start">
             <!-- Team Members -->
             <div class="card-strong p-4 flex flex-col h-full max-h-[500px] lg:col-span-1">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 shrink-0">
                     <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        {{ __('Team members') }}
                         <span class="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
                             {{ $project->members->count() }}
                         </span>
                     </h3>
+                    @if ($canManageMembers)
+                        <span class="text-[10px] font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded-md border border-slate-100 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            {{ __('Lead can assign deputy/member roles.') }}
+                        </span>
+                    @endif
                 </div>
 
                 <div class="overflow-y-auto pr-1 space-y-2 flex-grow custom-scrollbar">
@@ -179,8 +179,15 @@
                                 <div class="h-8 w-8 rounded-full bg-white border border-accent/20 flex items-center justify-center text-accent font-bold shadow-sm shrink-0 text-xs">
                                     {{ strtoupper(substr($project->owner?->name ?? '?', 0, 2)) }}
                                 </div>
-                                <div class="min-w-0">
-                                    <p class="font-bold text-slate-900 text-xs truncate max-w-[100px]">{{ $project->owner?->name }}</p>
+                                <div class="min-w-0 overflow-hidden w-full relative group/text">
+                                    <div class="font-bold text-slate-900 text-xs {{ strlen($project->owner?->name) > 15 ? 'flex w-fit animate-marquee group-hover/text:pause whitespace-nowrap' : 'truncate' }}">
+                                        @if(strlen($project->owner?->name) > 15)
+                                            <span class="mr-4">{{ $project->owner?->name }}</span>
+                                            <span>{{ $project->owner?->name }}</span>
+                                        @else
+                                            {{ $project->owner?->name }}
+                                        @endif
+                                    </div>
                                     <p class="text-[10px] text-slate-500 truncate max-w-[100px]">{{ $project->owner?->email }}</p>
                                 </div>
                             </div>
@@ -197,8 +204,15 @@
                                     <div class="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold shrink-0 text-xs">
                                         {{ strtoupper(substr($member->name, 0, 2)) }}
                                     </div>
-                                    <div class="min-w-0">
-                                        <p class="font-semibold text-slate-900 text-xs truncate max-w-[90px] group-hover:text-accent transition-colors">{{ $member->name }}</p>
+                                    <div class="min-w-0 overflow-hidden w-full relative group/text">
+                                        <div class="font-semibold text-slate-900 text-xs group-hover:text-accent transition-colors {{ strlen($member->name) > 15 ? 'flex w-fit animate-marquee group-hover/text:pause whitespace-nowrap' : 'truncate' }}">
+                                            @if(strlen($member->name) > 15)
+                                                <span class="mr-4">{{ $member->name }}</span>
+                                                <span>{{ $member->name }}</span>
+                                            @else
+                                                {{ $member->name }}
+                                            @endif
+                                        </div>
                                         <div class="flex items-center gap-1">
                                             <span class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider {{ $member->pivot->role === 'deputy' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600' }}">
                                                 {{ $roleLabels[$member->pivot->role] ?? $member->pivot->role }}
@@ -233,30 +247,51 @@
                 </div>
 
                 @if ($canManageMembers)
-                    <div class="mt-3 pt-3 border-t border-slate-100 shrink-0">
-                        <button x-data @click="$refs.addMemberDetails.classList.toggle('hidden')" class="btn-secondary w-full justify-center gap-1.5 text-xs !py-1.5">
+                    <div class="mt-3 pt-3 border-t border-slate-100 shrink-0 relative" x-data="{ open: false }">
+                        <button @click="open = !open" type="button" class="btn-secondary w-full justify-center gap-1.5 text-xs !py-1.5 focus:ring-2 focus:ring-accent focus:ring-offset-1">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                             {{ __('Add') }}
                         </button>
-                        <div x-ref="addMemberDetails" class="hidden mt-2">
-                            <form method="POST" action="{{ route('projects.members.add', $project) }}" class="space-y-2">
+
+                         <div
+                            x-show="open"
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            @click.away="open = false"
+                            class="absolute left-0 bottom-full mb-2 w-64 bg-white border border-slate-200 shadow-xl rounded-lg p-3 z-50"
+                            style="display: none;"
+                        >
+                            <form method="POST" action="{{ route('projects.members.add', $project) }}" class="space-y-3">
                                 @csrf
-                                <select name="user_id" required class="block w-full rounded-md border-slate-200 text-xs py-1.5 focus:ring-accent focus:border-accent">
-                                    <option value="">{{ __('User...') }}</option>
-                                    @foreach ($availableUsers as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="flex gap-2">
-                                    <select name="role" required class="block w-1/3 rounded-md border-slate-200 text-xs py-1.5 focus:ring-accent focus:border-accent">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">{{ __('Select User') }}</label>
+                                    <select name="user_id" required class="block w-full rounded-md border-slate-200 text-xs py-1.5 focus:ring-accent focus:border-accent">
+                                        <option value="">{{ __('User...') }}</option>
+                                        @foreach ($availableUsers as $user)
+                                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1">{{ __('Role') }}</label>
+                                    <select name="role" required class="block w-full rounded-md border-slate-200 text-xs py-1.5 focus:ring-accent focus:border-accent">
                                         <option value="member">{{ $roleLabels['member'] }}</option>
                                         <option value="deputy">{{ $roleLabels['deputy'] }}</option>
                                     </select>
-                                    <button type="submit" class="btn-primary w-2/3 justify-center text-xs !py-1.5">
-                                        {{ __('OK') }}
+                                </div>
+                                <div class="flex justify-end gap-2 pt-1">
+                                    <button type="button" @click="open = false" class="btn-secondary text-xs !py-1">{{ __('Cancel') }}</button>
+                                    <button type="submit" class="btn-primary text-xs !py-1">
+                                        {{ __('Add Member') }}
                                     </button>
                                 </div>
                             </form>
+                            <!-- Arrow for tooltip -->
+                            <div class="absolute -bottom-1 left-10 w-2 h-2 bg-white border-b border-l border-slate-200 transform -rotate-45"></div>
                         </div>
                     </div>
                 @endif
@@ -292,11 +327,20 @@
                             @foreach ($memberStats as $stat)
                                 <tr class="hover:bg-slate-50/80 transition-colors">
                                     <td class="px-4 py-3">
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex items-center gap-3 overflow-hidden max-w-[200px]">
                                             <div class="h-8 w-8 rounded-full bg-gradient-to-br from-accent to-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
                                                 {{ strtoupper(substr($stat['user']->name, 0, 1)) }}
                                             </div>
-                                            <span class="font-medium text-slate-900">{{ $stat['user']->name }}</span>
+                                            <div class="overflow-hidden w-full relative group/text">
+                                                <div class="font-medium text-slate-900 {{ strlen($stat['user']->name) > 15 ? 'flex w-fit animate-marquee group-hover/text:pause whitespace-nowrap' : 'truncate' }}">
+                                                    @if(strlen($stat['user']->name) > 15)
+                                                        <span class="mr-4">{{ $stat['user']->name }}</span>
+                                                        <span>{{ $stat['user']->name }}</span>
+                                                    @else
+                                                        {{ $stat['user']->name }}
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3 text-center font-medium">{{ $stat['total_tasks'] }}</td>
@@ -320,7 +364,7 @@
             </div>
         </div>
 
-        <div class="card-strong p-6">
+        <div class="card-strong p-6 mt-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>

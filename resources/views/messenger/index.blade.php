@@ -6,7 +6,7 @@
                 <h2 class="text-2xl font-semibold text-slate-900">{{ __('Chats & Groups') }}</h2>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('chat-groups.index') }}" target="_top" class="btn-secondary text-xs">{{ __('Manage Groups') }}</a>
+                <button type="button" onclick="document.dispatchEvent(new CustomEvent('open-groups-modal'))" class="btn-secondary text-xs">{{ __('Manage Groups') }}</button>
                 <a href="{{ route('ai.chat.index', ['popup' => request()->query('popup')]) }}" class="btn-secondary text-xs">{{ __('AI Assistant') }}</a>
                 @if ($activeType === 'direct')
                     <button type="button" id="start-call-header" class="btn-primary text-xs">{{ __('Call') }}</button>
@@ -15,7 +15,130 @@
         </div>
     </x-slot>
 
-    <div class="card-strong p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50/70 {{ request()->query('popup') ? 'h-screen rounded-none border-0' : '' }}">
+    <div x-data="{ showGroupsSettings: false }" @open-groups-modal.window="showGroupsSettings = true">
+        <!-- Groups Management Modal -->
+        <div
+            x-show="showGroupsSettings"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+            style="display: none;"
+        >
+            <div
+                @click.outside="showGroupsSettings = false"
+                class="w-full max-w-sm h-fit max-h-[85vh] bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col relative"
+            >
+                <div class="h-fit" x-data="{
+                            groupName: '',
+                            search: '',
+                            selected: [],
+                            users: {{ Js::from($contacts->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])) }},
+                            toggle(id) {
+                                if (this.selected.includes(id)) {
+                                    this.selected = this.selected.filter(i => i !== id);
+                                } else {
+                                    this.selected.push(id);
+                                }
+                            },
+                            get filteredUsers() {
+                                if (this.search === '') return this.users;
+                                const lower = this.search.toLowerCase();
+                                return this.users.filter(u => 
+                                    u.name.toLowerCase().includes(lower) || 
+                                    u.email.toLowerCase().includes(lower)
+                                );
+                            },
+                            get selectedUsers() {
+                                return this.users.filter(u => this.selected.includes(u.id));
+                            }
+                        }">
+                    <form method="POST" action="{{ route('chat-groups.store', ['popup' => request()->query('popup')]) }}" class="flex flex-col h-full">
+                        @csrf
+                        <input type="hidden" name="from_messenger" value="1">
+                        
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50">
+                            <div>
+                                <h3 class="font-semibold text-sm text-slate-900">{{ __('Create Group') }}</h3>
+                            </div>
+                            <button type="button" @click="showGroupsSettings = false" class="text-slate-400 hover:text-slate-600 transition p-1 hover:bg-slate-100 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="flex-1 overflow-y-auto p-4 bg-white space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-medium text-slate-500 mb-1 uppercase tracking-wider">{{ __('Name') }}</label>
+                                <div class="flex gap-2">
+                                    <input type="text" name="name" x-model="groupName" class="flex-1 rounded-md border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs py-1.5" placeholder="{{ __('Group Name') }}" required>
+                                    <button type="submit" class="btn-primary text-xs !py-1.5 !px-3 shadow-sm shrink-0" :disabled="!groupName">
+                                        {{ __('Create') }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-medium text-slate-500 mb-1 uppercase tracking-wider">{{ __('Members') }}</label>
+                                <div class="flex rounded-md shadow-sm">
+                                    <input type="text" x-model="search" class="flex-1 min-w-0 block w-full px-3 py-1.5 rounded-l-md border border-slate-200 text-xs focus:ring-indigo-500 focus:border-indigo-500" placeholder="{{ __('Search...') }}">
+                                    <span class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-slate-200 bg-slate-50 text-slate-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                
+                                <!-- Selected Tags -->
+                                <div class="flex flex-wrap gap-1 mt-2 min-h-[1.25rem] bg-slate-50/50 p-1 rounded-md border border-dashed border-slate-200" x-show="selected.length > 0">
+                                    <template x-for="user in selectedUsers" :key="user.id">
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-white text-indigo-700 border border-indigo-100 shadow-sm">
+                                            <span x-text="user.name"></span>
+                                            <button type="button" @click="toggle(user.id)" class="text-indigo-400 hover:text-indigo-600 focus:outline-none ml-1">
+                                                <svg class="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                            </button>
+                                            <input type="hidden" name="member_ids[]" :value="user.id">
+                                        </span>
+                                    </template>
+                                    <button type="button" @click="selected = []" class="text-[10px] text-slate-400 hover:text-slate-600 underline ml-1 self-center" x-show="selected.length > 1">{{ __('Clear all') }}</button>
+                                </div>
+
+                                <!-- User List -->
+                                <div class="mt-2 h-32 overflow-y-auto border border-slate-200 rounded-md divide-y divide-slate-50 bg-white shadow-sm scroll-smooth text-xs">
+                                    <template x-for="user in filteredUsers" :key="user.id">
+                                        <div @click="toggle(user.id)" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 cursor-pointer transition group select-none">
+                                            <div class="flex-shrink-0 relative">
+                                                <div class="w-4 h-4 rounded border flex items-center justify-center transition-colors duration-200" 
+                                                        :class="selected.includes(user.id) ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300 bg-white'">
+                                                    <svg x-show="selected.includes(user.id)" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="font-medium text-slate-700 truncate group-hover:text-indigo-700 transition-colors" x-text="user.name"></p>
+                                                <p class="text-[10px] text-slate-400 truncate" x-text="user.email"></p>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div x-show="filteredUsers.length === 0" class="p-4 text-center">
+                                        <p class="text-xs text-slate-500 italic mb-1">{{ __('No members found') }}</p>
+                                        <button type="button" @click="search = ''" class="text-[10px] text-indigo-500 hover:underline">{{ __('Show all') }}</button>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1 text-right" x-show="selected.length > 0">
+                                    <span x-text="selected.length"></span> {{ __('selected') }}
+                                </p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-strong p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50/70 {{ request()->query('popup') ? 'h-screen rounded-none border-0' : '' }}">
         <div class="grid md:grid-cols-12 {{ request()->query('popup') ? 'h-full' : 'h-[calc(100vh-220px)]' }}">
             <aside class="md:col-span-4 lg:col-span-3 border-b md:border-b-0 md:border-r border-slate-100 p-3 overflow-y-auto min-h-0 max-h-64 md:max-h-none bg-white/70 backdrop-blur">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">{{ __('Direct') }}</p>
@@ -35,7 +158,7 @@
 
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">{{ __('Groups') }}</p>
-                    <a href="{{ route('chat-groups.index') }}" target="_top" class="text-[10px] font-medium text-accent hover:underline">{{ __('Manage') }}</a>
+                    <button type="button" @click="showGroupsSettings = true" class="text-[10px] font-medium text-accent hover:underline">{{ __('Create') }}</button>
                 </div>
                 <div class="space-y-1">
                     @foreach ($groups as $group)
@@ -47,7 +170,7 @@
                 </div>
             </aside>
 
-            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-[45vh] md:min-h-0 relative bg-white/40">
+            <section class="md:col-span-8 lg:col-span-9 p-3 flex flex-col min-h-[45vh] md:min-h-0 relative bg-white/40" x-data="{ showGroupSettings: false }">
                 @if ($activeType)
                     <div class="relative flex items-center justify-between pb-2 border-b border-slate-100">
                         <div>
@@ -62,19 +185,18 @@
                             </p>
                         </div>
                         @if ($activeType === 'direct')
-                            <button type="button" id="start-call-inline" class="btn-secondary text-xs">{{ __('Start Call') }}</button>
+                            <button type="button" id="start-call-inline" class="btn-secondary text-xs py-1.5 px-3">{{ __('Start Call') }}</button>
                         @elseif ($activeType === 'group')
                             <button
                                 type="button"
-                                id="group-settings-toggle"
-                                aria-expanded="false"
-                                class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-300 transition"
+                                @click="showGroupSettings = true"
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:border-slate-300 transition"
                                 title="{{ __('Group options') }}"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="4" y1="7" x2="20" y2="7"></line>
-                                    <line x1="4" y1="12" x2="20" y2="12"></line>
-                                    <line x1="4" y1="17" x2="20" y2="17"></line>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                    <circle cx="19" cy="12" r="1"></circle>
+                                    <circle cx="5" cy="12" r="1"></circle>
                                 </svg>
                             </button>
                         @endif
@@ -82,83 +204,178 @@
 
                     @if ($activeType === 'group')
                         @php($groupMemberIds = $groupMembers->pluck('id')->map(fn ($id) => (int) $id)->all())
-                        <div id="group-settings-backdrop" class="hidden absolute inset-0 z-10 bg-slate-900/10 rounded-2xl"></div>
+                        
+                        <!-- Group Settings Modal -->
+                        <div x-show="showGroupSettings" 
+                             style="display: none;"
+                             class="fixed inset-0 z-50 overflow-y-auto" 
+                             aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                             
+                            <!-- Backdrop -->
+                            <div x-show="showGroupSettings" 
+                                 x-transition:enter="ease-out duration-300"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="ease-in duration-200"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 bg-slate-500/75 transition-opacity backdrop-blur-sm" 
+                                 @click="showGroupSettings = false"></div>
 
-                        <div id="group-settings-panel" class="absolute left-3 right-3 top-[56px] z-20 max-h-[calc(100%-76px)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl space-y-3 origin-top-right opacity-0 scale-95 pointer-events-none transition duration-200 ease-out">
-                            <form method="POST" action="{{ route('messenger.group.rename', $activeTarget) }}" class="flex items-end gap-2">
-                                @csrf
-                                @method('PATCH')
-                                <div class="flex-1">
-                                    <label for="group-name" class="text-[11px] text-slate-500">{{ __('Group name') }}</label>
-                                    <input id="group-name" type="text" name="name" value="{{ old('name', $activeTarget->name) }}" class="mt-1 w-full rounded-xl border-slate-200 text-sm" maxlength="255" required>
-                                </div>
-                                <button type="submit" class="btn-secondary text-xs">{{ __('Rename group') }}</button>
-                            </form>
-
-                            <form method="POST" action="{{ route('messenger.group.members', $activeTarget) }}" class="space-y-2 rounded-xl border border-slate-200 p-3">
-                                @csrf
-                                @method('PATCH')
-                                <div class="flex items-center justify-between gap-2">
-                                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ __('Members') }}</p>
-                                    <p class="text-xs text-slate-500">{{ __('Tick to add / untick to remove') }}</p>
-                                </div>
-
-                                <div class="grid sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
-                                    <label class="flex items-start gap-2 rounded-lg border border-slate-200 px-3 py-2 bg-slate-50">
-                                        <input type="checkbox" checked disabled class="mt-1 rounded border-slate-300 text-slate-900">
-                                        <input type="hidden" name="member_ids[]" value="{{ auth()->id() }}">
-                                        <span>
-                                            <span class="block text-sm font-medium text-slate-800">{{ auth()->user()->name }} {{ __('(You)') }}</span>
-                                            <span class="block text-[11px] text-slate-500">{{ auth()->user()->email }}</span>
-                                        </span>
-                                    </label>
-
-                                    @foreach ($contacts as $contact)
-                                        <label class="flex items-start gap-2 rounded-lg border border-slate-200 px-3 py-2 cursor-pointer hover:border-slate-300">
-                                            <input type="checkbox" name="member_ids[]" value="{{ $contact->id }}" class="mt-1 rounded border-slate-300 text-slate-900" @checked(in_array((int) $contact->id, $groupMemberIds, true))>
-                                            <span>
-                                                <span class="block text-sm font-medium text-slate-800">{{ $contact->name }}</span>
-                                                <span class="block text-[11px] text-slate-500">{{ $contact->email }}</span>
-                                            </span>
-                                        </label>
-                                    @endforeach
-                                </div>
-
-                                <button type="submit" class="btn-secondary text-xs">{{ __('Save members') }}</button>
-                            </form>
-
-                            <div class="flex flex-wrap gap-2">
-                                @foreach ($groupMembers as $member)
-                                    @php($memberName = $groupNicknames[$member->id] ?? $member->name)
-                                    <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-700">
-                                        <span class="inline-flex h-2 w-2 rounded-full {{ $member->isOnline() ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>
-                                        <span>{{ $memberName }}</span>
-                                    </span>
-                                @endforeach
-                            </div>
-
-                            <div class="grid md:grid-cols-2 gap-2">
-                                @foreach ($groupMembers as $member)
-                                    @php($memberName = $groupNicknames[$member->id] ?? $member->name)
-                                    <form method="POST" action="{{ route('messenger.group.member-nickname', [$activeTarget, $member]) }}" class="flex items-end gap-2 rounded-xl border border-slate-200 p-2">
-                                        @csrf
-                                        @method('PATCH')
-                                        <div class="flex-1">
-                                            <p class="text-[11px] text-slate-500">{{ __('Nickname for :name', ['name' => $member->name]) }}</p>
-                                            <input type="text" name="nickname" value="{{ old('nickname_'.$member->id, $member->pivot->nickname ?? '') }}" maxlength="40" class="mt-1 w-full rounded-xl border-slate-200 text-sm" placeholder="{{ __('Current: :nick', ['nick' => $memberName]) }}">
+                            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                                <div x-show="showGroupSettings" 
+                                     x-transition:enter="ease-out duration-300"
+                                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                     x-transition:leave="ease-in duration-200"
+                                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                     class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full sm:my-8 sm:w-full sm:max-w-lg">
+                                    
+                                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
+                                            <h3 class="text-base font-semibold leading-6 text-slate-900" id="modal-title">{{ __('Group Settings') }}</h3>
+                                            <button @click="showGroupSettings = false" class="text-slate-400 hover:text-slate-500">
+                                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
                                         </div>
-                                        <button type="submit" class="btn-secondary text-xs">{{ __('Save') }}</button>
-                                    </form>
-                                @endforeach
-                            </div>
 
-                            @if ($canDeleteGroup)
-                                <form method="POST" action="{{ route('chat-groups.destroy', $activeTarget) }}" class="pt-1">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn-secondary text-xs text-red-600 border-red-200 hover:border-red-300">{{ __('Delete group') }}</button>
-                                </form>
-                            @endif
+                                        <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
+                                            <!-- Rename Group -->
+                                            <form method="POST" action="{{ route('messenger.group.rename', $activeTarget) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <label for="group-name" class="block text-sm font-medium leading-6 text-slate-900">{{ __('Group Name') }}</label>
+                                                <div class="mt-1 flex rounded-md shadow-sm">
+                                                    <input type="text" name="name" id="group-name" class="block w-full rounded-none rounded-l-md border-0 py-1.5 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" value="{{ old('name', $activeTarget->name) }}" required>
+                                                    <button type="submit" class="relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50">
+                                                        {{ __('Rename') }}
+                                                    </button>
+                                                </div>
+                                            </form>
+
+                                            <!-- Members Management -->
+                                            <div class="border-t border-slate-100 pt-4">
+                                                <h4 class="text-sm font-medium leading-6 text-slate-900 mb-2">{{ __('Manage Members') }}</h4>
+                                                <form method="POST" action="{{ route('messenger.group.members', $activeTarget) }}" 
+                                                    class="space-y-4"
+                                                    x-data="{
+                                                        search: '',
+                                                        selected: {{ Js::from($groupMemberIds) }},
+                                                        users: {{ Js::from($contacts->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])->merge($groupMembers->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email]))->unique('id')->values()) }},
+                                                        toggle(id) {
+                                                            if (this.selected.includes(id)) {
+                                                                this.selected = this.selected.filter(i => i !== id);
+                                                            } else {
+                                                                this.selected.push(id);
+                                                            }
+                                                        },
+                                                        get filteredUsers() {
+                                                            if (this.search === '') return this.users;
+                                                            const lower = this.search.toLowerCase();
+                                                            return this.users.filter(u => 
+                                                                u.name.toLowerCase().includes(lower) || 
+                                                                u.email.toLowerCase().includes(lower)
+                                                            );
+                                                        },
+                                                        get selectedUsers() {
+                                                            return this.users.filter(u => this.selected.includes(u.id));
+                                                        }
+                                                    }">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="member_ids[]" value="{{ auth()->id() }}">
+                                                    
+                                                    <div class="relative">
+                                                        <input type="text" x-model="search" class="block w-full rounded-md border-0 py-1.5 pl-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="{{ __('Search by name or email...') }}">
+                                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                                            <svg class="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Selected Tags -->
+                                                    <div class="flex flex-wrap gap-2" x-show="selected.length > 0">
+                                                        <template x-for="user in selectedUsers" :key="user.id">
+                                                            <span class="inline-flex items-center gap-x-0.5 rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
+                                                                <span x-text="user.name"></span>
+                                                                <button type="button" @click="toggle(user.id)" class="group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-indigo-600/20">
+                                                                    <span class="sr-only">Remove</span>
+                                                                    <svg viewBox="0 0 14 14" class="h-3.5 w-3.5 stroke-indigo-700/50 group-hover:stroke-indigo-700/75">
+                                                                        <path d="M4 4l6 6m0-6l-6 6" />
+                                                                    </svg>
+                                                                </button>
+                                                                <input type="hidden" name="member_ids[]" :value="user.id">
+                                                            </span>
+                                                        </template>
+                                                        <span class="text-xs text-slate-500 self-center" x-show="selected.length > 0">
+                                                            <span x-text="selected.length"></span> {{ __('selected') }}
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- User List -->
+                                                    <div class="max-h-60 overflow-y-auto rounded-md border border-slate-200 bg-white shadow-sm custom-scrollbar">
+                                                        <template x-for="user in filteredUsers" :key="user.id">
+                                                            <div @click="toggle(user.id)" class="relative flex cursor-pointer select-none items-center px-4 py-3 hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                                                                <div class="flex h-5 items-center">
+                                                                    <input type="checkbox" :checked="selected.includes(user.id)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600">
+                                                                </div>
+                                                                <div class="ml-3 text-sm leading-6">
+                                                                    <label class="font-medium text-slate-900" x-text="user.name"></label>
+                                                                    <p class="text-slate-500" x-text="user.email"></p>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <div x-show="filteredUsers.length === 0" class="p-8 text-center">
+                                                            <svg class="mx-auto h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                                            </svg>
+                                                            <p class="mt-2 text-sm text-slate-500">{{ __('No members found.') }}</p>
+                                                            <button type="button" @click="search = ''" class="mt-1 text-sm text-indigo-600 hover:text-indigo-500">{{ __('View all members') }}</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 rounded-b-lg -mx-6 -mb-6 mt-4 border-t border-slate-100">
+                                                        <button type="submit" class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto">{{ __('Save Changes') }}</button>
+                                                        <button type="button" @click="showGroupSettings = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:mt-0 sm:w-auto">{{ __('Cancel') }}</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            @if ($canDeleteGroup)
+                                                <div class="border-t border-slate-100 pt-6 mt-6">
+                                                    <div class="rounded-md bg-red-50 p-4">
+                                                        <div class="flex">
+                                                            <div class="flex-shrink-0">
+                                                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                            <div class="ml-3">
+                                                                <h3 class="text-sm font-medium text-red-800">{{ __('Delete Group') }}</h3>
+                                                                <div class="mt-2 text-sm text-red-700">
+                                                                    <p>{{ __('Once you delete a group, there is no going back. Please be certain.') }}</p>
+                                                                </div>
+                                                                <div class="mt-4">
+                                                                    <form method="POST" action="{{ route('chat-groups.destroy', $activeTarget) }}">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="rounded-md bg-red-50 px-2.5 py-1.5 text-sm font-semibold text-red-800 shadow-sm hover:bg-red-100 ring-1 ring-inset ring-red-300">{{ __('Delete this group') }}</button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     @endif
 
@@ -174,10 +391,10 @@
                         @csrf
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
                             <textarea id="composer" name="body" rows="2" class="w-full rounded-xl border-slate-200 text-sm" placeholder="{{ __('Type a message...') }}">{{ old('body') }}</textarea>
-                            <button id="composer-submit" type="submit" class="btn-primary sm:shrink-0">{{ __('Send') }}</button>
+                            <button id="composer-submit" type="submit" class="btn-primary sm:shrink-0 text-xs py-1.5 px-4 h-fit">{{ __('Send') }}</button>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input id="composer-attachment" type="file" name="attachment" class="w-full text-xs text-slate-500 file:mr-2 file:rounded-full file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-slate-700">
+                            <input id="composer-attachment" type="file" name="attachment" class="w-full text-xs text-slate-500 file:mr-2 file:rounded-full file:border-0 file:bg-slate-900 file:px-2.5 file:py-1 file:text-[10px] file:font-semibold file:text-white hover:file:bg-slate-700">
                         </div>
                         @error('body')
                             <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
@@ -212,10 +429,10 @@
                         <p id="call-status-text" class="text-xs text-slate-500 mt-1"></p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button type="button" id="accept-call" class="btn-primary text-xs hidden">{{ __('Accept') }}</button>
-                        <button type="button" id="reject-call" class="btn-secondary text-xs hidden">{{ __('Reject') }}</button>
-                        <button type="button" id="end-call" class="btn-secondary text-xs hidden">{{ __('End') }}</button>
-                        <button type="button" id="close-call" class="btn-secondary text-xs">{{ __('Close') }}</button>
+                        <button type="button" id="accept-call" class="btn-primary text-xs py-1.5 px-3 hidden">{{ __('Accept') }}</button>
+                        <button type="button" id="reject-call" class="btn-secondary text-xs py-1.5 px-3 hidden">{{ __('Reject') }}</button>
+                        <button type="button" id="end-call" class="btn-secondary text-xs py-1.5 px-3 hidden">{{ __('End') }}</button>
+                        <button type="button" id="close-call" class="btn-secondary text-xs py-1.5 px-3">{{ __('Close') }}</button>
                     </div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-3 p-4 bg-slate-50">
@@ -1000,4 +1217,5 @@
             })();
         </script>
     @endif
+    </div>
 </x-app-layout>

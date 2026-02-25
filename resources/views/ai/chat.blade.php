@@ -1,4 +1,5 @@
 <x-app-layout>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
             <div>
@@ -12,10 +13,20 @@
     <div class="card-strong p-0 overflow-hidden {{ request()->query('popup') ? 'h-screen rounded-none border-0 flex flex-col' : '' }}">
         <div class="grid md:grid-cols-12 {{ request()->query('popup') ? 'flex-1 overflow-hidden' : 'min-h-[70vh]' }}">
             <section class="md:col-span-8 p-4 flex flex-col border-b md:border-b-0 md:border-r border-slate-100 {{ request()->query('popup') ? 'flex-1 min-h-0' : 'min-h-[55vh]' }}">
-                <div id="ai-feed" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                <div id="ai-feed" class="flex-1 overflow-y-auto space-y-3 pr-1 scroll-smooth">
                     <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                         {{ __('Xin chào! Bạn có thể hỏi về kế hoạch công việc, phân chia task, rủi ro deadline, hoặc gợi ý nội dung trao đổi trong nhóm.') }}
                     </div>
+                    @foreach($messages as $msg)
+                        <div class="flex justify-end">
+                            <div class="max-w-[92%] md:max-w-[78%] rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap bg-slate-900 text-white">{{ $msg->user_message }}</div>
+                        </div>
+                        <div class="flex justify-start">
+                            <div class="max-w-[92%] md:max-w-[78%] rounded-2xl px-4 py-2 text-sm bg-slate-100 text-slate-800 prose prose-sm prose-slate max-w-none break-words">
+                                {!! \Illuminate\Support\Str::markdown($msg->ai_response) !!}
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
 
                 <form id="ai-form" class="mt-3 border-t border-slate-100 pt-3">
@@ -86,35 +97,35 @@
 
             const addBubble = (text, mine = false, typewriter = false) => {
                 const row = document.createElement('div');
-                row.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
+                row.className = `flex w-full mb-4 ${mine ? 'justify-end' : 'justify-start'}`;
 
                 const bubble = document.createElement('div');
-                bubble.className = `max-w-[92%] md:max-w-[78%] rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap ${mine ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`;
+                bubble.className = `max-w-[92%] md:max-w-[78%] rounded-2xl px-4 py-2 text-sm ${mine ? 'bg-slate-900 text-white whitespace-pre-wrap' : 'bg-slate-100 text-slate-800 prose prose-sm prose-slate max-w-none break-words'}`;
                 
-                if (typewriter && !mine) {
-                    bubble.textContent = '';
-                    row.appendChild(bubble);
-                    feed?.appendChild(row);
-                    
-                    let i = 0;
-                    const speed = 15; // ms per character
-                    
-                    const typeWriterEffect = () => {
-                        if (i < text.length) {
-                            bubble.textContent += text.charAt(i);
-                            i++;
-                            if (feed) feed.scrollTop = feed.scrollHeight;
-                            setTimeout(typeWriterEffect, speed);
-                        }
-                    };
-                    typeWriterEffect();
-                } else {
+                if (mine) {
                     bubble.textContent = text;
                     row.appendChild(bubble);
                     feed?.appendChild(row);
-                    if (feed) {
-                        feed.scrollTop = feed.scrollHeight;
+                } else {
+                    if (typeof window.marked !== 'undefined' && typeof window.marked.parse === 'function') {
+                        bubble.innerHTML = window.marked.parse(text);
+                    } else {
+                        bubble.textContent = text;
                     }
+                    row.appendChild(bubble);
+                    feed?.appendChild(row);
+                }
+                
+                if (typewriter && !mine) {
+                    bubble.style.opacity = '0';
+                    bubble.style.transition = 'opacity 0.4s ease-out';
+                    requestAnimationFrame(() => {
+                        bubble.style.opacity = '1';
+                    });
+                }
+                
+                if (feed) {
+                    feed.scrollTop = feed.scrollHeight;
                 }
             };
 

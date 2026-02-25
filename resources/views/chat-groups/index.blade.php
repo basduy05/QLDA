@@ -1,4 +1,11 @@
 <x-app-layout>
+    @if(request()->query('popup'))
+        <style>
+            nav, header { display: none !important; }
+            main { padding-top: 0 !important; }
+            .min-h-screen { background: white !important; }
+        </style>
+    @endif
     <x-slot name="header">
         <div>
             <p class="text-sm text-slate-500">{{ __('Communication') }}</p>

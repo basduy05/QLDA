@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AiMessage;
 use App\Models\AppSetting;
 use App\Models\Project;
 use App\Models\User;
@@ -19,6 +20,15 @@ class AiAssistantController extends Controller
         $user = Auth::user();
         $hasApiKey = filled(AppSetting::getValue('ai.gemini_api_key'));
 
+        // Delete messages older than 24 hours
+        AiMessage::where('created_at', '<', now()->subHours(24))->delete();
+
+        // Retrieve messages from the last 24 hours
+        $messages = AiMessage::where('user_id', $user->id)
+            ->where('created_at', '>=', now()->subHours(24))
+            ->orderBy('created_at', 'asc')
+            ->get();
+
         return view('ai.chat', [
             'projects' => $this->availableProjects($user),
             'quickPrompts' => $this->quickPrompts(app()->getLocale()),
@@ -26,6 +36,7 @@ class AiAssistantController extends Controller
             'hasApiKey' => $hasApiKey,
             'isAdmin' => $user->isAdmin(),
             'taskSuggestions' => $this->buildGeneralTaskSuggestions(),
+            'messages' => $messages,
         ]);
     }
 
@@ -145,6 +156,14 @@ class AiAssistantController extends Controller
                 'message' => __('AI returned an empty response.'),
             ], 503);
         }
+
+        // Store the message and response
+        AiMessage::create([
+            'user_id' => $user->id,
+            'project_id' => $data['project_id'] ?? null,
+            'user_message' => $message,
+            'ai_response' => $reply,
+        ]);
 
         return response()->json([
             'ok' => true,

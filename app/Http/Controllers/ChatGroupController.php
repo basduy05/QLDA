@@ -60,7 +60,7 @@ class ChatGroupController extends Controller
 
         $group->members()->sync($memberIds);
 
-        return redirect()->route('messenger.group', $group)
+        return redirect()->route('messenger.group', ['chatGroup' => $group, 'popup' => $request->query('popup')])
             ->with('status', __('Group created successfully.'));
     }
 
@@ -107,10 +107,15 @@ class ChatGroupController extends Controller
         return back()->with('status', __('Nickname updated.'));
     }
 
-    public function destroy(ChatGroup $chatGroup): RedirectResponse
+    public function destroy(Request $request, ChatGroup $chatGroup): RedirectResponse
     {
         $this->ensureManagePermission($chatGroup);
         $chatGroup->delete();
+
+        if ($request->has('from_messenger')) {
+            return redirect()->route('messenger.index')
+                ->with('status', __('Group deleted.'));
+        }
 
         return redirect()->route('chat-groups.index')
             ->with('status', __('Group deleted.'));
