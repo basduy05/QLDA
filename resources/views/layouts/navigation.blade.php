@@ -68,7 +68,7 @@
             <a class="nav-pill block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
             @if (Auth::user()?->isAdmin())
                 <a class="nav-pill block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
-                <a class="nav-pill block" href="{{ route('admin.settings.ai.edit') }}">{{ __('AI Settings') }}</a>
+                <a class="nav-pill block" href="{{ route('admin.settings.ai.edit') }}">{{ __('Settings') }}</a>
             @endif
             <a class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
             <div class="pt-2">

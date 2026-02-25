@@ -29,7 +29,7 @@ class TaskController extends Controller
         : Project::where('owner_id', $user->id)
             ->orWhereHas('members', function ($q) use ($user) {
                 $q->where('users.id', $user->id)
-                  ->whereIn('role', [Project::ROLE_LEAD, Project::ROLE_DEPUTY]);
+                  ->whereIn('project_members.role', [Project::ROLE_LEAD, Project::ROLE_DEPUTY]);
             })
             ->select('id', 'name')
             ->orderBy('name')
