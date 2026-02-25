@@ -80,12 +80,30 @@
         </div>
     </div>
 
+    @php
+        $trendSource = collect($taskTrendData ?? []);
+        $trendLabels = $trendSource->pluck('label')->values();
+        $trendCreated = $trendSource->pluck('created')->map(fn ($value) => (int) $value)->values();
+        $trendCompleted = $trendSource->pluck('completed')->map(fn ($value) => (int) $value)->values();
+
+        $statusSource = collect($taskStatusData ?? []);
+        $statusLabels = $statusSource->pluck('label')->values();
+        $statusValues = $statusSource->pluck('value')->map(fn ($value) => (int) $value)->values();
+    @endphp
+
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script>
-        // Store data as window variables
-        window.tasksTrendData = <?php echo json_encode($tasksTrend); ?>;
-        window.taskStatusData = <?php echo json_encode($taskStatusDistribution); ?>;
+        window.tasksTrendData = {
+            labels: <?php echo json_encode($trendLabels); ?>,
+            created: <?php echo json_encode($trendCreated); ?>,
+            completed: <?php echo json_encode($trendCompleted); ?>,
+        };
+
+        window.taskStatusData = {
+            labels: <?php echo json_encode($statusLabels); ?>,
+            values: <?php echo json_encode($statusValues); ?>,
+        };
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
