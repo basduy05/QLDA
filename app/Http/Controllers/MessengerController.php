@@ -221,7 +221,7 @@ class MessengerController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        return redirect()->route('messenger.direct', $contact);
+        return redirect()->route('messenger.direct', ['contact' => $contact, 'popup' => $request->query('popup')]);
     }
 
     public function sendGroup(Request $request, ChatGroup $chatGroup)
@@ -296,7 +296,7 @@ class MessengerController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        return redirect()->route('messenger.group', $chatGroup);
+        return redirect()->route('messenger.group', ['chatGroup' => $chatGroup, 'popup' => $request->query('popup')]);
     }
 
     public function typing(User $contact)
@@ -350,7 +350,7 @@ class MessengerController extends Controller
             ])
         );
 
-        return redirect()->route('messenger.group', $chatGroup)
+        return redirect()->route('messenger.group', ['chatGroup' => $chatGroup, 'popup' => $request->query('popup')])
             ->with('status', __('Group name updated.'));
     }
 
@@ -393,7 +393,7 @@ class MessengerController extends Controller
             );
         }
 
-        return redirect()->route('messenger.group', $chatGroup)
+        return redirect()->route('messenger.group', ['chatGroup' => $chatGroup, 'popup' => $request->query('popup')])
             ->with('status', __('Group nickname updated.'));
     }
 
@@ -452,7 +452,7 @@ class MessengerController extends Controller
             );
         }
 
-        return redirect()->route('messenger.group', $chatGroup)
+        return redirect()->route('messenger.group', ['chatGroup' => $chatGroup, 'popup' => $request->query('popup')])
             ->with('status', __('Group members updated.'));
     }
 

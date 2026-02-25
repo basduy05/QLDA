@@ -68,7 +68,7 @@ class ChatGroupController extends Controller
     {
         $this->ensureAccess($chatGroup);
 
-        return redirect()->route('messenger.group', $chatGroup);
+        return redirect()->route('messenger.group', ['chatGroup' => $chatGroup, 'popup' => request()->query('popup')]);
     }
 
     public function messages(ChatGroup $chatGroup)
@@ -113,7 +113,7 @@ class ChatGroupController extends Controller
         $chatGroup->delete();
 
         if ($request->has('from_messenger')) {
-            return redirect()->route('messenger.index')
+            return redirect()->route('messenger.index', ['popup' => $request->query('popup')])
                 ->with('status', __('Group deleted.'));
         }
 

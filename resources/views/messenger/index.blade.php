@@ -168,7 +168,7 @@
                     >
                     <div x-show="search.length > 0 && results.length > 0" class="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto" style="display: none;">
                         <template x-for="person in results" :key="person.id">
-                            <a :href="`{{ route('messenger.index') }}/direct/${person.id}`" class="block px-3 py-2 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left cursor-pointer z-50 relative">
+                            <a :href="`{{ route('messenger.index') }}/direct/${person.id}{{ request()->query('popup') ? '?popup=1' : '' }}`" class="block px-3 py-2 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left cursor-pointer z-50 relative">
                                 <p class="font-semibold text-sm text-slate-900" x-text="person.name"></p>
                                 <p class="text-xs text-slate-500" x-text="person.email"></p>
                             </a>
@@ -265,7 +265,7 @@
                                      x-transition:leave="ease-in duration-200"
                                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                                     class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full sm:my-8 sm:w-full sm:max-w-lg">
+                                     class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full sm:my-8 sm:w-full sm:max-w-2xl">
                                     
                                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                         <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
@@ -277,9 +277,9 @@
                                             </button>
                                         </div>
 
-                                        <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
+                                        <div class="space-y-4 pr-1">
                                             <!-- Rename Group -->
-                                            <form method="POST" action="{{ route('messenger.group.rename', $activeTarget) }}">
+                                            <form method="POST" action="{{ route('messenger.group.rename', ['chatGroup' => $activeTarget, 'popup' => request()->query('popup')]) }}">
                                                 @csrf
                                                 @method('PATCH')
                                                 <label for="group-name" class="block text-sm font-medium leading-6 text-slate-900">{{ __('Group Name') }}</label>
@@ -294,7 +294,7 @@
                                             <!-- Members Management -->
                                             <div class="border-t border-slate-100 pt-4">
                                                 <h4 class="text-sm font-medium leading-6 text-slate-900 mb-2">{{ __('Manage Members') }}</h4>
-                                                <form method="POST" action="{{ route('messenger.group.members', $activeTarget) }}" 
+                                                <form method="POST" action="{{ route('messenger.group.members', ['chatGroup' => $activeTarget, 'popup' => request()->query('popup')]) }}" 
                                                     class="space-y-4"
                                                     x-data="{
                                                         search: '',
@@ -358,7 +358,7 @@
                                                                 <div class="flex h-5 items-center">
                                                                     <input type="checkbox" :checked="selected.includes(user.id)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600">
                                                                 </div>
-                                                                <div class="ml-3 text-sm leading-6">
+                                                                <div class="ml-6 text-sm leading-6"> <!-- Increased ml-3 to ml-6 -->
                                                                     <label class="font-medium text-slate-900" x-text="user.name"></label>
                                                                     <p class="text-slate-500" x-text="user.email"></p>
                                                                 </div>
@@ -373,9 +373,9 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 rounded-b-lg -mx-6 -mb-6 mt-4 border-t border-slate-100">
-                                                        <button type="submit" class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto">{{ __('Save Changes') }}</button>
-                                                        <button type="button" @click="showGroupSettings = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:mt-0 sm:w-auto">{{ __('Cancel') }}</button>
+                                                    <div class="bg-gray-50 px-4 py-3 flex items-center justify-end gap-3 rounded-lg mt-4 border border-slate-100">
+                                                        <button type="button" @click="showGroupSettings = false" class="inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">{{ __('Cancel') }}</button>
+                                                        <button type="submit" class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">{{ __('Save Changes') }}</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -395,7 +395,7 @@
                                                                     <p>{{ __('Once you delete a group, there is no going back. Please be certain.') }}</p>
                                                                 </div>
                                                                 <div class="mt-4">
-                                                                    <form method="POST" action="{{ route('chat-groups.destroy', $activeTarget) }}">
+                                                                    <form method="POST" action="{{ route('chat-groups.destroy', ['chatGroup' => $activeTarget, 'popup' => request()->query('popup')]) }}">
                                                                         @csrf
                                                                         @method('DELETE')
                                                                         <button type="submit" class="rounded-md bg-red-50 px-2.5 py-1.5 text-sm font-semibold text-red-800 shadow-sm hover:bg-red-100 ring-1 ring-inset ring-red-300">{{ __('Delete this group') }}</button>
@@ -422,7 +422,7 @@
                         @endif
                     </div>
 
-                    <form id="composer-form" method="POST" enctype="multipart/form-data" action="{{ $activeType === 'direct' ? route('messenger.send-direct', $activeTarget) : route('messenger.send-group', $activeTarget) }}" class="pt-2 border-t border-slate-100 bg-white/70 backdrop-blur rounded-2xl px-2 pb-2 space-y-2">
+                    <form id="composer-form" method="POST" enctype="multipart/form-data" action="{{ $activeType === 'direct' ? route('messenger.send-direct', ['contact' => $activeTarget, 'popup' => request()->query('popup')]) : route('messenger.send-group', ['chatGroup' => $activeTarget, 'popup' => request()->query('popup')]) }}" class="pt-2 border-t border-slate-100 bg-white/70 backdrop-blur rounded-2xl px-2 pb-2 space-y-2">
                         @csrf
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
                             <textarea id="composer" name="body" rows="2" class="w-full rounded-xl border-slate-200 text-sm" placeholder="{{ __('Type a message...') }}">{{ old('body') }}</textarea>
