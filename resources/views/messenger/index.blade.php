@@ -304,7 +304,7 @@
                                                     x-data="{
                                                         search: '',
                                                         selected: {{ Js::from($groupMemberIds) }},
-                                                        users: {{ Js::from($contacts->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])->merge($groupMembers->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email]))->unique('id')->values()) }},
+                                                        users: {{ Js::from($contacts->toBase()->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email])->merge($groupMembers->toBase()->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email]))->unique('id')->values()) }},
                                                         toggle(id) {
                                                             if (this.selected.includes(id)) {
                                                                 this.selected = this.selected.filter(i => i !== id);

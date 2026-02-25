@@ -211,41 +211,38 @@ class AiAssistantController extends Controller
 
     private function buildProjectContext(Project $project): string
     {
-        $tasks = $project->tasks;
+        $tasks = $project->tasks()->with(['assignee'])->get();
         $total = $tasks->count();
-        $done = $tasks->where('status', 'done')->count();
-        $inProgress = $tasks->where('status', 'in_progress')->count();
-        $todo = $tasks->where('status', 'todo')->count();
+        $done = $tasks->where('status', 'done');
+        $inProgress = $tasks->where('status', 'in_progress');
+        $todo = $tasks->where('status', 'todo');
         $overdue = $tasks->filter(function ($task) {
             return $task->due_date && $task->due_date->isPast() && $task->status !== 'done';
-        })->count();
+        });
 
-        $taskLines = $tasks
-            ->sortBy(function ($task) {
-                return $task->due_date?->timestamp ?? PHP_INT_MAX;
-            })
-            ->take(15)
-            ->map(function ($task) {
-                $due = $task->due_date?->format('Y-m-d') ?? 'none';
-                $assignee = $task->assignee?->name ?? 'unassigned';
-                return sprintf(
-                    '- %s | status=%s | priority=%s | due=%s | assignee=%s',
-                    Str::limit((string) $task->title, 70),
-                    $task->status,
-                    $task->priority,
-                    $due,
-                    $assignee
-                );
-            })
-            ->implode("\n");
+        $formatTask = function ($t) {
+            $due = $t->due_date ? $t->due_date->format('Y-m-d') : 'none';
+            $assignee = $t->assignee ? $t->assignee->name : 'unassigned';
+            return "- [{$t->id}] {$t->title} (Status: {$t->status}, Priority: {$t->priority}, Due: {$due}, Assignee: {$assignee})";
+        };
 
-        return "Project: {$project->name}\nStatus: {$project->status}\nTask summary: total={$total}, done={$done}, in_progress={$inProgress}, todo={$todo}, overdue={$overdue}\nKey tasks:\n{$taskLines}";
+        $doneSummary = $done->take(10)->map($formatTask)->implode("\n");
+        $inProgressSummary = $inProgress->map($formatTask)->implode("\n");
+        $todoSummary = $todo->take(20)->map($formatTask)->implode("\n");
+
+        return "Project: {$project->name}\n" .
+               "Status: {$project->status}\n" .
+               "Overview: Total={$total}, Done={$done->count()}, In Progress={$inProgress->count()}, Todo={$todo->count()}, Overdue={$overdue->count()}\n\n" .
+               "Tasks In Progress:\n{$inProgressSummary}\n\n" .
+               "Tasks To Do (Top 20):\n{$todoSummary}\n\n" .
+               "Recently Completed (Top 10):\n{$doneSummary}";
     }
 
     private function buildGeneralContext(User $user): string
     {
-        // Get all projects user has access to
-        $projectsQuery = Project::query();
+        // 1. Projects Access (Owned + Member)
+        $projectsQuery = Project::query()->withCount(['tasks', 'members']);
+        
         if (! $user->isAdmin()) {
             $projectsQuery->where(function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
@@ -255,30 +252,35 @@ class AiAssistantController extends Controller
             });
         }
         
-        $projects = $projectsQuery->withCount(['tasks', 'members'])->limit(10)->get();
+        $projects = $projectsQuery->orderByDesc('created_at')->limit(30)->get();
 
-        $projectSummary = $projects->map(function ($p) {
-            return "- {$p->name} ({$p->status}): {$p->tasks_count} tasks, {$p->members_count} members.";
+        $projectSummary = $projects->map(function ($p) use ($user) {
+            $role = ($p->owner_id == $user->id) ? 'Owner' : 'Member';
+            return "- {$p->name} [ID:{$p->id}] (Status: {$p->status}, Role: {$role}): {$p->tasks_count} tasks.";
         })->implode("\n");
 
-        // Get urgent tasks assigned to user across all projects
-        $urgentTasks = \App\Models\Task::where('assignee_id', $user->id)
-            ->whereIn('status', ['todo', 'in_progress'])
-            ->where(function ($q) {
-                $q->where('priority', 'high')
-                  ->orWhere('due_date', '<=', now()->addDays(3));
-            })
-            ->with('project')
+        // 2. User's Task Workload (Assigned to Me)
+        $myTasks = \App\Models\Task::where('assignee_id', $user->id)
+            ->with('project:id,name')
+            ->orderByRaw("FIELD(status, 'in_progress', 'todo', 'done')")
             ->orderBy('due_date')
-            ->limit(5)
+            ->limit(50)
             ->get();
-            
-        $taskSummary = $urgentTasks->map(function ($t) {
-            $due = $t->due_date?->format('Y-m-d') ?? 'none';
-            return "- [{$t->project->name}] {$t->title} (Priority: {$t->priority}, Due: {$due})";
-        })->implode("\n");
 
-        return "User: {$user->name} (Role: {$user->role})\n\nActive Projects Summary:\n{$projectSummary}\n\nUrgent Tasks for User:\n{$taskSummary}";
+        $groupedTasks = $myTasks->groupBy('status');
+
+        $formatMyTask = fn($t) => "- [{$t->project->name}] {$t->title} (Priority: {$t->priority}, Due: " . ($t->due_date?->format('Y-m-d') ?? 'none') . ")";
+
+        $inProgressTasks = $groupedTasks->get('in_progress', collect())->map($formatMyTask)->implode("\n");
+        $todoTasks = $groupedTasks->get('todo', collect())->map($formatMyTask)->implode("\n");
+        $doneTasks = $groupedTasks->get('done', collect())->map($formatMyTask)->implode("\n");
+
+        return "User: {$user->name} (Global Role: {$user->role})\n\n" .
+               "=== AVAILABLE PROJECTS (Top 30) ===\n{$projectSummary}\n\n" .
+               "=== MY ASSIGNED TASKS ===\n" .
+               "--- IN PROGRESS ---\n{$inProgressTasks}\n\n" .
+               "--- TO DO ---\n{$todoTasks}\n\n" .
+               "--- RECENTLY COMPLETED ---\n{$doneTasks}";
     }
 
     private function buildPrompt(User $user, string $userMessage, ?string $contextData, string $locale): string
