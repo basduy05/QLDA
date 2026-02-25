@@ -7,27 +7,29 @@
 
         <title>{{ config('app.name', 'QhorizonPM') }}</title>
 
+        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,600,700|fraunces:400,600,700&display=swap" rel="stylesheet" />
 
+        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen page-shell">
+    <body class="antialiased">
+        <div class="page-shell">
             @include('layouts.navigation')
 
+            <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white/90 border-b border-slate-200 backdrop-blur-sm">
-                    <div class="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+                <header class="bg-white/80 backdrop-blur border-b border-slate-100">
+                    <div class="w-full py-6 px-4 md:px-6 xl:px-10">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
-            <main>
-                <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    {{ $slot }}
-                </div>
+            <!-- Page Content -->
+            <main class="w-full px-4 md:px-6 xl:px-10 py-8 md:py-10">
+                {{ $slot }}
             </main>
         </div>
 
@@ -89,11 +91,12 @@
         <script>
             document.addEventListener('submit', function (event) {
                 const form = event.target;
-                if (!form.dataset.confirm) {
+                const message = form?.dataset?.confirm;
+                if (!message) {
                     return;
                 }
 
-                if (!confirm(form.dataset.confirm)) {
+                if (!confirm(message)) {
                     event.preventDefault();
                 }
             });

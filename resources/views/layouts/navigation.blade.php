@@ -1,83 +1,59 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-slate-800 dark:text-slate-200" />
+<nav x-data="{ open: false }" class="bg-white/80 backdrop-blur border-b border-slate-100">
+    <div class="w-full px-4 md:px-6 xl:px-10">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('dashboard') }}" class="text-lg font-semibold text-slate-800">QhorizonPM</a>
+                <div class="hidden md:flex items-center gap-2 text-sm font-medium text-slate-600">
+                    <a href="{{ route('dashboard') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}" title="{{ __('Dashboard') }}" aria-label="{{ __('Dashboard') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
                     </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
-                        {{ __('Projects') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.index')">
-                        {{ __('Tasks') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('messenger.index')" :active="request()->routeIs('messenger.*')">
-                        {{ __('Messenger') }}
-                    </x-nav-link>
+                    <a href="{{ route('projects.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('projects.*') ? 'nav-pill-active' : '' }}" title="{{ __('Projects') }}" aria-label="{{ __('Projects') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
+                    </a>
+                    <a href="{{ route('tasks.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('tasks.index') ? 'nav-pill-active' : '' }}" title="{{ __('Tasks') }}" aria-label="{{ __('Tasks') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    </a>
+                    <a href="{{ route('messenger.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('messenger.*') ? 'nav-pill-active' : '' }}" title="{{ __('Messenger') }}" aria-label="{{ __('Messenger') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z"/></svg>
+                    </a>
                     @if (Auth::user()?->isAdmin())
-                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                            {{ __('Users') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.settings.ai.edit')" :active="request()->routeIs('admin.settings.ai.*')">
-                            {{ __('Settings') }}
-                        </x-nav-link>
+                        <a href="{{ route('admin.users.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.users.*') ? 'nav-pill-active' : '' }}" title="{{ __('Users') }}" aria-label="{{ __('Users') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+                        </a>
+                        <a href="{{ route('admin.settings.ai.edit') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.settings.ai.*') ? 'nav-pill-active' : '' }}" title="{{ __('AI Settings') }}" aria-label="{{ __('AI Settings') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4"/><path d="m16.24 7.76 2.83-2.83"/><path d="M18 12h4"/><path d="m16.24 16.24 2.83 2.83"/><path d="M12 18v4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M2 12h4"/><path d="m4.93 4.93 2.83 2.83"/><circle cx="12" cy="12" r="4"/></svg>
+                        </a>
                     @endif
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
-
-                <div class="nav-lang mr-4" aria-label="{{ __('Locale') }}">
+            <div class="hidden md:flex items-center gap-2">
+                <a href="{{ route('notifications.index') }}" class="nav-action-btn" title="{{ __('Notifications') }}" aria-label="{{ __('Notifications') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    @php($unreadCount = Auth::user()?->unreadNotificationsCountSafe() ?? 0)
+                    <span id="nav-unread-count" class="absolute -top-2 -right-3 text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full {{ $unreadCount > 0 ? '' : 'hidden' }}">{{ $unreadCount }}</span>
+                </a>
+                <div class="nav-lang" aria-label="{{ __('Locale') }}">
                     <a href="{{ route('lang.switch', 'vi') }}" class="nav-lang-btn {{ app()->getLocale() === 'vi' ? 'nav-lang-btn-active' : '' }}">VI</a>
                     <a href="{{ route('lang.switch', 'en') }}" class="nav-lang-btn {{ app()->getLocale() === 'en' ? 'nav-lang-btn-active' : '' }}">EN</a>
                 </div>
-
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
-
-                            <div class="ml-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                <div class="flex items-center gap-2">
+                    <span class="nav-profile-chip">
+                        {{ Auth::user()->name }}
+                    </span>
+                    <a href="{{ route('profile.edit') }}" class="btn-secondary h-9 text-xs !px-3">{{ __('Profile') }}</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn-secondary h-9 text-xs !px-3">{{ __('Log Out') }}</button>
+                    </form>
+                </div>
             </div>
 
-            <!-- Hamburger -->
-            <div class="-mr-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 dark:text-slate-500 hover:text-slate-500 dark:hover:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 focus:outline-none focus:bg-slate-100 dark:focus:bg-slate-900 focus:text-slate-500 dark:focus:text-slate-400 transition duration-150 ease-in-out">
+            <div class="md:hidden">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-slate-700">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -87,55 +63,28 @@
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
-                {{ __('Projects') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.index')">
-                {{ __('Tasks') }}
-            </x-responsive-nav-link>
-             <x-responsive-nav-link :href="route('messenger.index')" :active="request()->routeIs('messenger.*')">
-                {{ __('Messenger') }}
-            </x-responsive-nav-link>
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden md:hidden border-t border-slate-100 bg-white">
+        <div class="px-6 py-4 space-y-2 text-sm text-slate-600">
+            <a class="nav-pill block" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
+            <a class="nav-pill block" href="{{ route('projects.index') }}">{{ __('Projects') }}</a>
+            <a class="nav-pill block" href="{{ route('tasks.index') }}">{{ __('Tasks') }}</a>
+            <a class="nav-pill block" href="{{ route('messenger.index') }}">{{ __('Messenger') }}</a>
+            <a class="nav-pill block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
             @if (Auth::user()?->isAdmin())
-                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                    {{ __('Users') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.settings.ai.edit')" :active="request()->routeIs('admin.settings.ai.*')">
-                    {{ __('Settings') }}
-                </x-responsive-nav-link>
+                <a class="nav-pill block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
+                <a class="nav-pill block" href="{{ route('admin.settings.ai.edit') }}">{{ __('AI Settings') }}</a>
             @endif
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-slate-200 dark:border-slate-600">
-            <div class="px-4">
-                <div class="font-medium text-base text-slate-800 dark:text-slate-200">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-slate-500">{{ Auth::user()->email }}</div>
+            <a class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
+            <div class="pt-2">
+                <div class="nav-lang">
+                    <a href="{{ route('lang.switch', 'vi') }}" class="nav-lang-btn {{ app()->getLocale() === 'vi' ? 'nav-lang-btn-active' : '' }}">VI</a>
+                    <a href="{{ route('lang.switch', 'en') }}" class="nav-lang-btn {{ app()->getLocale() === 'en' ? 'nav-lang-btn-active' : '' }}">EN</a>
+                </div>
             </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-            </div>
+            <form method="POST" action="{{ route('logout') }}" class="pt-2">
+                @csrf
+                <button type="submit" class="text-left text-slate-600">{{ __('Log Out') }}</button>
+            </form>
         </div>
     </div>
 </nav>
-
