@@ -93,7 +93,6 @@ class DashboardController extends Controller
 
         $months = collect(range(5, 0, -1))
             ->map(fn (int $offset) => now()->startOfMonth()->subMonths($offset))
-            ->push(now()->startOfMonth())
             ->values();
 
         $taskTrendData = $months->map(function (Carbon $month) use ($taskQuery) {

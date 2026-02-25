@@ -3,7 +3,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">{{ __('Workspace') }}</p>
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight">{{ __('Tasks') }}</h2>
+                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">{{ __('Tasks') }}</h2>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ route('exports.tasks') }}" class="btn-secondary inline-flex items-center gap-2">
@@ -16,16 +16,34 @@
 
     <div class="card-strong overflow-hidden">
         <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <form method="GET" action="{{ route('tasks.index') }}" class="relative w-full sm:max-w-xs">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+            <form method="GET" action="{{ route('tasks.index') }}" class="w-full flex flex-col sm:flex-row gap-3 sm:items-center">
+                <div class="relative w-full sm:max-w-xs">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search tasks...') }}" class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent sm:text-sm transition-shadow">
                 </div>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search tasks...') }}" class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent sm:text-sm transition-shadow">
+
+                <select name="project_id" class="w-full sm:w-64 px-3 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent">
+                    <option value="">{{ __('All projects') }}</option>
+                    @foreach ($projectsFilter as $projectOption)
+                        <option value="{{ $projectOption->id }}" @selected((string) request('project_id') === (string) $projectOption->id)>
+                            {{ $projectOption->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="btn-secondary h-10 !px-4">{{ __('Filter') }}</button>
+                    @if(request()->filled('search') || request()->filled('project_id'))
+                        <a href="{{ route('tasks.index') }}" class="btn-secondary h-10 !px-4">{{ __('Clear') }}</a>
+                    @endif
+                </div>
             </form>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full text-sm whitespace-nowrap">
+            <table class="min-w-full text-sm">
                 <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold">
                     <tr>
                         <th class="px-6 py-4 text-left">{{ __('Task') }}</th>
@@ -117,16 +135,13 @@
                                         $isOverdue = $task->due_date->isPast() && $task->status !== 'done';
                                         $isDueSoon = $task->due_date->isFuture() && $task->due_date->diffInDays(now()) <= 2 && $task->status !== 'done';
                                     @endphp
-                                    <div class="flex items-center gap-1.5 {{ $isOverdue ? 'text-rose-600 font-medium' : ($isDueSoon ? 'text-amber-600 font-medium' : '') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                        <span>{{ $task->due_date->format('d/m/Y') }}</span>
-                                    </div>
+                                    <span class="{{ $isOverdue ? 'text-rose-600 font-medium' : ($isDueSoon ? 'text-amber-600 font-medium' : '') }}">{{ $task->due_date->format('d/m/Y') }}</span>
                                 @else
                                     <span class="text-slate-400">—</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <a href="{{ route('tasks.show', $task) }}" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-accent hover:bg-accent/5 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100" title="{{ __('Open') }}">
+                                <a href="{{ route('tasks.show', $task) }}" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-accent hover:bg-accent/5 transition-colors" title="{{ __('Open') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                                 </a>
                             </td>
@@ -139,8 +154,8 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                                     </div>
                                     <h3 class="text-sm font-medium text-slate-900 mb-1">{{ __('No tasks found') }}</h3>
-                                    <p class="text-sm text-slate-500 mb-4 max-w-sm">{{ request('search') ? __('We couldn\'t find any tasks matching your search.') : __('You don\'t have any tasks assigned to you yet.') }}</p>
-                                    @if(request('search'))
+                                    <p class="text-sm text-slate-500 mb-4 max-w-sm">{{ (request()->filled('search') || request()->filled('project_id')) ? __('We couldn\'t find any tasks matching your filters.') : __('You don\'t have any tasks assigned to you yet.') }}</p>
+                                    @if(request()->filled('search') || request()->filled('project_id'))
                                         <a href="{{ route('tasks.index') }}" class="btn-secondary">{{ __('Clear search') }}</a>
                                     @endif
                                 </div>

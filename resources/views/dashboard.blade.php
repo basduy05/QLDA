@@ -3,105 +3,105 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="space-y-1">
                 <p class="text-sm text-slate-500">{{ __('Overview') }}</p>
-                <h2 class="text-3xl font-semibold text-slate-900">{{ __('Project command center') }}</h2>
+                <h2 class="text-2xl font-semibold text-slate-900 lg:text-3xl">{{ __('Project command center') }}</h2>
                 <p class="text-sm text-slate-500">{{ __('A quick pulse of project health and delivery rhythm.') }}</p>
             </div>
             <a href="{{ route('exports.reports') }}" class="btn-secondary">{{ __('Export report') }}</a>
         </div>
     </x-slot>
 
-    <div class="space-y-8">
+    <div class="space-y-6">
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <div class="card-strong dashboard-kpi p-5">
+            <div class="card-strong dashboard-kpi p-4">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Total projects') }}</p>
-                <p class="mt-2 text-3xl font-semibold text-slate-900">{{ $projectsCount }}</p>
-                <p class="mt-1 text-xs text-slate-500">{{ __('Across all monitored workspaces') }}</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $projectsCount }}</p>
+                <p class="mt-0.5 text-xs text-slate-500">{{ __('Across all monitored workspaces') }}</p>
             </div>
-            <div class="card-strong dashboard-kpi p-5">
+            <div class="card-strong dashboard-kpi p-4">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Active projects') }}</p>
-                <p class="mt-2 text-3xl font-semibold text-slate-900">{{ $activeProjectsCount }}</p>
-                <p class="mt-1 text-xs text-slate-500">{{ __('In current execution phase') }}</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $activeProjectsCount }}</p>
+                <p class="mt-0.5 text-xs text-slate-500">{{ __('In current execution phase') }}</p>
             </div>
-            <div class="card-strong dashboard-kpi p-5">
+            <div class="card-strong dashboard-kpi p-4">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Tasks in view') }}</p>
-                <p class="mt-2 text-3xl font-semibold text-slate-900">{{ $tasksCount }}</p>
-                <p class="mt-1 text-xs text-slate-500">{{ __('All tasks inside your visibility') }}</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $tasksCount }}</p>
+                <p class="mt-0.5 text-xs text-slate-500">{{ __('All tasks inside your visibility') }}</p>
             </div>
-            <div class="card-strong dashboard-kpi p-5">
+            <div class="card-strong dashboard-kpi p-4">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Open tasks') }}</p>
-                <p class="mt-2 text-3xl font-semibold text-slate-900">{{ $openTasksCount }}</p>
-                <p class="mt-1 text-xs text-slate-500">{{ __('Need follow-up or action') }}</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $openTasksCount }}</p>
+                <p class="mt-0.5 text-xs text-slate-500">{{ __('Need follow-up or action') }}</p>
             </div>
-            <div class="card-strong dashboard-kpi p-5 bg-gradient-to-br from-white to-sky-50">
+            <div class="card-strong dashboard-kpi p-4 bg-gradient-to-br from-white to-sky-50">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Completion rate') }}</p>
-                <div class="mt-3 flex items-center gap-4">
-                    <div id="completion-ring" data-rate="{{ $completionRate }}" class="h-14 w-14 rounded-full border border-slate-200 grid place-items-center text-sm font-semibold text-slate-800 bg-slate-100">
-                        <span class="h-10 w-10 rounded-full bg-white grid place-items-center">{{ $completionRate }}%</span>
+                <div class="mt-2 flex items-center gap-3">
+                    <div id="completion-ring" data-rate="{{ $completionRate }}" class="h-12 w-12 rounded-full border border-slate-200 grid place-items-center text-sm font-semibold text-slate-800 bg-slate-100">
+                        <span class="h-8 w-8 rounded-full bg-white grid place-items-center">{{ $completionRate }}%</span>
                     </div>
                     <div>
-                        <p class="text-2xl font-semibold text-slate-900">{{ $doneTasksCount }}</p>
+                        <p class="text-xl font-semibold text-slate-900">{{ $doneTasksCount }}</p>
                         <p class="text-xs text-slate-500">{{ __('completed tasks') }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid gap-6 xl:grid-cols-3">
-            <div class="card-strong p-6 xl:col-span-2">
-                <div class="mb-5 flex items-center justify-between gap-2">
-                    <h3 class="text-xl font-semibold">{{ __('Workload trend (6 months)') }}</h3>
+        <div class="grid gap-4 xl:grid-cols-5">
+            <div class="card-strong p-4 xl:col-span-3">
+                <div class="mb-4 flex items-center justify-between gap-2">
+                    <h3 class="text-base font-semibold">{{ __('Workload trend (6 months)') }}</h3>
                     <span class="text-xs text-slate-500">{{ __('Created vs Completed') }}</span>
                 </div>
-                <div class="dashboard-chart-card rounded-2xl p-3">
-                    <canvas id="tasks-trend-chart" height="110" class="dashboard-chart-canvas"></canvas>
+                <div class="dashboard-chart-card rounded-xl p-2">
+                    <canvas id="tasks-trend-chart" height="100" class="dashboard-chart-canvas"></canvas>
                 </div>
                 <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                    <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-sky-500"></span>{{ __('Created') }}</span>
-                    <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>{{ __('Completed') }}</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-sky-500"></span>{{ __('Created') }}</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>{{ __('Completed') }}</span>
                 </div>
             </div>
 
-            <div class="card-strong p-6">
-                <h3 class="text-xl font-semibold mb-4">{{ __('Task status') }}</h3>
-                <div class="dashboard-chart-card rounded-2xl p-3">
-                    <canvas id="task-status-chart" height="150" class="dashboard-chart-canvas"></canvas>
+            <div class="card-strong p-4 xl:col-span-2">
+                <h3 class="text-base font-semibold mb-3">{{ __('Task status') }}</h3>
+                <div class="dashboard-chart-card rounded-xl p-2">
+                    <canvas id="task-status-chart" height="140" class="dashboard-chart-canvas"></canvas>
                 </div>
             </div>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-3">
-            <div class="card-strong p-6 lg:col-span-2">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-semibold">{{ __('Recent projects') }}</h3>
-                    <a href="{{ route('projects.index') }}" class="text-sm text-slate-500">{{ __('View all') }}</a>
+        <div class="grid gap-4 lg:grid-cols-5">
+            <div class="card-strong p-4 lg:col-span-3">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-semibold">{{ __('Recent projects') }}</h3>
+                    <a href="{{ route('projects.index') }}" class="text-sm text-slate-500 hover:text-slate-800">{{ __('View all') }}</a>
                 </div>
                 <div class="divide-y divide-slate-100">
                     @forelse ($recentProjects as $project)
-                        <div class="py-4 flex items-center justify-between gap-3">
+                        <div class="py-3 flex items-center justify-between gap-3">
                             <div>
-                                <p class="font-semibold text-slate-900">{{ $project->name }}</p>
-                                <p class="text-sm text-slate-500">{{ $project->owner?->name }} · {{ __($project->status) }}</p>
+                                <p class="font-medium text-slate-900">{{ $project->name }}</p>
+                                <p class="text-xs text-slate-500">{{ $project->owner?->name }} · {{ __($project->status) }}</p>
                             </div>
-                            <a href="{{ route('projects.show', $project) }}" class="text-sm text-slate-600">{{ __('Open') }}</a>
+                            <a href="{{ route('projects.show', $project) }}" class="text-xs text-slate-600 hover:text-slate-900">{{ __('Open') }}</a>
                         </div>
                     @empty
-                        <p class="text-sm text-slate-500 py-6">{{ __('No projects yet.') }}</p>
+                        <p class="text-sm text-slate-500 py-4">{{ __('No projects yet.') }}</p>
                     @endforelse
                 </div>
             </div>
 
-            <div class="card-strong p-6">
-                <h3 class="text-xl font-semibold mb-4">{{ __('Project status') }}</h3>
-                <div class="dashboard-chart-card rounded-2xl p-3">
-                    <canvas id="project-status-chart" height="180" class="dashboard-chart-canvas"></canvas>
+            <div class="card-strong p-4 lg:col-span-2">
+                <h3 class="text-base font-semibold mb-3">{{ __('Project status') }}</h3>
+                <div class="dashboard-chart-card rounded-xl p-2">
+                    <canvas id="project-status-chart" height="160" class="dashboard-chart-canvas"></canvas>
                 </div>
                 <div class="mt-4 h-px bg-slate-100"></div>
-                <h4 class="text-base font-semibold mt-4 mb-3">{{ __('Upcoming tasks') }}</h4>
-                <div class="space-y-4">
+                <h4 class="text-sm font-medium mt-3 mb-2">{{ __('Upcoming tasks') }}</h4>
+                <div class="space-y-2">
                     @forelse ($upcomingTasks as $task)
-                        <div class="rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/70">
-                            <p class="font-semibold text-slate-900">{{ $task->title }}</p>
-                            <p class="text-sm text-slate-500">{{ $task->project?->name }} · {{ $task->due_date?->format('d/m/Y') }}</p>
+                        <div class="rounded-lg border border-slate-200 px-3 py-2 bg-slate-50/70">
+                            <p class="font-medium text-sm text-slate-900">{{ $task->title }}</p>
+                            <p class="text-xs text-slate-500">{{ $task->project?->name }} · {{ $task->due_date?->format('d/m/Y') }}</p>
                         </div>
                     @empty
                         <p class="text-sm text-slate-500">{{ __('No upcoming tasks.') }}</p>
@@ -110,16 +110,16 @@
             </div>
         </div>
 
-        <div class="card-strong p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-semibold">{{ __('Overdue tasks') }}</h3>
-                <a href="{{ route('tasks.index') }}" class="text-sm text-slate-500">{{ __('Manage tasks') }}</a>
+        <div class="card-strong p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-semibold">{{ __('Overdue tasks') }}</h3>
+                <a href="{{ route('tasks.index') }}" class="text-sm text-slate-500 hover:text-slate-800">{{ __('Manage tasks') }}</a>
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-3 md:grid-cols-2">
                 @forelse ($overdueTasks as $task)
-                    <div class="card p-4 border-red-100 bg-red-50/30">
-                        <p class="font-semibold text-slate-900">{{ $task->title }}</p>
-                        <p class="text-sm text-slate-500">{{ $task->project?->name }} · {{ $task->due_date?->format('d/m/Y') }}</p>
+                    <div class="card p-3 border-red-100 bg-red-50/30">
+                        <p class="font-medium text-sm text-slate-900">{{ $task->title }}</p>
+                        <p class="text-xs text-slate-500">{{ $task->project?->name }} · {{ $task->due_date?->format('d/m/Y') }}</p>
                     </div>
                 @empty
                     <p class="text-sm text-slate-500">{{ __('No overdue tasks.') }}</p>

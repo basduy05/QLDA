@@ -5,13 +5,13 @@
                 <p class="text-sm text-slate-500">{{ __('AI Assistant') }}</p>
                 <h2 class="text-2xl font-semibold text-slate-900">{{ __('Project AI Chat') }}</h2>
             </div>
-            <a href="{{ route('messenger.index') }}" class="btn-secondary text-xs">{{ __('Back to Messenger') }}</a>
+            <a href="{{ route('messenger.index', ['popup' => request()->query('popup')]) }}" class="btn-secondary text-xs">{{ __('Back to Messenger') }}</a>
         </div>
     </x-slot>
 
-    <div class="card-strong p-0 overflow-hidden">
-        <div class="grid lg:grid-cols-12 min-h-[70vh]">
-            <aside class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-slate-100 p-4 space-y-3 bg-white/80">
+    <div class="card-strong p-0 overflow-hidden {{ request()->query('popup') ? 'h-screen rounded-none border-0 flex flex-col' : '' }}">
+        <div class="grid lg:grid-cols-12 {{ request()->query('popup') ? 'flex-1 overflow-hidden' : 'min-h-[70vh]' }}">
+            <aside class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-slate-100 p-4 space-y-3 bg-white/80 {{ request()->query('popup') ? 'overflow-y-auto max-h-[30vh] lg:max-h-none' : '' }}">
                 <div>
                     <label for="ai-project" class="text-sm font-medium text-slate-700">{{ __('Project context') }}</label>
                     <select id="ai-project" class="mt-2 w-full rounded-xl border-slate-200 text-sm">
@@ -53,7 +53,7 @@
                 </div>
             </aside>
 
-            <section class="lg:col-span-8 p-4 flex flex-col min-h-[55vh]">
+            <section class="lg:col-span-8 p-4 flex flex-col {{ request()->query('popup') ? 'flex-1 min-h-0' : 'min-h-[55vh]' }}">
                 <div id="ai-feed" class="flex-1 overflow-y-auto space-y-3 pr-1">
                     <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
                         {{ __('Xin chào! Bạn có thể hỏi về kế hoạch công việc, phân chia task, rủi ro deadline, hoặc gợi ý nội dung trao đổi trong nhóm.') }}

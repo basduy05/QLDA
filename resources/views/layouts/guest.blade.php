@@ -15,13 +15,13 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="antialiased">
-        <div class="page-shell min-h-screen flex flex-col justify-center items-center px-6 py-12">
+        <div class="page-shell min-h-screen flex flex-col justify-center items-center px-6 py-10">
             <div class="text-center mb-8">
                 <a href="/" class="text-2xl font-semibold text-slate-800">QhorizonPM</a>
                 <p class="text-sm text-slate-500 mt-2">{{ __('Plan, deliver, and celebrate project wins.') }}</p>
             </div>
 
-            <div class="w-full max-w-md card-strong px-8 py-6">
+            <div class="w-full max-w-md card-strong px-7 py-6">
                 {{ $slot }}
             </div>
         </div>

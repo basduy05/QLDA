@@ -24,6 +24,20 @@ class TaskController extends Controller
         $user = Auth::user();
         $query = Task::with(['project.owner', 'project.members', 'assignee'])->latest();
 
+        $projectFilterQuery = Project::query()->select('id', 'name')->orderBy('name');
+
+        if (!$user->isAdmin()) {
+            $projectFilterQuery->where(function ($projectQuery) use ($user) {
+                $projectQuery->where('owner_id', $user->id)
+                    ->orWhereHas('members', function ($memberQuery) use ($user) {
+                        $memberQuery->where('users.id', $user->id);
+                    })
+                    ->orWhereHas('tasks', function ($taskQuery) use ($user) {
+                        $taskQuery->where('assignee_id', $user->id);
+                    });
+            });
+        }
+
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -33,6 +47,10 @@ class TaskController extends Controller
                       $projectQuery->where('name', 'like', "%{$search}%");
                   });
             });
+        }
+
+        if ($request->filled('project_id')) {
+            $query->where('project_id', (int) $request->input('project_id'));
         }
 
         if (!$user->isAdmin()) {
@@ -49,6 +67,7 @@ class TaskController extends Controller
 
         return view('tasks.index', [
             'tasks' => $query->paginate(15)->withQueryString(),
+            'projectsFilter' => $projectFilterQuery->get(),
             'isAdmin' => $user->isAdmin(),
         ]);
     }

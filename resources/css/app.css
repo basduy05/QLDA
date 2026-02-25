@@ -13,12 +13,17 @@
 		--mist: #eef2f6;
 		--cloud: #f7f7fb;
 		--card: #ffffff;
+		--border-soft: rgba(148, 163, 184, 0.35);
 	}
 
 	body {
 		font-family: "Space Grotesk", "Segoe UI", sans-serif;
 		color: var(--ink);
-		background: radial-gradient(circle at top left, #fff7e7 0%, #f4f7ff 40%, #eef7f7 100%);
+		background: radial-gradient(circle at 12% 10%, #fff4e2 0%, transparent 38%),
+			radial-gradient(circle at 88% 6%, #eaf5ff 0%, transparent 42%),
+			linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
+		line-height: 1.6;
+		text-rendering: optimizeLegibility;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
@@ -38,6 +43,21 @@
 	h4 {
 		font-family: "Fraunces", "Times New Roman", serif;
 		letter-spacing: -0.02em;
+	}
+
+	input:not([type='checkbox']):not([type='radio']):not([type='file']),
+	select,
+	textarea {
+		border-color: rgba(148, 163, 184, 0.5);
+		background-color: rgba(255, 255, 255, 0.92);
+		color: var(--ink);
+	}
+
+	input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+	select:focus,
+	textarea:focus {
+		border-color: var(--accent);
+		box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
 	}
 }
 
@@ -66,30 +86,32 @@
 @layer components {
 	.page-shell {
 		@apply min-h-screen;
-		background: radial-gradient(circle at 20% 20%, #fff2da 0%, transparent 45%),
-			radial-gradient(circle at 80% 0%, #e6f4ff 0%, transparent 45%),
+		background: radial-gradient(circle at 16% 18%, #fff0d7 0%, transparent 40%),
+			radial-gradient(circle at 84% 6%, #e7f4ff 0%, transparent 40%),
 			linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
-		animation: softFadeUp 320ms ease-out both;
+		animation: softFadeUp 260ms ease-out both;
 	}
 
 	.card {
-		@apply rounded-2xl shadow-sm border border-slate-100 bg-white/90 backdrop-blur;
-		transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+		@apply rounded-xl border border-slate-200/70 bg-white/90 backdrop-blur-sm;
+		box-shadow: 0 4px 12px -8px rgba(15, 23, 42, 0.15);
+		transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
 	}
 
 	.card:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 10px 24px -18px rgba(15, 23, 42, 0.45);
+		box-shadow: 0 6px 16px -8px rgba(15, 23, 42, 0.2);
 	}
 
 	.card-strong {
-		@apply rounded-2xl shadow-lg border border-slate-200 bg-white;
-		transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+		@apply rounded-xl border border-slate-200 bg-white;
+		box-shadow: 0 6px 16px -8px rgba(15, 23, 42, 0.15);
+		transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 	}
 
 	.card-strong:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 16px 36px -22px rgba(15, 23, 42, 0.48);
+		box-shadow: 0 8px 20px -8px rgba(15, 23, 42, 0.2);
 	}
 
 	.badge {
@@ -97,8 +119,9 @@
 	}
 
 	.btn-primary {
-		@apply inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg transition;
+		@apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg transition;
 		background: linear-gradient(135deg, var(--accent), #0891b2);
+		min-height: 40px;
 		transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
 	}
 
@@ -112,7 +135,8 @@
 	}
 
 	.btn-secondary {
-		@apply inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold border border-slate-200 text-slate-700 bg-white transition;
+		@apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold border border-slate-200 text-slate-700 bg-white transition;
+		min-height: 40px;
 		transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 	}
 
@@ -210,7 +234,7 @@
 
 	.nav-pill {
 		@apply inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-slate-600 border border-transparent;
-		transition: all 160ms ease;
+		transition: all 150ms ease;
 	}
 
 	.nav-pill-icon {
@@ -229,7 +253,7 @@
 
 	.nav-action-btn {
 		@apply relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600;
-		transition: all 160ms ease;
+		transition: all 150ms ease;
 	}
 
 	.nav-action-btn:hover {

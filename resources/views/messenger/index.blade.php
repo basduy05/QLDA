@@ -6,8 +6,8 @@
                 <h2 class="text-2xl font-semibold text-slate-900">{{ __('Chats & Groups') }}</h2>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('chat-groups.index') }}" class="btn-secondary text-xs">{{ __('Manage Groups') }}</a>
-                <a href="{{ route('ai.chat.index') }}" class="btn-secondary text-xs">{{ __('AI Assistant') }}</a>
+                <a href="{{ route('chat-groups.index') }}" target="_top" class="btn-secondary text-xs">{{ __('Manage Groups') }}</a>
+                <a href="{{ route('ai.chat.index', ['popup' => request()->query('popup')]) }}" class="btn-secondary text-xs">{{ __('AI Assistant') }}</a>
                 @if ($activeType === 'direct')
                     <button type="button" id="start-call-header" class="btn-primary text-xs">{{ __('Call') }}</button>
                 @endif
@@ -15,14 +15,14 @@
         </div>
     </x-slot>
 
-    <div class="card-strong p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50/70">
-        <div class="grid md:grid-cols-12 h-[calc(100vh-220px)]">
+    <div class="card-strong p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50/70 {{ request()->query('popup') ? 'h-screen rounded-none border-0' : '' }}">
+        <div class="grid md:grid-cols-12 {{ request()->query('popup') ? 'h-full' : 'h-[calc(100vh-220px)]' }}">
             <aside class="md:col-span-4 lg:col-span-3 border-b md:border-b-0 md:border-r border-slate-100 p-3 overflow-y-auto min-h-0 max-h-64 md:max-h-none bg-white/70 backdrop-blur">
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">{{ __('Direct') }}</p>
                 <div class="space-y-1 mb-4">
                     @foreach ($contacts as $contact)
                         @php($meta = $directMap->get($contact->id))
-                        <a href="{{ route('messenger.direct', $contact) }}" class="block rounded-xl px-3 py-2 border transition duration-200 hover:-translate-y-0.5 {{ $activeType === 'direct' && $activeTarget?->id === $contact->id ? 'border-slate-900 bg-slate-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm' }}">
+                        <a href="{{ route('messenger.direct', [$contact, 'popup' => request()->query('popup')]) }}" class="block rounded-xl px-3 py-2 border transition duration-200 hover:-translate-y-0.5 {{ $activeType === 'direct' && $activeTarget?->id === $contact->id ? 'border-slate-900 bg-slate-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm' }}">
                             <div class="flex items-center justify-between gap-2">
                                 <p class="font-semibold text-sm text-slate-900">{{ $contact->name }}</p>
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full {{ $contact->isOnline() ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>
@@ -33,10 +33,13 @@
                     @endforeach
                 </div>
 
-                <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">{{ __('Groups') }}</p>
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">{{ __('Groups') }}</p>
+                    <a href="{{ route('chat-groups.index') }}" target="_top" class="text-[10px] font-medium text-accent hover:underline">{{ __('Manage') }}</a>
+                </div>
                 <div class="space-y-1">
                     @foreach ($groups as $group)
-                        <a href="{{ route('messenger.group', $group) }}" class="block rounded-xl px-3 py-2 border transition duration-200 hover:-translate-y-0.5 {{ $activeType === 'group' && $activeTarget?->id === $group->id ? 'border-slate-900 bg-slate-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm' }}">
+                        <a href="{{ route('messenger.group', [$group, 'popup' => request()->query('popup')]) }}" class="block rounded-xl px-3 py-2 border transition duration-200 hover:-translate-y-0.5 {{ $activeType === 'group' && $activeTarget?->id === $group->id ? 'border-slate-900 bg-slate-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm' }}">
                             <p class="font-semibold text-sm text-slate-900">{{ $group->name }}</p>
                             <p class="text-[11px] text-slate-500">{{ $group->messages_count }} {{ __('messages') }}</p>
                         </a>
