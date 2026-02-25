@@ -119,7 +119,7 @@ class AiAssistantController extends Controller
         );
 
         try {
-            $response = Http::withoutVerifying()->timeout(25)->acceptJson()->post($url, [
+            $response = Http::withoutVerifying()->timeout(60)->acceptJson()->post($url, [
                 'contents' => [
                     [
                         'role' => 'user',
@@ -130,7 +130,7 @@ class AiAssistantController extends Controller
                 ],
                 'generationConfig' => [
                     'temperature' => 0.4,
-                    'maxOutputTokens' => 700,
+                    'maxOutputTokens' => 4096,
                 ],
             ]);
         } catch (\Throwable) {
