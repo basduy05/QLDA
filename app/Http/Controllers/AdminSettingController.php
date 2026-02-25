@@ -51,4 +51,22 @@ class AdminSettingController extends Controller
 
         return substr($key, 0, 4).'••••••'.substr($key, -4);
     }
+
+    public function editMessenger()
+    {
+        return view('admin.settings.messenger', [
+            'projectMembersOnly' => (bool) AppSetting::getValue('messenger.project_members_only', false),
+        ]);
+    }
+
+    public function updateMessenger(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'project_members_only' => ['boolean'],
+        ]);
+
+        AppSetting::put('messenger.project_members_only', (bool) ($validated['project_members_only'] ?? false));
+
+        return back()->with('status', __('Messenger settings saved successfully.'));
+    }
 }

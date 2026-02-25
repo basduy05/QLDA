@@ -140,7 +140,42 @@
 
         <div class="card-strong p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50/70 {{ request()->query('popup') ? 'h-screen rounded-none border-0' : '' }}">
         <div class="grid md:grid-cols-12 {{ request()->query('popup') ? 'h-full' : 'h-[calc(100vh-220px)]' }}">
-            <aside class="md:col-span-4 lg:col-span-3 border-b md:border-b-0 md:border-r border-slate-100 p-3 overflow-y-auto min-h-0 max-h-64 md:max-h-none bg-white/70 backdrop-blur">
+            <aside class="md:col-span-4 lg:col-span-3 border-b md:border-b-0 md:border-r border-slate-100 p-3 overflow-y-auto min-h-0 max-h-64 md:max-h-none bg-white/70 backdrop-blur" x-data="{
+                search: '',
+                results: [],
+                performSearch() {
+                    if (this.search.length < 3) {
+                        this.results = [];
+                        return;
+                    }
+                    fetch(`{{ route('messenger.search') }}?query=${encodeURIComponent(this.search)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.results = data;
+                        })
+                        .catch(() => {
+                            this.results = [];
+                        });
+                }
+            }">
+                <div class="mb-4 relative">
+                    <input
+                        type="search"
+                        x-model="search"
+                        @input.debounce.500ms="performSearch"
+                        class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm focus:border-slate-300 focus:ring-slate-300"
+                        placeholder="{{ __('Search by email...') }}"
+                    >
+                    <div x-show="search.length > 0 && results.length > 0" class="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto" style="display: none;">
+                        <template x-for="person in results" :key="person.id">
+                            <a :href="`{{ route('messenger.index') }}/direct/${person.id}`" class="block px-3 py-2 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left">
+                                <p class="font-semibold text-sm text-slate-900" x-text="person.name"></p>
+                                <p class="text-xs text-slate-500" x-text="person.email"></p>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+
                 <p class="text-[11px] font-semibold uppercase tracking-widest text-slate-500 mb-2">{{ __('Direct') }}</p>
                 <div class="space-y-1 mb-4">
                     @foreach ($contacts as $contact)

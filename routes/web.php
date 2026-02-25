@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('messenger.terms')->group(function () {
     Route::get('/messenger', [MessengerController::class, 'index'])->name('messenger.index');
+    Route::get('/messenger/search', [MessengerController::class, 'search'])->name('messenger.search');
     Route::get('/messenger/ai', [AiAssistantController::class, 'index'])->name('ai.chat.index');
     Route::post('/messenger/ai/chat', [AiAssistantController::class, 'chat'])->name('ai.chat');
     Route::post('/messenger/ai/suggestions', [AiAssistantController::class, 'suggestions'])->name('ai.suggestions');
@@ -125,6 +126,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/admin/settings/ai', [AdminSettingController::class, 'updateAi'])
         ->middleware('admin')
         ->name('admin.settings.ai.update');
+
+    Route::get('/admin/settings/messenger', [AdminSettingController::class, 'editMessenger'])
+        ->middleware('admin')
+        ->name('admin.settings.messenger.edit');
+    Route::patch('/admin/settings/messenger', [AdminSettingController::class, 'updateMessenger'])
+        ->middleware('admin')
+        ->name('admin.settings.messenger.update');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

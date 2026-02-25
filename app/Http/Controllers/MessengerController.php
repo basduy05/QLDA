@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\ChatGroup;
 use App\Models\ChatMessage;
 use App\Models\DirectConversation;
@@ -112,6 +113,32 @@ class MessengerController extends Controller
             ])->render(),
             'typing' => $this->isTyping($contact->id, $user->id),
         ]);
+    }
+
+    public function search(Request $request)
+    {
+        $query = trim((string) $request->get('query'));
+        if (strlen($query) < 3) {
+            return response()->json([]);
+        }
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Allow searching by exact email or partial name/email
+        // Limit to 20 results
+        $results = User::where('id', '!=', $user->id)
+            ->where(function ($q) use ($query) {
+                $q->where('email', 'like', "%{$query}%")
+                  ->orWhere('name', 'like', "%{$query}%");
+            })
+            ->take(20)
+            ->get(['id', 'name', 'email']); // Return minimal data
+
+        // If restriction is ON, maybe we should indicate if they are in project or not?
+        // But the requirement says "Allow searching by email". So we return them regardless.
+
+        return response()->json($results);
     }
 
     public function groupFeed(ChatGroup $chatGroup)
@@ -442,8 +469,25 @@ class MessengerController extends Controller
 
         $groups = $groupsQuery->get();
 
+        $contactsQuery = User::where('id', '!=', $user->id)->orderBy('name');
+
+        if (! $user->isAdmin() && AppSetting::getValue('messenger.project_members_only', false)) {
+            $myProjectIds = \Illuminate\Support\Facades\DB::table('project_members')
+                ->where('user_id', $user->id) 
+                ->pluck('project_id')
+                ->merge(\Illuminate\Support\Facades\DB::table('projects')->where('owner_id', $user->id)->pluck('id'))
+                ->unique();
+
+            $contactsQuery->where(function ($q) use ($myProjectIds) {
+                // Users who are members of my projects
+                $q->whereHas('projects', fn ($dq) => $dq->whereIn('projects.id', $myProjectIds))
+                  // Or users who own my projects
+                  ->orWhereHas('projectsOwned', fn ($dq) => $dq->whereIn('projects.id', $myProjectIds));
+            });
+        }
+
         return [
-            'contacts' => User::where('id', '!=', $user->id)->orderBy('name')->get(),
+            'contacts' => $contactsQuery->get(),
             'groups' => $groups,
             'directMap' => $this->buildDirectMap($user),
             'wsUrl' => (string) config('services.realtime.ws_url', ''),
