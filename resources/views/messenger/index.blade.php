@@ -164,11 +164,11 @@
                         x-model="search"
                         @input.debounce.500ms="performSearch"
                         class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm focus:border-slate-300 focus:ring-slate-300"
-                        placeholder="{{ __('Search by email...') }}"
+                        placeholder="{{ __('Search by email or name...') }}"
                     >
                     <div x-show="search.length > 0 && results.length > 0" class="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto" style="display: none;">
                         <template x-for="person in results" :key="person.id">
-                            <a :href="`{{ route('messenger.index') }}/direct/${person.id}`" class="block px-3 py-2 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left">
+                            <a :href="`{{ route('messenger.index') }}/direct/${person.id}`" class="block px-3 py-2 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left cursor-pointer z-50 relative">
                                 <p class="font-semibold text-sm text-slate-900" x-text="person.name"></p>
                                 <p class="text-xs text-slate-500" x-text="person.email"></p>
                             </a>

@@ -16,6 +16,7 @@ class AdminSettingController extends Controller
             'geminiModel' => AppSetting::getValue('ai.gemini_model', 'gemini-2.5-flash'),
             'hasApiKey' => filled($apiKey),
             'apiKeyMask' => $this->maskApiKey($apiKey),
+            'projectMembersOnly' => (bool) AppSetting::getValue('messenger.project_members_only', false),
         ]);
     }
 
