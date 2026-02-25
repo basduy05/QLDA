@@ -11,11 +11,6 @@
     </x-slot>
 
     <div class="card-strong p-6 max-w-3xl">
-        @if (session('status'))
-            <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                {{ session('status') }}
-            </div>
-        @endif
 
         <form method="POST" action="{{ route('admin.settings.messenger.update') }}" class="space-y-4">
             @csrf

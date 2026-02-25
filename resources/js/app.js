@@ -16,6 +16,13 @@ Alpine.start();
 			.trim();
 
 	const isEnglish = (document.documentElement.lang || '').toLowerCase().startsWith('en');
+
+	window.notify = (message, type = 'success') => {
+		window.dispatchEvent(new CustomEvent('notify', {
+			detail: { message, type }
+		}));
+	};
+
 	const destructiveKeywords = ['xoa', 'delete', 'remove', 'huy', 'cancel', 'discard'];
 	const saveKeywords = ['luu', 'save', 'update', 'cap nhat'];
 
@@ -74,16 +81,36 @@ Alpine.start();
 		}
 
 		modalRoot = document.createElement('div');
-		modalRoot.className = 'hidden fixed inset-0 z-[80]';
+		modalRoot.className = 'hidden fixed inset-0 z-[80] overflow-y-auto';
+		modalRoot.setAttribute('aria-labelledby', 'modal-title');
+		modalRoot.setAttribute('role', 'dialog');
+		modalRoot.setAttribute('aria-modal', 'true');
+		
 		modalRoot.innerHTML = `
-			<div class="absolute inset-0 bg-slate-900/40" data-confirm-close="1"></div>
-			<div class="relative z-10 min-h-full flex items-center justify-center p-4">
-				<div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="app-confirm-title">
-					<h3 id="app-confirm-title" class="text-base font-semibold text-slate-900"></h3>
-					<p id="app-confirm-message" class="mt-2 text-sm text-slate-600"></p>
-					<div class="mt-5 flex items-center justify-end gap-2">
-						<button type="button" id="app-confirm-cancel" class="btn-secondary text-xs"></button>
-						<button type="button" id="app-confirm-ok" class="btn-primary text-xs"></button>
+			<div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+				<!-- Backdrop -->
+				<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" data-confirm-close="1"></div>
+
+				<!-- Modal Panel -->
+				<div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+					<div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+						<div class="sm:flex sm:items-start">
+							<div id="app-confirm-icon-wrapper" class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+								<svg id="app-confirm-icon" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.008v.008H12v-.008z" />
+								</svg>
+							</div>
+							<div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+								<h3 class="text-base font-semibold leading-6 text-gray-900" id="app-confirm-title"></h3>
+								<div class="mt-2">
+									<p class="text-sm text-gray-500" id="app-confirm-message"></p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+						<button type="button" id="app-confirm-ok" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"></button>
+						<button type="button" id="app-confirm-cancel" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"></button>
 					</div>
 				</div>
 			</div>
@@ -95,6 +122,9 @@ Alpine.start();
 		modalMessage = modalRoot.querySelector('#app-confirm-message');
 		modalCancelBtn = modalRoot.querySelector('#app-confirm-cancel');
 		modalConfirmBtn = modalRoot.querySelector('#app-confirm-ok');
+		// We'll grab the icon wrapper to change colors if needed
+		const iconWrapper = modalRoot.querySelector('#app-confirm-icon-wrapper');
+		const icon = modalRoot.querySelector('#app-confirm-icon');
 
 		modalRoot.addEventListener('click', (event) => {
 			const closer = event.target.closest('[data-confirm-close="1"]');
@@ -143,9 +173,30 @@ Alpine.start();
 		modalCancelBtn.textContent = cancelText;
 		modalConfirmBtn.textContent = confirmText;
 
-		modalConfirmBtn.classList.remove('text-red-600', 'border-red-200', 'hover:border-red-300');
+		// Default styles (Save/Action)
+		const iconWrapper = modalRoot.querySelector('#app-confirm-icon-wrapper');
+		const icon = modalRoot.querySelector('#app-confirm-icon');
+
+		// Reset classes
+		modalConfirmBtn.className = 'inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto h-9';
+		iconWrapper.className = 'mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-[20px] sm:mx-0 sm:h-10 sm:w-10';
+		
 		if (actionType === 'destructive') {
-			modalConfirmBtn.classList.add('text-red-600', 'border-red-200', 'hover:border-red-300');
+			modalConfirmBtn.classList.add('bg-red-600', 'hover:bg-red-500');
+			iconWrapper.classList.add('bg-red-100');
+			// Warning icon for destructive
+			icon.classList.remove('text-indigo-600');
+			icon.classList.add('text-red-600');
+			icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.008v.008H12v-.008z" />';
+			modalConfirmBtn.textContent = isEnglish ? 'Yes, delete it' : 'Xoá ngay';
+		} else {
+			// Save or other action
+			modalConfirmBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+			iconWrapper.classList.add('bg-indigo-100');
+			// Check icon for save
+			icon.classList.remove('text-red-600');
+			icon.classList.add('text-indigo-600');
+			icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />';
 		}
 
 		previousFocus = document.activeElement;
@@ -227,4 +278,9 @@ Alpine.start();
 		},
 		true
 	);
+
+	window.notify = (message, type = 'success') => {
+		window.dispatchEvent(new CustomEvent('notify', { detail: { message, type } }));
+	};
+
 })();

@@ -11,22 +11,6 @@
     </x-slot>
 
     <div class="space-y-6 max-w-3xl">
-        @if (session('status'))
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                {{ session('status') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                <ul class="list-disc list-inside">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
         <!-- AI Settings Card -->
         <div class="card-strong p-6">
             <h3 class="text-lg font-bold text-slate-900 mb-4">{{ __('AI Configuration') }}</h3>

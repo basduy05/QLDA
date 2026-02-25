@@ -30,7 +30,7 @@
             @endif
 
             <!-- Flash Message -->
-            @include('components.flash-message')
+            @include('components.toast-notification')
 
             <!-- Page Content -->
             <main>
@@ -84,6 +84,9 @@
 
                         if (currentCount > lastCount) {
                             playSound();
+                            if (window.notify) {
+                                window.notify("{{ __('You have a new notification.') }}", 'info');
+                            }
                         }
 
                         lastCount = currentCount;
@@ -95,19 +98,6 @@
             })();
         </script>
 
-        <script>
-            document.addEventListener('submit', function (event) {
-                const form = event.target;
-                const message = form?.dataset?.confirm;
-                if (!message) {
-                    return;
-                }
-
-                if (!confirm(message)) {
-                    event.preventDefault();
-                }
-            });
-        </script>
 
         @if(!request()->query('popup'))
         <!-- Floating Chat Bubbles -->
@@ -160,6 +150,8 @@
             </button>
         </div>
         @endif
+
+        <x-toast-notification />
 
         @stack('scripts')
     </body>

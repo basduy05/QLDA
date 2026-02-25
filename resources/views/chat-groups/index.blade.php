@@ -15,11 +15,7 @@
     </x-slot>
 
     <div class="space-y-6">
-        @if (session('status'))
-            <div class="card p-4 text-sm text-emerald-700 bg-emerald-50">
-                {{ session('status') }}
-            </div>
-        @endif
+
 
         <div class="card-strong p-6">
             <h3 class="text-lg font-semibold text-slate-900 mb-4">{{ __('Create Group') }}</h3>

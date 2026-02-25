@@ -31,9 +31,7 @@
             </aside>
 
             <section class="md:col-span-2 p-4 flex flex-col">
-                @if (session('status'))
-                    <div class="card p-3 text-sm text-emerald-700 bg-emerald-50 mb-3">{{ session('status') }}</div>
-                @endif
+
 
                 @if ($activeContact)
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100">

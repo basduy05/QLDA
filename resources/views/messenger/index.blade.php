@@ -141,8 +141,13 @@
         <div class="card-strong p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50/70 {{ request()->query('popup') ? 'h-screen rounded-none border-0' : '' }}">
         <div class="grid md:grid-cols-12 {{ request()->query('popup') ? 'h-full' : 'h-[calc(100vh-220px)]' }}">
             <aside class="md:col-span-4 lg:col-span-3 border-b md:border-b-0 md:border-r border-slate-100 p-3 overflow-y-auto min-h-0 max-h-64 md:max-h-none bg-white/70 backdrop-blur" x-data="{
-                search: '',
+                search: new URLSearchParams(window.location.search).get('q') || '',
                 results: [],
+                init() {
+                     if (this.search) {
+                         this.performSearch();
+                     }
+                },
                 performSearch() {
                     if (this.search.length < 3) {
                         this.results = [];
@@ -168,7 +173,7 @@
                     >
                     <div x-show="search.length > 0 && results.length > 0" class="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto" style="display: none;">
                         <template x-for="person in results" :key="person.id">
-                            <a :href="`{{ route('messenger.index') }}/direct/${person.id}{{ request()->query('popup') ? '?popup=1' : '' }}`" class="block px-3 py-2 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left cursor-pointer z-50 relative">
+                            <a :href="`{{ route('messenger.index') }}/direct/${person.id}{{ request()->query('popup') ? '?popup=1' : '' }}&q=${encodeURIComponent(search)}`" class="block px-3 py-2 hover:bg-slate-50 border-b border-slate-50 last:border-0 text-left cursor-pointer z-50 relative">
                                 <p class="font-semibold text-sm text-slate-900" x-text="person.name"></p>
                                 <p class="text-xs text-slate-500" x-text="person.email"></p>
                             </a>
@@ -395,7 +400,7 @@
                                                                     <p>{{ __('Once you delete a group, there is no going back. Please be certain.') }}</p>
                                                                 </div>
                                                                 <div class="mt-4">
-                                                                    <form method="POST" action="{{ route('chat-groups.destroy', ['chatGroup' => $activeTarget, 'popup' => request()->query('popup')]) }}">
+                                                                    <form method="POST" action="{{ route('chat-groups.destroy', ['chatGroup' => $activeTarget, 'popup' => request()->query('popup'), 'from_messenger' => 1]) }}">
                                                                         @csrf
                                                                         @method('DELETE')
                                                                         <button type="submit" class="rounded-md bg-red-50 px-2.5 py-1.5 text-sm font-semibold text-red-800 shadow-sm hover:bg-red-100 ring-1 ring-inset ring-red-300">{{ __('Delete this group') }}</button>

@@ -19,12 +19,7 @@
     </x-slot>
 
     <div class="space-y-6">
-        @if (session('status'))
-            <div class="card p-4 text-sm text-emerald-700 bg-emerald-50 border-emerald-200 flex items-center gap-3 animate-[softFadeUp_0.3s_ease-out]">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                {{ session('status') }}
-            </div>
-        @endif
+
 
         <div class="card-strong overflow-hidden">
             <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

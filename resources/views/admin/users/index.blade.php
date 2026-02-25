@@ -10,9 +10,7 @@
     </x-slot>
 
     <div class="card-strong p-6">
-        @if (session('status'))
-            <p class="text-sm text-emerald-700 mb-4">{{ session('status') }}</p>
-        @endif
+
         @if ($errors->has('role'))
             <p class="text-sm text-red-600 mb-4">{{ $errors->first('role') }}</p>
         @endif
