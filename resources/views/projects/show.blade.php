@@ -232,7 +232,7 @@
             @if ($canManageMembers)
                 <div class="mt-6 pt-6 border-t border-slate-100">
                     <h4 class="text-sm font-bold text-slate-900 mb-3">{{ __('Add new member') }}</h4>
-                    <form method="POST" action="{{ route('projects.members.store', $project) }}" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <form method="POST" action="{{ route('projects.members.add', $project) }}" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                         @csrf
                         <div class="w-full sm:max-w-xs">
                             <select name="user_id" required class="w-full rounded-lg border-slate-200 text-sm focus:ring-accent focus:border-accent">

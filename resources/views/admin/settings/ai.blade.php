@@ -39,10 +39,10 @@
                     name="gemini_model"
                     value="{{ old('gemini_model', $geminiModel) }}"
                     class="mt-2 w-full rounded-xl border-slate-200"
-                    placeholder="gemini-3.0-flash"
+                    placeholder="gemini-2.5-flash"
                     required
                 >
-                <p class="mt-1 text-xs text-slate-500">{{ __('Example: gemini-3.0-flash') }}</p>
+                <p class="mt-1 text-xs text-slate-500">{{ __('Example: gemini-2.5-flash') }}</p>
             </div>
 
             <div>

@@ -22,7 +22,7 @@ class AiAssistantController extends Controller
         return view('ai.chat', [
             'projects' => $this->availableProjects($user),
             'quickPrompts' => $this->quickPrompts(app()->getLocale()),
-            'defaultModel' => AppSetting::getValue('ai.gemini_model', 'gemini-3.0-flash'),
+            'defaultModel' => AppSetting::getValue('ai.gemini_model', 'gemini-2.5-flash'),
             'hasApiKey' => $hasApiKey,
             'isAdmin' => $user->isAdmin(),
             'taskSuggestions' => $this->buildGeneralTaskSuggestions(),
@@ -80,7 +80,7 @@ class AiAssistantController extends Controller
         }
 
         $apiKey = AppSetting::getValue('ai.gemini_api_key');
-        $model = AppSetting::getValue('ai.gemini_model', 'gemini-3.0-flash');
+        $model = AppSetting::getValue('ai.gemini_model', 'gemini-2.5-flash');
 
         if (! filled($apiKey)) {
             return response()->json([
@@ -108,7 +108,7 @@ class AiAssistantController extends Controller
         );
 
         try {
-            $response = Http::timeout(25)->acceptJson()->post($url, [
+            $response = Http::withoutVerifying()->timeout(25)->acceptJson()->post($url, [
                 'contents' => [
                     [
                         'role' => 'user',

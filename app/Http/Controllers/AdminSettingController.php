@@ -13,7 +13,7 @@ class AdminSettingController extends Controller
         $apiKey = AppSetting::getValue('ai.gemini_api_key');
 
         return view('admin.settings.ai', [
-            'geminiModel' => AppSetting::getValue('ai.gemini_model', 'gemini-3.0-flash'),
+            'geminiModel' => AppSetting::getValue('ai.gemini_model', 'gemini-2.5-flash'),
             'hasApiKey' => filled($apiKey),
             'apiKeyMask' => $this->maskApiKey($apiKey),
         ]);

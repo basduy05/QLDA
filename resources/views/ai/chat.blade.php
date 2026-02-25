@@ -84,18 +84,37 @@
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             let locked = false;
 
-            const addBubble = (text, mine = false) => {
+            const addBubble = (text, mine = false, typewriter = false) => {
                 const row = document.createElement('div');
                 row.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
 
                 const bubble = document.createElement('div');
                 bubble.className = `max-w-[92%] md:max-w-[78%] rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap ${mine ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`;
-                bubble.textContent = text;
-
-                row.appendChild(bubble);
-                feed?.appendChild(row);
-                if (feed) {
-                    feed.scrollTop = feed.scrollHeight;
+                
+                if (typewriter && !mine) {
+                    bubble.textContent = '';
+                    row.appendChild(bubble);
+                    feed?.appendChild(row);
+                    
+                    let i = 0;
+                    const speed = 15; // ms per character
+                    
+                    const typeWriterEffect = () => {
+                        if (i < text.length) {
+                            bubble.textContent += text.charAt(i);
+                            i++;
+                            if (feed) feed.scrollTop = feed.scrollHeight;
+                            setTimeout(typeWriterEffect, speed);
+                        }
+                    };
+                    typeWriterEffect();
+                } else {
+                    bubble.textContent = text;
+                    row.appendChild(bubble);
+                    feed?.appendChild(row);
+                    if (feed) {
+                        feed.scrollTop = feed.scrollHeight;
+                    }
                 }
             };
 
@@ -202,7 +221,7 @@
                         return;
                     }
 
-                    addBubble(payload.reply || "{{ __('AI returned an empty response.') }}", false);
+                    addBubble(payload.reply || "{{ __('AI returned an empty response.') }}", false, true);
                 } catch (_) {
                     setError("{{ __('AI service is temporarily unavailable.') }}");
                 } finally {
