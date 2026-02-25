@@ -51,7 +51,7 @@
                     </a>
                 @endif
                 @if ($canManageMembers)
-                    <form method="POST" action="{{ route('projects.destroy', $project) }}" data-confirm="{{ __('Delete this project?') }}" onsubmit="return confirm(this.dataset.confirm)">
+                    <form method="POST" action="{{ route('projects.destroy', $project) }}" data-confirm="{{ __('Delete this project?') }}">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn-secondary text-rose-600 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700 inline-flex items-center gap-2">
@@ -214,7 +214,7 @@
                                         </select>
                                     </form>
 
-                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" data-confirm="{{ __('Remove this member?') }}" onsubmit="return confirm(this.dataset.confirm)">
+                                    <form method="POST" action="{{ route('projects.members.remove', [$project, $member]) }}" data-confirm="{{ __('Remove this member?') }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors" title="{{ __('Remove') }}">

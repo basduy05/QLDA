@@ -103,6 +103,7 @@ class ProjectController extends Controller
         $this->ensureAccess($project);
 
         $project->load(['owner', 'members', 'tasks.assignee']);
+        $project->loadCount('tasks');
 
         /** @var User $user */
         $user = Auth::user();

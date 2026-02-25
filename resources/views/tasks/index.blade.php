@@ -6,6 +6,32 @@
                 <h2 class="text-2xl font-bold text-slate-900 tracking-tight">{{ __('Tasks') }}</h2>
             </div>
             <div class="flex flex-wrap items-center gap-3">
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" @click.away="open = false" class="btn-primary inline-flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        {{ __('New Task') }}
+                    </button>
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="transform opacity-0 scale-95"
+                         x-transition:enter-end="transform opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="transform opacity-100 scale-100"
+                         x-transition:leave-end="transform opacity-0 scale-95"
+                         class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
+                         style="display: none;">
+                         <div class="py-1 max-h-60 overflow-y-auto">
+                            @if($manageableProjects->isEmpty())
+                                <p class="block px-4 py-2 text-sm text-slate-500">{{ __('No projects available for task creation.') }}</p>
+                            @else
+                                <p class="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ __('Select Project') }}</p>
+                                @foreach($manageableProjects as $project)
+                                    <a href="{{ route('projects.tasks.create', $project) }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900">{{ $project->name }}</a>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
+                </div>
                 <a href="{{ route('exports.tasks') }}" class="btn-secondary inline-flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                     {{ __('Export XLSX') }}

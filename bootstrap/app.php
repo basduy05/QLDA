@@ -30,5 +30,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('admin/*')) {
+                 return redirect()->route('dashboard')->with('status', 'Bạn không có quyền truy cập vào trang quản trị.');
+            }
+            return redirect()->back()->with('status', 'Bạn không có quyền thực hiện hành động này.');
+        });
     })->create();

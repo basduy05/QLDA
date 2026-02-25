@@ -9,8 +9,23 @@ export default {
         './resources/views/**/*.blade.php',
     ],
 
+    safelist: [
+        'from-emerald-500',
+        'to-green-600',
+        'focus:ring-emerald-500',
+        'text-emerald-500', 
+        'bg-emerald-500',
+        'border-emerald-500',
+        'text-green-600',
+        'bg-green-600',
+    ],
+
     theme: {
         extend: {
+            colors: {
+                accent: 'var(--accent)',
+                'accent-strong': 'var(--accent-strong)',
+            },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },

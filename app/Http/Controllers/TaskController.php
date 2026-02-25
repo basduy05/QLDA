@@ -24,6 +24,17 @@ class TaskController extends Controller
         $user = Auth::user();
         $query = Task::with(['project.owner', 'project.members', 'assignee'])->latest();
 
+        $manageableProjects = $user->isAdmin()
+        ? Project::orderBy('name')->select('id', 'name')->get()
+        : Project::where('owner_id', $user->id)
+            ->orWhereHas('members', function ($q) use ($user) {
+                $q->where('users.id', $user->id)
+                  ->whereIn('role', [Project::ROLE_LEAD, Project::ROLE_DEPUTY]);
+            })
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         $projectFilterQuery = Project::query()->select('id', 'name')->orderBy('name');
 
         if (!$user->isAdmin()) {
@@ -69,6 +80,7 @@ class TaskController extends Controller
             'tasks' => $query->paginate(15)->withQueryString(),
             'projectsFilter' => $projectFilterQuery->get(),
             'isAdmin' => $user->isAdmin(),
+            'manageableProjects' => $manageableProjects,
         ]);
     }
 

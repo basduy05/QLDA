@@ -29,6 +29,9 @@
                 @endisset
             @endif
 
+            <!-- Flash Message -->
+            @include('components.flash-message')
+
             <!-- Page Content -->
             <main>
                 <div class="{{ request()->query('popup') ? 'w-full h-screen overflow-hidden p-0' : 'mx-auto w-full max-w-[1440px] px-4 py-4 md:px-6 md:py-5 xl:px-8' }}">
@@ -126,7 +129,7 @@
 
             <!-- Messenger Popup -->
             <div x-show="activePopup === 'messenger'" x-transition.opacity.duration.300ms class="fixed bottom-24 right-6 h-[700px] max-h-[calc(100vh-8rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-50" style="width: 1000px; max-width: calc(100vw - 3rem); display: none;">
-                <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white">
+                <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white">
                     <h3 class="font-semibold flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         {{ __('Messenger') }}
@@ -148,7 +151,7 @@
             </button>
 
             <!-- Messenger Bubble -->
-            <button @click="activePopup = activePopup === 'messenger' ? null : 'messenger'" class="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500" aria-label="{{ __('Messenger') }}">
+            <button @click="activePopup = activePopup === 'messenger' ? null : 'messenger'" class="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" aria-label="{{ __('Messenger') }}">
                 <svg x-show="activePopup !== 'messenger'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 <svg x-show="activePopup === 'messenger'" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 <span class="absolute right-full mr-4 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none shadow-md">
