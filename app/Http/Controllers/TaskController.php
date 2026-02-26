@@ -179,14 +179,16 @@ class TaskController extends Controller
 
         $originalAssigneeId = $task->assignee_id;
 
-        $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+        $rules = [
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'status' => ['required', 'in:' . implode(',', $this->statuses)],
-            'priority' => ['required', 'in:' . implode(',', $this->priorities)],
+            'status' => ['sometimes', 'required', 'in:' . implode(',', $this->statuses)],
+            'priority' => ['sometimes', 'required', 'in:' . implode(',', $this->priorities)],
             'due_date' => ['nullable', 'date'],
             'assignee_id' => ['nullable', Rule::in($assignableIds)],
-        ]);
+        ];
+        
+        $data = $request->validate($rules);
 
         $task->update($data);
 
@@ -195,6 +197,10 @@ class TaskController extends Controller
             if ($assignee && $assignee->id !== Auth::id()) {
                 $assignee->notify(new TaskAssignedNotification($task));
             }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'task' => $task]);
         }
 
         return redirect()
