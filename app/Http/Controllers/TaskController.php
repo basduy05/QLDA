@@ -148,7 +148,7 @@ class TaskController extends Controller
 
         return view('tasks.show', [
             'task' => $task,
-            'isAdmin' => $user->isAdmin(),
+            'mentionableUsers' => $this->projectAssignableUsers($task->project),
         ]);
     }
 
