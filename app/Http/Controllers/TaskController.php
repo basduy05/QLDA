@@ -198,7 +198,7 @@ class TaskController extends Controller
         }
 
         return redirect()
-            ->route('projects.show', $task->project)
+            ->route('tasks.show', $task)
             ->with('status', __('Task updated successfully.'));
     }
 

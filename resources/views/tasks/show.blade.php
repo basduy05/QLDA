@@ -104,11 +104,13 @@
 
                 <div class="prose prose-sm prose-slate max-w-none border-t border-slate-100 pt-4">
                     <span class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">{{ __('Description') }}</span>
-                    @if($task->description)
-                        <p class="text-slate-600 leading-relaxed whitespace-pre-line">{!! nl2br(e($task->description)) !!}</p>
-                    @else
-                        <p class="text-slate-400 italic">{{ __('No description provided.') }}</p>
-                    @endif
+                    <div class="max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                        @if($task->description)
+                            <p class="text-slate-600 leading-relaxed whitespace-pre-line">{!! nl2br(e($task->description)) !!}</p>
+                        @else
+                            <p class="text-slate-400 italic">{{ __('No description provided.') }}</p>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -300,7 +302,7 @@
         {{-- Sidebar (Subtasks & Attachments) --}}
         <div class="lg:col-span-1 space-y-6">
             {{-- Subtasks --}}
-            <div class="card-strong p-5 flex flex-col max-h-[400px]">
+            <div class="card-strong p-5 flex flex-col h-[400px]">
                 <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                     {{ __('Subtasks') }}
@@ -367,7 +369,7 @@
             </div>
 
             {{-- Attachments --}}
-            <div class="card-strong p-5 flex flex-col max-h-[400px]">
+            <div class="card-strong p-5 flex flex-col h-[400px]">
                 <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/><path d="M22 22 2 2" class="hidden"/></svg>
                     {{ __('Attachments') }}
