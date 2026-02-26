@@ -788,7 +788,7 @@
 
                 if (feed) {
                     feed.scrollTop = feed.scrollHeight;
-                    setInterval(scheduleRefresh, 12000);
+                    // setInterval(scheduleRefresh, 12000);
                 }
 
                 const triggerTyping = () => {
@@ -843,12 +843,13 @@
                                     return;
                                 }
 
-                                if (eventName === 'message.direct' || eventName === 'message.group') {
+                                if (eventName === 'message.new' || eventName === 'direct-message.new') {
                                     scheduleRefresh();
                                 }
                             } catch (_) {
                             }
                         });
+
 
                         socket.addEventListener('close', () => {
                             setTimeout(connect, 1800);
@@ -1253,7 +1254,36 @@
                     if (event.target === modal) closeModal();
                 });
 
-                setInterval(sync, 2000);
+                if (window.realtime) {
+                    window.realtime.on('call.incoming', (payload) => {
+                        console.log('Incoming call', payload);
+                        if (currentCall && ['ringing', 'active'].includes(currentCall.status)) return;
+                        update(payload.call);
+                    });
+                    
+                    window.realtime.on('call.accepted', (payload) => {
+                        console.log('Call accepted', payload);
+                        if (currentCall && currentCall.id === payload.call.id) {
+                            update(payload.call);
+                        }
+                    });
+
+                    window.realtime.on('call.rejected', (payload) => {
+                        console.log('Call rejected', payload);
+                        if (currentCall && currentCall.id === payload.call.id) {
+                            update(payload.call);
+                        }
+                    });
+
+                    window.realtime.on('call.ended', (payload) => {
+                        console.log('Call ended', payload);
+                        if (currentCall && currentCall.id === payload.call.id) {
+                            update(payload.call);
+                        }
+                    });
+                }
+
+                // setInterval(sync, 2000);
             })();
         </script>
     @endif

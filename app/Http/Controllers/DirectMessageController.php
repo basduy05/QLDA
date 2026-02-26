@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DirectConversation;
 use App\Models\DirectMessage;
 use App\Models\User;
+use App\Services\RealtimeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -89,7 +90,7 @@ class DirectMessageController extends Controller
         ]);
     }
 
-    public function store(Request $request, User $contact): RedirectResponse
+    public function store(Request $request, User $contact, RealtimeService $realtime): RedirectResponse
     {
         $this->purgeExpiredMessages();
 
@@ -106,10 +107,19 @@ class DirectMessageController extends Controller
 
         $conversation = $this->findOrCreateConversation($user->id, $contact->id);
 
-        DirectMessage::create([
+        $message = DirectMessage::create([
             'direct_conversation_id' => $conversation->id,
             'user_id' => $user->id,
             'body' => trim($data['body']),
+        ]);
+
+        $realtime->broadcast(['user.'.$contact->id, 'user.'.$user->id], 'direct-message.new', [
+            'id' => $message->id,
+            'direct_conversation_id' => $conversation->id,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'body' => $message->body,
+            'created_at' => $message->created_at->toIso8601String(),
         ]);
 
         return redirect()->route('messages.show', $contact)

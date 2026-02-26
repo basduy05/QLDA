@@ -1,8 +1,10 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
+import RealtimeClient from './realtime-client';
 
 window.Alpine = Alpine;
+window.realtime = new RealtimeClient();
 
 Alpine.start();
 

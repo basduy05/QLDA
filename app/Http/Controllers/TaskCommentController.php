@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\TaskComment;
 use App\Models\User;
+use App\Services\RealtimeService;
 use App\Notifications\TaskCommented;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Notification;
 
 class TaskCommentController extends Controller
 {
-    public function store(Request $request, Task $task)
+    public function store(Request $request, Task $task, RealtimeService $realtime)
     {
         $this->ensureTaskViewAccess($task);
 
@@ -54,10 +55,12 @@ class TaskCommentController extends Controller
 
         if ($mentionedRecipients->isNotEmpty()) {
             Notification::send($mentionedRecipients, new TaskCommented($comment, true));
+            $realtime->broadcast($mentionedRecipients->map(fn($u) => 'user.'.$u->id)->all(), 'notification.new', []);
         }
 
         if ($baseRecipients->isNotEmpty()) {
             Notification::send($baseRecipients, new TaskCommented($comment, false));
+            $realtime->broadcast($baseRecipients->map(fn($u) => 'user.'.$u->id)->all(), 'notification.new', []);
         }
 
         return redirect()

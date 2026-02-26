@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CallSession;
 use App\Models\User;
+use App\Services\RealtimeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,7 +12,7 @@ class CallSessionController extends Controller
 {
     private const RING_TIMEOUT_SECONDS = 45;
 
-    public function start(User $contact)
+    public function start(User $contact, RealtimeService $realtime)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -48,9 +49,14 @@ class CallSessionController extends Controller
             'callee_id' => $contact->id,
             'status' => 'ringing',
         ]);
+        
+        $realtime->broadcast('user.'.$contact->id, 'call.incoming', [
+            'call' => $this->serialize($call)
+        ]);
 
         return response()->json(['call' => $this->serialize($call)], 201);
     }
+
 
     public function poll()
     {
@@ -100,7 +106,7 @@ class CallSessionController extends Controller
         return response()->json(['call' => $this->serialize($callSession)]);
     }
 
-    public function accept(CallSession $callSession)
+    public function accept(CallSession $callSession, RealtimeService $realtime)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -115,12 +121,16 @@ class CallSessionController extends Controller
                 'status' => 'active',
                 'accepted_at' => now(),
             ]);
+
+            $realtime->broadcast('user.'.$callSession->caller_id, 'call.accepted', [
+                'call' => $this->serialize($callSession)
+            ]);
         }
 
         return response()->json(['call' => $this->serialize($callSession->fresh())]);
     }
 
-    public function reject(CallSession $callSession)
+    public function reject(CallSession $callSession, RealtimeService $realtime)
     {
         $this->ensureAccess($callSession);
 
@@ -129,12 +139,15 @@ class CallSessionController extends Controller
                 'status' => 'rejected',
                 'ended_at' => now(),
             ]);
+            
+            $other = $callSession->caller_id === Auth::id() ? $callSession->callee_id : $callSession->caller_id;
+            $realtime->broadcast('user.'.$other, 'call.rejected', ['call' => $this->serialize($callSession)]);
         }
 
         return response()->json(['call' => $this->serialize($callSession->fresh())]);
     }
 
-    public function end(CallSession $callSession)
+    public function end(CallSession $callSession, RealtimeService $realtime)
     {
         $this->ensureAccess($callSession);
 
@@ -143,6 +156,9 @@ class CallSessionController extends Controller
                 'status' => 'ended',
                 'ended_at' => now(),
             ]);
+
+            $other = $callSession->caller_id === Auth::id() ? $callSession->callee_id : $callSession->caller_id;
+            $realtime->broadcast('user.'.$other, 'call.ended', ['call' => $this->serialize($callSession)]);
         }
 
         return response()->json(['call' => $this->serialize($callSession->fresh())]);

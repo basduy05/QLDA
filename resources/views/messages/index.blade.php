@@ -69,48 +69,68 @@
 
     @if ($activeContact)
         <script>
-            (function () {
+            document.addEventListener('DOMContentLoaded', () => {
                 const feed = document.getElementById('dm-feed');
-                const textarea = document.querySelector('textarea[name="body"]');
-                const endpoint = "{{ route('messages.feed', $activeContact) }}";
-                let loading = false;
+                if (!feed) return;
 
-                const sync = async () => {
-                    if (loading || !feed) {
-                        return;
-                    }
+                // Initial scroll
+                feed.scrollTop = feed.scrollHeight;
 
-                    if (textarea && document.activeElement === textarea) {
-                        return;
-                    }
+                const authId = {{ Auth::id() }};
+                const contactId = {{ $activeContact->id }};
 
-                    loading = true;
-                    const nearBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 120;
+                if (window.realtime) {
+                    window.realtime.subscribe(`user.${authId}`);
 
-                    try {
-                        const response = await fetch(endpoint, {
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                            credentials: 'same-origin',
-                        });
-
-                        if (!response.ok) {
+                    window.realtime.on('direct-message.new', (payload) => {
+                        console.log('New message received:', payload);
+                        
+                        // Prevent duplicates if already rendered
+                        if (document.querySelector(`[data-message-id="${payload.id}"]`)) {
                             return;
                         }
 
-                        const html = await response.text();
-                        feed.innerHTML = html;
+                        // Check if message belongs to this conversation
+                        // Either from me to contact, or from contact to me
+                        const validContext = 
+                            (payload.user_id === authId && payload.direct_conversation_id === {{ $conversation->id }}) ||
+                            (payload.user_id === contactId && payload.direct_conversation_id === {{ $conversation->id }});
 
+                        if (!validContext) return;
+
+                        // Identify if message is mine
+                        const isMe = payload.user_id === authId;
+                        
+                        // Create element
+                        const wrapper = document.createElement('div');
+                        wrapper.className = isMe ? 'flex justify-end' : 'flex justify-start';
+                        
+                        const bubble = document.createElement('div');
+                        bubble.className = `max-w-[75%] rounded-2xl px-4 py-3 ${isMe ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`;
+                        
+                        const text = document.createElement('p');
+                        text.className = 'text-sm whitespace-pre-wrap';
+                        text.textContent = payload.body;
+                        
+                        const time = document.createElement('p');
+                        time.className = 'text-[10px] mt-2 opacity-75';
+                        const date = new Date(payload.created_at);
+                        time.textContent = date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0');
+                        
+                        bubble.appendChild(text);
+                        bubble.appendChild(time);
+                        wrapper.appendChild(bubble);
+                        
+                        feed.appendChild(wrapper);
+                        
+                        // Auto scroll if near bottom
+                        const nearBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 120;
                         if (nearBottom) {
                             feed.scrollTop = feed.scrollHeight;
                         }
-                    } finally {
-                        loading = false;
-                    }
-                };
-
-                feed.scrollTop = feed.scrollHeight;
-                setInterval(sync, 4000);
-            })();
+                    });
+                }
+            });
         </script>
     @endif
 </x-app-layout>

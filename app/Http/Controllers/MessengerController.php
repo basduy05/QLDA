@@ -203,7 +203,7 @@ class MessengerController extends Controller
 
         $this->emitRealtime(
             channels: ['user.'.$contact->id, 'user.'.$user->id],
-            event: 'message.direct',
+            event: 'direct-message.new',
             payload: [
                 'from_id' => $user->id,
                 'to_id' => $contact->id,
@@ -213,6 +213,15 @@ class MessengerController extends Controller
 
         $contact->notify(new MessageReceivedNotification(
             __('New message from :name', ['name' => $user->name]),
+            $this->notificationPreview($body, ! empty($attachmentPayload)),
+            route('messenger.direct', $user)
+        ));
+
+        $this->emitRealtime(
+            channels: ['user.'.$contact->id],
+            event: 'notification.new',
+            payload: []
+        );
             $this->notificationPreview($body, ! empty($attachmentPayload)),
             route('messenger.direct', $user)
         ));
@@ -274,7 +283,7 @@ class MessengerController extends Controller
 
         $this->emitRealtime(
             channels: $channels,
-            event: 'message.group',
+            event: 'message.new',
             payload: [
                 'group_id' => $chatGroup->id,
                 'from_id' => $user->id,
@@ -290,6 +299,12 @@ class MessengerController extends Controller
                     __(':name: :message', ['name' => $user->name, 'message' => $this->notificationPreview($body, ! empty($attachmentPayload))]),
                     route('messenger.group', $chatGroup)
                 ));
+
+                $this->emitRealtime(
+                    channels: ['user.'.$member->id],
+                    event: 'notification.new',
+                    payload: []
+                );
             });
 
         if ($request->expectsJson()) {

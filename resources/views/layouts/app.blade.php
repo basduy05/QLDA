@@ -94,7 +94,16 @@
                     }
                 };
 
-                setInterval(syncNotifications, 7000);
+                if (window.realtime) {
+                    const userId = {{ Auth::id() }};
+                    window.realtime.subscribe(`user.${userId}`);
+                    window.realtime.on('notification.new', () => {
+                        console.log('Realtime notification received');
+                        syncNotifications();
+                    });
+                }
+
+                // setInterval(syncNotifications, 7000);
             })();
         </script>
 

@@ -367,8 +367,8 @@
         <div class="mt-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-                    {{ __('Kanban Board') }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    {{ __('Tasks List') }}
                 </h3>
                 @if ($canManageTasks)
                     <a href="{{ route('projects.tasks.create', $project) }}" class="btn-primary py-2 px-4 rounded-full text-sm shadow-md shadow-accent/20">
@@ -378,182 +378,129 @@
                 @endif
             </div>
 
-            <div class="flex gap-6 overflow-x-auto pb-6" style="min-height: 500px;">
-                @php
-                    $columns = [
-                        'todo' => ['label' => 'To Do', 'color' => 'bg-slate-100 border-slate-200', 'text' => 'text-slate-700', 'dot' => 'bg-slate-400'],
-                        'in_progress' => ['label' => 'In Progress', 'color' => 'bg-sky-50 border-sky-100', 'text' => 'text-sky-700', 'dot' => 'bg-sky-400'],
-                        'done' => ['label' => 'Done', 'color' => 'bg-emerald-50 border-emerald-100', 'text' => 'text-emerald-700', 'dot' => 'bg-emerald-400'],
-                    ];
-                @endphp
-
-                @foreach ($columns as $status => $style)
-                    <div class="flex-1 min-w-[300px] flex flex-col h-full rounded-2xl bg-slate-50/50 border border-slate-200/60 p-2">
-                        {{-- Column Header --}}
-                        <div class="p-3 mb-2 flex items-center justify-between sticky top-0 bg-slate-50/50 backdrop-blur-sm z-10 rounded-xl">
-                            <div class="flex items-center gap-2">
-                                <div class="w-2.5 h-2.5 rounded-full {{ $style['dot'] }}"></div>
-                                <h4 class="font-bold text-sm text-slate-800 uppercase tracking-wide">{{ __($style['label']) }}</h4>
-                                <span class="bg-white px-2 py-0.5 rounded-md text-xs font-bold text-slate-500 border border-slate-100 shadow-sm">
-                                    {{ $project->tasks->where('status', $status)->count() }}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        {{-- Task Cards --}}
-                        <div class="flex-1 space-y-3 p-1 overflow-y-auto custom-scrollbar" 
-                             ondrop="drop(event, '{{ $status }}')" 
-                             ondragover="allowDrop(event)">
-                            @forelse ($project->tasks->where('status', $status)->sortByDesc('created_at') as $task)
-                                <div class="group bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-accent/30 transition-all duration-200 cursor-pointer relative task-card" 
-                                     draggable="{{ $canManageTasks ? 'true' : 'false' }}" 
-                                     ondragstart="drag(event, '{{ $task->id }}')"
-                                     onclick="if(!event.target.closest('a')) window.location='{{ route('tasks.show', $task) }}'">
-                                    
-                                    {{-- Priority Badge --}}
-                                    <div class="flex justify-between items-start mb-2">
-                                        @php
-                                            $priorityColors = [
-                                                'low' => 'text-slate-500 bg-slate-50 border-slate-100',
-                                                'medium' => 'text-amber-600 bg-amber-50 border-amber-100',
-                                                'high' => 'text-rose-600 bg-rose-50 border-rose-100',
-                                            ];
-                                        @endphp
-                                        <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border {{ $priorityColors[$task->priority] ?? 'text-slate-500' }}">
-                                            {{ $task->priority }}
-                                        </span>
-                                        
-                                        @if($canManageTasks)
-                                            <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2 flex gap-1 bg-white p-1 rounded-lg shadow-sm">
-                                                <a href="{{ route('tasks.edit', $task) }}" class="p-1.5 text-slate-400 hover:text-accent hover:bg-slate-50 rounded-md" onclick="event.stopPropagation()">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                                                </a>
+            <div class="card-strong overflow-hidden border border-slate-200/60 shadow-sm rounded-2xl">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-slate-50/50 text-slate-500 uppercase tracking-wider text-[10px] font-bold">
+                            <tr>
+                                <th class="px-6 py-4 text-left">{{ __('Task') }}</th>
+                                <th class="px-6 py-4 text-left">{{ __('Assignee') }}</th>
+                                <th class="px-6 py-4 text-left">{{ __('Status') }}</th>
+                                <th class="px-6 py-4 text-left">{{ __('Priority') }}</th>
+                                <th class="px-6 py-4 text-left">{{ __('Due date') }}</th>
+                                <th class="px-6 py-4 text-right"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            @forelse ($project->tasks->sortByDesc('created_at') as $task)
+                                <tr class="hover:bg-slate-50/50 transition-colors group">
+                                    <td class="px-6 py-4 whitespace-normal min-w-[250px]">
+                                        <div class="flex items-start gap-3">
+                                            <div class="mt-1">
+                                                @if($task->status === 'done')
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                @elseif($task->status === 'in_progress')
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                @else
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                                                @endif
                                             </div>
-                                        @endif
-                                    </div>
-
-                                    <h5 class="text-sm font-bold text-slate-800 mb-2 leading-snug group-hover:text-accent transition-colors">
-                                        {{ $task->title }}
-                                    </h5>
-                                    
-                                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
-                                        {{-- Assignee --}}
+                                            <div>
+                                                <a href="{{ route('tasks.show', $task) }}" class="font-bold text-slate-900 hover:text-accent transition-colors {{ $task->status === 'done' ? 'line-through text-slate-400' : '' }}">{{ $task->title }}</a>
+                                                <div class="flex items-center gap-3 mt-1">
+                                                    @if($task->subtasks_count > 0)
+                                                        <span class="text-[10px] text-slate-400 inline-flex items-center gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                                            {{ $task->subtasks->where('is_completed', true)->count() }}/{{ $task->subtasks_count }}
+                                                        </span>
+                                                    @endif
+                                                    @if($task->comments_count > 0)
+                                                        <span class="text-[10px] text-slate-400 inline-flex items-center gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                                            {{ $task->comments_count }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
                                         @if($task->assignee)
-                                            <div class="flex items-center gap-2" title="{{ __('Assigned to') }} {{ $task->assignee->name }}">
+                                            <div class="flex items-center gap-2">
                                                 <div class="h-6 w-6 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-[10px] font-bold">
                                                     {{ strtoupper(substr($task->assignee->name, 0, 2)) }}
                                                 </div>
-                                                 <span class="text-xs text-slate-500 font-medium truncate max-w-[80px]">{{ $task->assignee->name }}</span>
+                                                <span class="text-slate-700 font-medium whitespace-nowrap">{{ $task->assignee->name }}</span>
                                             </div>
                                         @else
-                                            <div class="flex items-center gap-1.5 text-slate-400">
-                                                 <div class="h-6 w-6 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
-                                                 </div>
-                                                <span class="text-[10px] italic">{{ __('Unassigned') }}</span>
-                                            </div>
+                                            <span class="inline-flex items-center gap-1.5 text-slate-400 italic text-xs">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                                                {{ __('Unassigned') }}
+                                            </span>
                                         @endif
-
-                                        {{-- Due Date --}}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @php
+                                            $statusColors = [
+                                                'todo' => 'bg-slate-100 text-slate-700 border-slate-200',
+                                                'in_progress' => 'bg-sky-50 text-sky-700 border-sky-100',
+                                                'done' => 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                                            ];
+                                            $colorClass = $statusColors[$task->status] ?? 'bg-slate-100 text-slate-700 border-slate-200';
+                                        @endphp
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $colorClass }}">
+                                            {{ __(ucwords(str_replace('_', ' ', $task->status))) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @php
+                                            $priorityColors = [
+                                                'low' => 'text-slate-500 bg-slate-50 border-slate-200',
+                                                'medium' => 'text-amber-600 bg-amber-50 border-amber-200',
+                                                'high' => 'text-rose-600 bg-rose-50 border-rose-200',
+                                            ];
+                                            $pColorClass = $priorityColors[$task->priority] ?? 'text-slate-500 bg-slate-50 border-slate-200';
+                                        @endphp
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border {{ $pColorClass }}">
+                                            {{ __($task->priority) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
                                         @if($task->due_date)
-                                             <div class="flex items-center gap-1.5 {{ $task->due_date->isPast() && $task->status !== 'done' ? 'text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded' : 'text-slate-400' }}" title="{{ __('Due date') }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                                <span class="text-[10px] font-semibold">{{ $task->due_date->format('M d') }}</span>
-                                            </div>
+                                            <span class="text-xs font-medium {{ $task->due_date->isPast() && $task->status !== 'done' ? 'text-rose-600' : 'text-slate-500' }}">
+                                                {{ $task->due_date->format('M d, Y') }}
+                                            </span>
+                                        @else
+                                            <span class="text-slate-300 text-xs">-</span>
                                         @endif
-                                    </div>
-                                    
-                                    {{-- Stats --}}
-                                    <div class="mt-2 flex items-center gap-3 text-slate-400">
-                                        @if($task->subtasks_count > 0)
-                                            <div class="flex items-center gap-1 text-[10px]" title="{{ __('Subtasks') }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                                                <span>{{ $task->subtasks->where('is_completed', true)->count() }}/{{ $task->subtasks_count }}</span>
-                                            </div>
-                                        @endif
-                                        @if($task->comments_count > 0)
-                                            <div class="flex items-center gap-1 text-[10px]" title="{{ __('Comments') }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                                <span>{{ $task->comments_count }}</span>
-                                            </div>
-                                        @endif
-                                         @if($task->attachments_count > 0)
-                                            <div class="flex items-center gap-1 text-[10px]" title="{{ __('Attachments') }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                                <span>{{ $task->attachments_count }}</span>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('tasks.show', $task) }}" class="p-2 text-slate-400 hover:text-accent hover:bg-slate-50 rounded-lg transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            </a>
+                                            @if($canManageTasks)
+                                                <a href="{{ route('tasks.edit', $task) }}" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
                             @empty
-                                <div class="text-center py-8 px-4 border-2 border-dashed border-slate-200 rounded-xl">
-                                    <p class="text-xs text-slate-400 font-medium">{{ __('No tasks') }}</p>
-                                </div>
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                                        <div class="flex flex-col items-center justify-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg>
+                                            <p class="font-medium">{{ __('No tasks found for this project.') }}</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             @endforelse
-                        </div>
-                    </div>
-                @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-    <script>
-        function drag(ev, taskId) {
-            ev.dataTransfer.setData("taskId", taskId);
-            ev.dataTransfer.effectAllowed = "move";
-        }
-
-        function allowDrop(ev) {
-            ev.preventDefault();
-            ev.dataTransfer.dropEffect = "move";
-        }
-
-        function drop(ev, newStatus) {
-            ev.preventDefault();
-            const taskId = ev.dataTransfer.getData("taskId");
-            const draggedElement = document.querySelector(`[ondragstart="drag(event, '${taskId}')"]`);
-            
-            // Optimistic UI update
-            if (draggedElement) {
-                const targetColumn = ev.currentTarget;
-                if (targetColumn === draggedElement.parentElement) return;
-                
-                targetColumn.appendChild(draggedElement);
-                
-                // Update counter logic (simple visual update)
-                const oldColumn = draggedElement.parentElement;
-                // Note: updating counters properly requires finding specific elements which is complex without a framework like Vue/React/Alpine
-                // For now, we rely on page reload on error or just let it be until refresh
-            }
-
-            // AJAX request to update status
-            fetch(`/tasks/${taskId}`, {
-                method: 'POST', // Method spoofing for PUT
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    _method: 'PATCH',
-                    status: newStatus
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Task updated:', data);
-                // Optionally show a toast notification
-            })
-            .catch(error => {
-                console.error('Error updating task:', error);
-                alert('{{ __("Failed to update task status.") }}');
-                window.location.reload(); // Revert changes on error
-            });
-        }
-    </script>
 </x-app-layout>

@@ -89,8 +89,43 @@
                 }
             };
 
-            setInterval(refreshMessages, 5000);
+            // setInterval(refreshMessages, 5000);
             list.scrollTop = list.scrollHeight;
+
+            if (window.realtime) {
+                const groupId = {{ $chatGroup->id }};
+                window.realtime.subscribe(`chat_group.${groupId}`);
+
+                window.realtime.on('message.new', (payload) => {
+                    console.log('Group message received', payload);
+
+                    if (document.querySelector(`[data-message-id="${payload.id}"]`)) return;
+
+                    const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 120;
+
+                    const card = document.createElement('div');
+                    card.className = "card p-4";
+                    card.setAttribute('data-message-id', payload.id);
+                    
+                    const dateDesc = new Date(payload.created_at).toLocaleString('vi-VN', {
+                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="font-semibold text-slate-900">${payload.user_name}</p>
+                            <p class="text-xs text-slate-500">${dateDesc}</p>
+                        </div>
+                        <p class="text-sm text-slate-700 mt-2 whitespace-pre-wrap text-left">${payload.body}</p>
+                    `;
+
+                    list.appendChild(card);
+
+                    if (nearBottom) {
+                        list.scrollTop = list.scrollHeight;
+                    }
+                });
+            }
         })();
     </script>
 </x-app-layout>

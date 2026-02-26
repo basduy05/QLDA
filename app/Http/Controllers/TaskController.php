@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\RealtimeService;
 use App\Notifications\TaskAssignedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -102,7 +103,7 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Project $project)
+    public function store(Request $request, Project $project, RealtimeService $realtime)
     {
         $this->ensureTaskManageAccess($project);
 
@@ -126,6 +127,7 @@ class TaskController extends Controller
             $assignee = User::find($task->assignee_id);
             if ($assignee && $assignee->id !== Auth::id()) {
                 $assignee->notify(new TaskAssignedNotification($task));
+                $realtime->broadcast('user.'.$assignee->id, 'notification.new', []);
             }
         }
 
@@ -171,7 +173,7 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(Request $request, Task $task, RealtimeService $realtime)
     {
         $this->ensureTaskManageAccess($task->project);
 
@@ -196,6 +198,7 @@ class TaskController extends Controller
             $assignee = User::find($task->assignee_id);
             if ($assignee && $assignee->id !== Auth::id()) {
                 $assignee->notify(new TaskAssignedNotification($task));
+                $realtime->broadcast('user.'.$assignee->id, 'notification.new', []);
             }
         }
 
