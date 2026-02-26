@@ -46,6 +46,121 @@
                 </div>
             </div>
 
+            {{-- Subtasks --}}
+            <div class="card-strong p-6 relative">
+                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    {{ __('Subtasks') }}
+                </h3>
+                
+                <div class="space-y-3 mb-4" id="subtasks-list">
+                    @foreach($task->subtasks as $subtask)
+                        <div class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg group" x-data="{ editing: false, title: '{{ $subtask->title }}' }">
+                             <form method="POST" action="{{ route('subtasks.update', $subtask) }}" class="flex items-center">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="is_completed" value="0">
+                                <input type="checkbox" 
+                                       name="is_completed" 
+                                       value="1" 
+                                       onchange="this.form.submit()" 
+                                       class="rounded border-slate-300 text-accent focus:ring-accent w-4 h-4 cursor-pointer"
+                                       {{ $subtask->is_completed ? 'checked' : '' }}>
+                             </form>
+                             
+                             <div class="flex-grow min-w-0">
+                                 <span x-show="!editing" 
+                                       @dblclick="editing = true"
+                                       class="text-sm text-slate-700 block truncate cursor-pointer {{ $subtask->is_completed ? 'line-through text-slate-400' : '' }}">
+                                     {{ $subtask->title }}
+                                 </span>
+                                 <form x-show="editing" 
+                                       method="POST" 
+                                       action="{{ route('subtasks.update', $subtask) }}" 
+                                       @click.away="editing = false"
+                                       class="flex-grow"
+                                       style="display: none;">
+                                     @csrf
+                                     @method('PATCH')
+                                     <input type="text" 
+                                            name="title" 
+                                            x-model="title" 
+                                            class="w-full text-sm border-slate-200 rounded px-2 py-1 focus:ring-accent focus:border-accent"
+                                            autofocus>
+                                 </form>
+                             </div>
+
+                             <form method="POST" action="{{ route('subtasks.destroy', $subtask) }}" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-slate-400 hover:text-rose-600 p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                             </form>
+                        </div>
+                    @endforeach
+                </div>
+
+                <form method="POST" action="{{ route('tasks.subtasks.store', $task) }}" class="flex items-center gap-2 mt-2">
+                    @csrf
+                    <input type="text" name="title" placeholder="{{ __('Add a subtask...') }}" class="flex-grow text-sm border-slate-200 rounded-lg focus:ring-accent focus:border-accent placeholder-slate-400" required>
+                    <button type="submit" class="btn-secondary whitespace-nowrap">
+                        {{ __('Add') }}
+                    </button>
+                </form>
+            </div>
+
+            {{-- Attachments --}}
+            <div class="card-strong p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/><path d="M22 22 2 2" class="hidden"/></svg>
+                    {{ __('Attachments') }}
+                </h3>
+
+                @if($task->attachments->count() > 0)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        @foreach($task->attachments as $attachment)
+                            <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg group hover:border-accent/30 transition-colors">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="h-10 w-10 shrink-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                                        @if($attachment->file_type === 'image')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                        @elseif($attachment->file_type === 'pdf')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <a href="{{ Storage::url($attachment->file_path) }}" target="_blank" class="block text-sm font-medium text-slate-700 hover:text-accent truncate" title="{{ $attachment->file_name }}">
+                                            {{ $attachment->file_name }}
+                                        </a>
+                                        <p class="text-xs text-slate-400">
+                                            {{ \Illuminate\Support\Number::fileSize($attachment->file_size) }} • {{ $attachment->created_at->format('M d') }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <form method="POST" action="{{ route('attachments.destroy', $attachment) }}" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-slate-400 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition-colors" onclick="return confirm('{{ __('Delete file?') }}')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('tasks.attachments.store', $task) }}" enctype="multipart/form-data" class="mt-2">
+                    @csrf
+                    <label class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer">
+                        <input type="file" name="files[]" multiple required class="w-full text-slate-500" onchange="this.form.submit()">
+                    </label>
+                    <p class="text-xs text-slate-400 mt-1 pl-1">{{ __('Max 10MB per file.') }}</p>
+                </form>
+            </div>
+
             {{-- Comments --}}
             <div class="card-strong p-6">
                 <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">

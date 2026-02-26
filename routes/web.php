@@ -16,6 +16,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskSubtaskController;
+use App\Http\Controllers\TaskAttachmentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -55,6 +57,16 @@ Route::middleware('auth')->group(function () {
         ->name('projects.export');
     Route::resource('projects.tasks', TaskController::class)->shallow();
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
+    
+    // Subtasks
+    Route::post('/tasks/{task}/subtasks', [TaskSubtaskController::class, 'store'])->name('tasks.subtasks.store');
+    Route::patch('/subtasks/{subtask}', [TaskSubtaskController::class, 'update'])->name('subtasks.update');
+    Route::delete('/subtasks/{subtask}', [TaskSubtaskController::class, 'destroy'])->name('subtasks.destroy');
+
+    // Attachments
+    Route::post('/tasks/{task}/attachments', [TaskAttachmentController::class, 'store'])->name('tasks.attachments.store');
+    Route::delete('/attachments/{attachment}', [TaskAttachmentController::class, 'destroy'])->name('attachments.destroy');
+
     Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])
         ->name('tasks.comments.store');
     Route::get('/exports/projects', [ExportController::class, 'projects'])->name('exports.projects');
