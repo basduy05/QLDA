@@ -222,9 +222,6 @@ class MessengerController extends Controller
             event: 'notification.new',
             payload: []
         );
-            $this->notificationPreview($body, ! empty($attachmentPayload)),
-            route('messenger.direct', $user)
-        ));
 
         if ($request->expectsJson()) {
             return response()->json(['ok' => true]);
