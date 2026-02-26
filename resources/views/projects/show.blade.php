@@ -453,7 +453,19 @@
                                 </td>
                                 <td class="px-4 py-4 text-center">
                                     @if($task->due_date)
-                                        <span class="text-xs font-medium {{ $task->due_date < now() && $task->status != 'completed' ? 'text-rose-600 bg-rose-50 px-2 py-1 rounded' : 'text-slate-600' }}">
+                                        @php
+                                            $dateClass = 'text-slate-600';
+                                            if ($task->status === 'done') {
+                                                if ($task->updated_at->gt($task->due_date)) {
+                                                    $dateClass = 'text-amber-600 bg-amber-50 px-2 py-1 rounded';
+                                                } else {
+                                                    $dateClass = 'text-emerald-600 bg-emerald-50 px-2 py-1 rounded';
+                                                }
+                                            } elseif ($task->due_date->isPast()) {
+                                                $dateClass = 'text-rose-600 bg-rose-50 px-2 py-1 rounded';
+                                            }
+                                        @endphp
+                                        <span class="text-xs font-medium {{ $dateClass }}">
                                             {{ $task->due_date->format('M d') }}
                                         </span>
                                     @else

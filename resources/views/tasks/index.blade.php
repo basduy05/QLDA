@@ -158,10 +158,20 @@
                             <td class="px-6 py-4 text-slate-500 text-xs">
                                 @if($task->due_date)
                                     @php
-                                        $isOverdue = $task->due_date->isPast() && $task->status !== 'done';
-                                        $isDueSoon = $task->due_date->isFuture() && $task->due_date->diffInDays(now()) <= 2 && $task->status !== 'done';
+                                        $dateClass = '';
+                                        if ($task->status === 'done') {
+                                            if ($task->updated_at->gt($task->due_date)) {
+                                                $dateClass = 'text-amber-600 bg-amber-50 px-2 py-1 rounded font-medium';
+                                            } else {
+                                                $dateClass = 'text-emerald-600 bg-emerald-50 px-2 py-1 rounded font-medium';
+                                            }
+                                        } elseif ($task->due_date->isPast()) {
+                                            $dateClass = 'text-rose-600 bg-rose-50 px-2 py-1 rounded font-medium';
+                                        } elseif ($task->due_date->isFuture() && $task->due_date->diffInDays(now()) <= 2) {
+                                            $dateClass = 'text-amber-600 font-medium';
+                                        }
                                     @endphp
-                                    <span class="{{ $isOverdue ? 'text-rose-600 font-medium' : ($isDueSoon ? 'text-amber-600 font-medium' : '') }}">{{ $task->due_date->format('d/m/Y') }}</span>
+                                    <span class="{{ $dateClass }}">{{ $task->due_date->format('d/m/Y') }}</span>
                                 @else
                                     <span class="text-slate-400">—</span>
                                 @endif
