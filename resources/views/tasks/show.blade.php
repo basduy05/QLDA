@@ -136,7 +136,13 @@
                                             {{ $attachment->file_name }}
                                         </a>
                                         <p class="text-xs text-slate-400">
-                                            {{ \Illuminate\Support\Number::fileSize($attachment->file_size) }} • {{ $attachment->created_at->format('M d') }}
+                                            @php
+                                                $size = $attachment->file_size;
+                                                $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                                                $power = $size > 0 ? floor(log($size, 1024)) : 0;
+                                                $formattedSize = number_format($size / pow(1024, $power), 2, '.', ',') . ' ' . $units[$power];
+                                            @endphp
+                                            {{ $formattedSize }} • {{ $attachment->created_at->format('M d') }}
                                         </p>
                                     </div>
                                 </div>
@@ -152,22 +158,36 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('tasks.attachments.store', $task) }}" enctype="multipart/form-data" class="mt-2">
+                <form method="POST" action="{{ route('tasks.attachments.store', $task) }}" enctype="multipart/form-data" class="mt-4" x-data="{ isDragging: false }">
                     @csrf
-                    <label class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer">
-                        <input type="file" name="files[]" multiple required class="w-full text-slate-500" onchange="this.form.submit()">
-                    </label>
-                    <p class="text-xs text-slate-400 mt-1 pl-1">{{ __('Max 10MB per file.') }}</p>
+                    <div class="relative group">
+                        <label 
+                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors"
+                            :class="isDragging ? 'border-accent bg-accent/5' : 'border-slate-300 hover:bg-slate-50'"
+                            @dragover.prevent="isDragging = true"
+                            @dragleave.prevent="isDragging = false"
+                            @drop.prevent="isDragging = false; $refs.fileInput.files = $event.dataTransfer.files; $refs.form.submit()"
+                        >
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-3 text-slate-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                </svg>
+                                <p class="mb-2 text-sm text-slate-500"><span class="font-semibold text-accent">{{ __('Click to upload') }}</span> {{ __('or drag and drop') }}</p>
+                                <p class="text-xs text-slate-400">PDF, PNG, JPG, DOCX (Max 10MB)</p>
+                            </div>
+                            <input x-ref="fileInput" type="file" name="files[]" multiple required class="hidden" onchange="this.form.submit()">
+                        </label>
+                    </div>
                 </form>
             </div>
 
             {{-- Comments --}}
-            <div class="card-strong p-6">
-                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <div class="card-strong p-6 flex flex-col h-[600px]">
+                <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     {{ __('Comments') }}
                 </h3>
-                <div class="space-y-4 mb-6">
+                <div class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                     @forelse ($task->comments as $comment)
                         <div class="flex items-start gap-3">
                             <div class="h-8 w-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold shrink-0 text-xs">
@@ -184,10 +204,13 @@
                             </div>
                         </div>
                     @empty
-                        <p class="text-sm text-center text-slate-500 py-4">{{ __('No comments yet.') }}</p>
+                        <div class="flex flex-col items-center justify-center h-full text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg>
+                            <p class="text-sm">{{ __('No comments yet.') }}</p>
+                        </div>
                     @endforelse
                 </div>
-                <div class="pt-4 border-t border-slate-100">
+                <div class="pt-4 border-t border-slate-100 flex-shrink-0">
                     <form method="POST" action="{{ route('tasks.comments.store', $task) }}" class="space-y-3">
                         @csrf
                         <div class="flex items-start gap-3">
@@ -195,7 +218,7 @@
                                 {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                             </div>
                             <div class="flex-1">
-                                <textarea name="body" rows="2" class="w-full rounded-xl border-slate-200 text-sm focus:ring-accent focus:border-accent" placeholder="{{ __('Write a comment...') }}" required>{{ old('body') }}</textarea>
+                                <textarea name="body" rows="2" class="w-full rounded-xl border-slate-200 text-sm focus:ring-accent focus:border-accent resize-none" placeholder="{{ __('Write a comment...') }}" required>{{ old('body') }}</textarea>
                                 <x-input-error :messages="$errors->get('body')" class="mt-2" />
                             </div>
                         </div>
