@@ -32,8 +32,6 @@ COPY . .
 
 COPY --from=assets /app/public/build /var/www/html/public/build
 
-# Update lock file since we don't have composer locally
-RUN composer update resend/resend-laravel --no-dev --optimize-autoloader
 RUN composer install --no-dev --optimize-autoloader
 RUN php artisan storage:link || true
 RUN chown -R www-data:www-data storage bootstrap/cache
