@@ -12,8 +12,8 @@ class RealtimeService
 
     public function __construct()
     {
-        $this->url = config('services.realtime.url', 'http://localhost:8081');
-        $this->secret = config('services.realtime.secret', '');
+        $this->url = config('services.realtime.server_url') ?? 'http://localhost:8081';
+        $this->secret = config('services.realtime.secret') ?? '';
     }
 
     public function broadcast(array $channels, string $event, array $payload = []): void

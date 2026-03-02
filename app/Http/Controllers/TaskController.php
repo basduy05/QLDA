@@ -65,6 +65,32 @@ class TaskController extends Controller
             $query->where('project_id', (int) $request->input('project_id'));
         }
 
+        if ($request->filled('assignee_id')) {
+            $query->where('assignee_id', (int) $request->input('assignee_id'));
+        }
+
+        $usersFilter = collect();
+        if ($request->filled('project_id')) {
+            $project = Project::find($request->input('project_id'));
+            if ($project) {
+                $usersFilter = $project->members()->orderBy('name')->get();
+                // Add owner if not already in members
+                if ($project->owner && !$usersFilter->contains('id', $project->owner_id)) {
+                    $usersFilter->push($project->owner);
+                }
+            }
+        } else {
+             if ($user->isAdmin()) {
+                 $usersFilter = User::orderBy('name')->get();
+             } else {
+                 $usersFilter = User::whereHas('projects', function($q) use ($user) {
+                     $q->whereIn('projects.id', $user->projects->pluck('id'));
+                 })->orWhere('id', $user->id)->orderBy('name')->get();
+             }
+        }
+        
+        $usersFilter = $usersFilter->unique('id')->sortBy('name');
+
         if (!$user->isAdmin()) {
             $query->where(function ($taskQuery) use ($user) {
                 $taskQuery->where('assignee_id', $user->id)
@@ -80,6 +106,7 @@ class TaskController extends Controller
         return view('tasks.index', [
             'tasks' => $query->paginate(15)->withQueryString(),
             'projectsFilter' => $projectFilterQuery->get(),
+            'usersFilter' => $usersFilter,
             'isAdmin' => $user->isAdmin(),
             'manageableProjects' => $manageableProjects,
         ]);

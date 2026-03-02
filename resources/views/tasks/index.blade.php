@@ -50,11 +50,20 @@
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search tasks...') }}" class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent sm:text-sm transition-shadow">
                 </div>
 
-                <select name="project_id" class="w-full sm:w-64 px-3 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent">
-                    <option value="">{{ __('All projects') }}</option>
+                <select name="project_id" onchange="this.form.submit()" class="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent">
+                    <option value="">{{ __('All Projects') }}</option>
                     @foreach ($projectsFilter as $projectOption)
                         <option value="{{ $projectOption->id }}" @selected((string) request('project_id') === (string) $projectOption->id)>
                             {{ $projectOption->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <select name="assignee_id" class="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent">
+                    <option value="">{{ __('All Assignees') }}</option>
+                    @foreach ($usersFilter as $userOption)
+                        <option value="{{ $userOption->id }}" @selected((string) request('assignee_id') === (string) $userOption->id)>
+                            {{ $userOption->name }}
                         </option>
                     @endforeach
                 </select>
