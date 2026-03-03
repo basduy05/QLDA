@@ -175,10 +175,20 @@ class TaskController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        $canEdit = $user->isAdmin();
+        if (!$canEdit) {
+            if ($task->assignee_id) {
+                $canEdit = $user->id === $task->assignee_id;
+            } else {
+                $canEdit = $task->project->userHasRole($user, [Project::ROLE_LEAD, Project::ROLE_DEPUTY]);
+            }
+        }
+
         return view('tasks.show', [
             'task' => $task,
             'mentionableUsers' => $this->projectAssignableUsers($task->project),
             'isAdmin' => $user->isAdmin(),
+            'canEdit' => $canEdit,
         ]);
     }
 
@@ -187,7 +197,7 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        $this->ensureTaskManageAccess($task->project);
+        $this->ensureTaskEditAccess($task);
 
         return view('tasks.edit', [
             'task' => $task,
@@ -203,7 +213,7 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task, RealtimeService $realtime)
     {
-        $this->ensureTaskManageAccess($task->project);
+        $this->ensureTaskEditAccess($task);
 
         $assignableIds = $this->projectAssignableUserIds($task->project);
 
@@ -267,6 +277,25 @@ class TaskController extends Controller
         }
 
         abort(403);
+    }
+
+    private function ensureTaskEditAccess(Task $task): void
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        if ($task->assignee_id) {
+            if ($user->id === $task->assignee_id) {
+                return;
+            }
+            abort(403);
+        }
+
+        $this->ensureTaskManageAccess($task->project);
     }
 
     private function ensureTaskViewAccess(Task $task): void

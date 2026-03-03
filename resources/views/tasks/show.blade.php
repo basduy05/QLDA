@@ -12,10 +12,14 @@
                 </h2>
             </div>
             <div class="flex flex-wrap items-center gap-2">
+                @if($canEdit)
                 <a href="{{ route('tasks.edit', $task) }}" class="btn-secondary inline-flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                     {{ __('Edit') }}
                 </a>
+                @endif
+
+                @if(auth()->user()->isAdmin() || $task->project->userHasRole(auth()->user(), ['lead', 'deputy']))
                 <form method="POST" action="{{ route('tasks.destroy', $task) }}" data-confirm="{{ __('Are you sure you want to delete this task?') }}">
                     @csrf
                     @method('DELETE')
@@ -24,6 +28,7 @@
                         {{ __('Delete') }}
                     </button>
                 </form>
+                @endif
             </div>
         </div>
     </x-slot>
@@ -377,19 +382,21 @@
                                        value="1" 
                                        onchange="this.form.submit()" 
                                        class="rounded border-slate-300 text-accent focus:ring-accent w-4 h-4 cursor-pointer"
-                                       {{ $subtask->is_completed ? 'checked' : '' }}>
+                                       {{ $subtask->is_completed ? 'checked' : '' }}
+                                       {{ $canEdit ? '' : 'disabled' }}>
                              </form>
                              
                              <div class="flex-grow min-w-0 flex flex-col gap-1">
                                  <div class="flex items-center justify-between gap-2">
                                      <span x-show="!editing" 
-                                           @dblclick="editing = true"
+                                           @if($canEdit) @dblclick="editing = true" @endif
                                            class="text-sm text-slate-700 block break-words cursor-pointer {{ $subtask->is_completed ? 'line-through text-slate-400' : '' }}">
                                          {{ $subtask->title }}
                                      </span>
                                      <span x-show="!editing" class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 flex-shrink-0" title="{{ __('Efficiency Points') }}">{{ $subtask->points * 1 }} pts</span>
                                  </div>
-
+                                 
+                                 @if($canEdit)
                                  <form x-show="editing" 
                                        method="POST" 
                                        action="{{ route('subtasks.update', $subtask) }}" 
@@ -412,8 +419,10 @@
                                          <button type="submit" class="ml-auto bg-accent text-white text-[10px] px-2 py-1 rounded hover:bg-accent/90">{{ __('Save') }}</button>
                                      </div>
                                  </form>
+                                 @endif
                              </div>
 
+                             @if($canEdit)
                              <form method="POST" action="{{ route('subtasks.destroy', $subtask) }}" class="opacity-0 group-hover:opacity-100 transition-opacity pt-1">
                                 @csrf
                                 @method('DELETE')
@@ -421,10 +430,12 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 </button>
                              </form>
+                             @endif
                         </div>
                     @endforeach
                 </div>
 
+                @if($canEdit)
                 <form method="POST" action="{{ route('tasks.subtasks.store', $task) }}" class="flex items-center gap-2 mt-auto pt-2 border-t border-slate-100">
                     @csrf
                     <input type="text" name="title" placeholder="{{ __('Add subtask...') }}" class="flex-grow text-xs border-slate-200 rounded-lg focus:ring-accent focus:border-accent placeholder-slate-400" required>
@@ -435,6 +446,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                 </form>
+                @endif
             </div>
 
             {{-- Attachments --}}

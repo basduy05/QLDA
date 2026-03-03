@@ -479,7 +479,21 @@
                                             <a href="{{ route('tasks.show', $task) }}" class="p-2 text-slate-400 hover:text-accent hover:bg-slate-50 rounded-lg transition-colors">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                                             </a>
-                                            @if($canManageTasks)
+                                            
+                                            @php
+                                                $canEditTask = false;
+                                                if (auth()->user()->isAdmin()) {
+                                                    $canEditTask = true;
+                                                } elseif ($task->assignee_id) {
+                                                    $canEditTask = auth()->id() === $task->assignee_id;
+                                                } else {
+                                                    // Unassigned tasks can be edited by Managers (Admin/Lead/Deputy)
+                                                    // Note: $canManageTasks is passed from controller and includes Admin/Lead/Deputy logic
+                                                    $canEditTask = $canManageTasks;
+                                                }
+                                            @endphp
+
+                                            @if($canEditTask)
                                                 <a href="{{ route('tasks.edit', $task) }}" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                                 </a>

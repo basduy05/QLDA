@@ -84,17 +84,22 @@ class TaskSubtaskController extends Controller
 
     private function ensureAccess(Task $task): void
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         
         if ($user->isAdmin()) {
             return;
         }
 
-        if ($task->project->owner_id === $user->id) {
-            return;
+        if ($task->assignee_id) {
+            if ($user->id === $task->assignee_id) {
+                return;
+            }
+            abort(403);
         }
 
-        if ($task->project->members()->where('users.id', $user->id)->exists()) {
+        // Unassigned tasks: allow Project managers
+        if ($task->project->userHasRole($user, ['lead', 'deputy'])) {
             return;
         }
 
