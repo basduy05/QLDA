@@ -23,15 +23,18 @@ class DashboardController extends Controller
         if (!$user->isAdmin()) {
             $projectQuery->where(function (Builder $query) use ($user) {
                 $query->where('owner_id', $user->id)
-                    ->orWhereHas('tasks', function (Builder $taskQuery) use ($user) {
-                        $taskQuery->where('assignee_id', $user->id);
+                    ->orWhereHas('members', function (Builder $memberQuery) use ($user) {
+                        $memberQuery->where('users.id', $user->id);
                     });
             });
 
             $taskQuery->where(function ($query) use ($user) {
                 $query->where('assignee_id', $user->id)
                     ->orWhereHas('project', function ($projectQuery) use ($user) {
-                        $projectQuery->where('owner_id', $user->id);
+                        $projectQuery->where('owner_id', $user->id)
+                            ->orWhereHas('members', function (Builder $memberQuery) use ($user) {
+                                $memberQuery->where('users.id', $user->id);
+                            });
                     });
             });
         }
