@@ -1283,6 +1283,16 @@
                     });
                 }
 
+                window.realtime.on('direct-message.new', () => {
+                    console.log('Realtime direct-message received');
+                    sync();
+                });
+                
+                window.realtime.on('message.new', () => {
+                    console.log('Realtime group message received');
+                    sync();
+                });
+
                 // setInterval(sync, 2000);
             })();
         </script>
