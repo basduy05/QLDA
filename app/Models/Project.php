@@ -79,7 +79,7 @@ class Project extends Model
     public function getMemberStatistics(): array
     {
         $stats = [];
-        $tasks = $this->tasks()->get();
+        $tasks = $this->tasks()->with('subtasks')->get();
 
         // Initialize stats for all members
         foreach ($this->members as $member) {
@@ -141,6 +141,15 @@ class Project extends Model
                     $stats[$assigneeId]['in_progress']++;
                     $stats[$assigneeId]['score'] += 2; // 2 points for in-progress/todo
                     $totalProjectScore += 2;
+                }
+            }
+
+            // Add subtask points to score
+            foreach ($task->subtasks as $subtask) {
+                if ($subtask->is_completed) {
+                    $points = (float) ($subtask->points ?? 0.2);
+                    $stats[$assigneeId]['score'] += $points;
+                    $totalProjectScore += $points;
                 }
             }
         }

@@ -405,8 +405,10 @@
                                             rows="2"
                                             autofocus></textarea>
                                      <div class="flex items-center gap-2">
-                                         <label class="text-[10px] uppercase font-bold text-slate-500">{{ __('Points') }}:</label>
-                                         <input type="number" name="points" x-model="points" min="0.1" max="10" step="0.1" class="w-16 h-6 text-xs border-slate-200 rounded focus:ring-accent focus:border-accent">
+                                         @if($isAdmin)
+                                             <label class="text-[10px] uppercase font-bold text-slate-500">{{ __('Points') }}:</label>
+                                             <input type="number" name="points" x-model="points" min="0.1" max="10" step="0.1" class="w-16 h-6 text-xs border-slate-200 rounded focus:ring-accent focus:border-accent">
+                                         @endif
                                          <button type="submit" class="ml-auto bg-accent text-white text-[10px] px-2 py-1 rounded hover:bg-accent/90">{{ __('Save') }}</button>
                                      </div>
                                  </form>
@@ -426,7 +428,9 @@
                 <form method="POST" action="{{ route('tasks.subtasks.store', $task) }}" class="flex items-center gap-2 mt-auto pt-2 border-t border-slate-100">
                     @csrf
                     <input type="text" name="title" placeholder="{{ __('Add subtask...') }}" class="flex-grow text-xs border-slate-200 rounded-lg focus:ring-accent focus:border-accent placeholder-slate-400" required>
-                    <input type="number" name="points" placeholder="Pts" class="w-14 text-xs border-slate-200 rounded-lg focus:ring-accent focus:border-accent placeholder-slate-400 text-center" min="0.1" max="10" step="0.1" value="0.2" title="{{ __('Efficiency Points (0.1-10)') }}">
+                    @if($isAdmin)
+                        <input type="number" name="points" placeholder="Pts" class="w-14 text-xs border-slate-200 rounded-lg focus:ring-accent focus:border-accent placeholder-slate-400 text-center" min="0.1" max="10" step="0.1" value="0.2" title="{{ __('Efficiency Points (0.1-10)') }}">
+                    @endif
                     <button type="submit" class="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 hover:text-slate-900 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>

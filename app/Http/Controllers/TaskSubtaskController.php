@@ -16,14 +16,23 @@ class TaskSubtaskController extends Controller
     {
         $this->ensureAccess($task);
 
-        $validated = $request->validate([
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $isAdmin = $user->isAdmin();
+
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
-            'points' => ['nullable', 'numeric', 'min:0.1', 'max:10'],
-        ]);
+        ];
+
+        if ($isAdmin) {
+            $rules['points'] = ['nullable', 'numeric', 'min:0.1', 'max:10'];
+        }
+
+        $validated = $request->validate($rules);
 
         $task->subtasks()->create([
             'title' => $validated['title'],
-            'points' => $validated['points'] ?? 0.2,
+            'points' => $isAdmin ? ($validated['points'] ?? 0.2) : 0.2,
             'is_completed' => false,
         ]);
 
@@ -37,11 +46,20 @@ class TaskSubtaskController extends Controller
     {
         $this->ensureAccess($subtask->task);
 
-        $validated = $request->validate([
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $isAdmin = $user->isAdmin();
+
+        $rules = [
             'is_completed' => ['nullable', 'boolean'],
             'title' => ['nullable', 'string', 'max:255'],
-            'points' => ['nullable', 'numeric', 'min:0.1', 'max:10'],
-        ]);
+        ];
+
+        if ($isAdmin) {
+             $rules['points'] = ['nullable', 'numeric', 'min:0.1', 'max:10'];
+        }
+
+        $validated = $request->validate($rules);
 
         $subtask->update($validated);
 
