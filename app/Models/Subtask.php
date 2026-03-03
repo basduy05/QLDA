@@ -11,10 +11,12 @@ class Subtask extends Model
         'task_id',
         'title',
         'is_completed',
+        'points',
     ];
 
     protected $casts = [
         'is_completed' => 'boolean',
+        'points' => 'decimal:2',
     ];
 
     public function task(): BelongsTo

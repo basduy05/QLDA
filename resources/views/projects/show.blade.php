@@ -84,7 +84,7 @@
                 </h3>
                 <div class="prose prose-sm prose-slate max-w-none flex-grow">
                     @if($project->description)
-                        <p class="text-slate-600 leading-relaxed">{{ $project->description }}</p>
+                        <p class="text-slate-600 leading-relaxed whitespace-pre-line">{!! \App\Helpers\TextHelper::parseLinks($project->description) !!}</p>
                     @else
                         <p class="text-slate-400 italic">{{ __('No description provided.') }}</p>
                     @endif
@@ -107,9 +107,9 @@
                         <div>
                             <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">{{ __('Timeline') }}</p>
                             <p class="font-semibold text-slate-900">
-                                {{ $project->start_date?->format('d/m/Y') ?? '—' }} 
-                                <span class="text-slate-400 mx-1">→</span> 
-                                {{ $project->end_date?->format('d/m/Y') ?? '—' }}
+                                {{ $project->start_date?->format('d/m/Y H:i') ?? '—' }} 
+                                <span class="text-slate-400 mx-1">→</span>
+                                {{ $project->end_date?->format('d/m/Y H:i') ?? '—' }}
                             </p>
                         </div>
                     </div>

@@ -101,7 +101,7 @@
                     @forelse ($upcomingTasks as $task)
                         <div class="rounded-lg border border-slate-200 px-3 py-2 bg-slate-50/70">
                             <p class="font-medium text-sm text-slate-900">{{ $task->title }}</p>
-                            <p class="text-xs text-slate-500">{{ $task->project?->name }} · {{ $task->due_date?->format('d/m/Y') }}</p>
+                            <p class="text-xs text-slate-500">{{ $task->project?->name }} · {{ $task->due_date?->format('d/m/Y H:i') }}</p>
                         </div>
                     @empty
                         <p class="text-sm text-slate-500">{{ __('No upcoming tasks.') }}</p>
@@ -119,7 +119,7 @@
                 @forelse ($overdueTasks as $task)
                     <div class="card p-3 border-red-100 bg-red-50/30">
                         <p class="font-medium text-sm text-slate-900">{{ $task->title }}</p>
-                        <p class="text-xs text-slate-500">{{ $task->project?->name }} · {{ $task->due_date?->format('d/m/Y') }}</p>
+                        <p class="text-xs text-slate-500">{{ $task->project?->name }} · {{ $task->due_date?->format('d/m/Y H:i') }}</p>
                     </div>
                 @empty
                     <p class="text-sm text-slate-500">{{ __('No overdue tasks.') }}</p>

@@ -97,7 +97,7 @@
                         <span class="text-xs font-medium text-slate-500 uppercase tracking-wider block mb-1">{{ __('Due Date') }}</span>
                         <div class="flex items-center gap-1.5 text-sm font-semibold {{ $task->due_date && $task->due_date->isPast() && $task->status !== 'done' ? 'text-rose-600' : 'text-slate-900' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            {{ $task->due_date ? $task->due_date->format('d/m/Y') : '—' }}
+                            {{ $task->due_date ? $task->due_date->format('d/m/Y H:i') : '—' }}
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                     <span class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2 block">{{ __('Description') }}</span>
                     <div class="max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                         @if($task->description)
-                            <p class="text-slate-600 leading-relaxed whitespace-pre-line">{!! nl2br(e($task->description)) !!}</p>
+                            <p class="text-slate-600 leading-relaxed whitespace-pre-line">{!! \App\Helpers\TextHelper::parseLinks($task->description) !!}</p>
                         @else
                             <p class="text-slate-400 italic">{{ __('No description provided.') }}</p>
                         @endif
@@ -132,7 +132,7 @@
                                     <span class="text-slate-500" title="{{ $comment->created_at->format('d/m/Y H:i:s') }}">{{ $comment->created_at->diffForHumans() }}</span>
                                 </div>
                                 <div class="text-sm text-slate-700 whitespace-pre-line">
-                                    {!! $comment->body !!}
+                                    {!! \App\Helpers\TextHelper::parseLinks($comment->body) !!}
                                 </div>
                             </div>
                         </div>
@@ -301,17 +301,73 @@
 
         {{-- Sidebar (Subtasks & Attachments) --}}
         <div class="lg:col-span-1 space-y-6">
-            {{-- Subtasks --}}
-            <div class="card-strong p-5 flex flex-col h-[400px]">
-                <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2 flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                    {{ __('Subtasks') }}
-                    <span class="text-xs font-normal text-slate-400 ml-auto">{{ $task->subtasks->where('is_completed', true)->count() }}/{{ $task->subtasks->count() }}</span>
-                </h3>
-                
-                <div class="space-y-2 mb-3 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent flex-1" id="subtasks-list">
+
+<div x-data="{ showPointsInfo: false }">
+    <div class="card-strong p-5 flex flex-col h-[400px]">
+        <h3 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2 flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            {{ __('Subtasks') }}
+            <button @click="showPointsInfo = true" type="button" class="text-slate-400 hover:text-accent ml-1" title="{{ __('How is progress calculated?') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </button>
+            <span class="text-xs font-normal text-slate-400 ml-auto">{{ $task->subtasks->where('is_completed', true)->count() }}/{{ $task->subtasks->count() }}</span>
+        </h3>
+        
+        {{-- Points Explanation Modal --}}
+        <div x-show="showPointsInfo" 
+             style="display: none;"
+             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+             x-transition.opacity>
+            <div @click.away="showPointsInfo = false" class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-slate-900">{{ __('Hệ thống tính điểm hiệu suất') }}</h3>
+                        <button @click="showPointsInfo = false" class="text-slate-400 hover:text-slate-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    
+                    <div class="prose prose-sm prose-slate">
+                        <p>{{ __('Cách tính % hoàn thành công việc không chỉ dựa trên số lượng đầu việc, mà dựa trên mục tiêu trọng số (điểm) của từng đầu việc con.') }}</p>
+                        
+                        <div class="bg-slate-50 p-4 rounded-lg my-4 border border-slate-100">
+                            <h4 class="font-bold text-slate-900 mt-0">{{ __('Công thức tính toán:') }}</h4>
+                            <p class="font-mono text-xs bg-white p-2 rounded border border-slate-200 mt-2">
+                                {{ __('Tiến độ (%) = (Tổng điểm đã hoàn thành / Tổng điểm toàn bộ) x 100%') }}
+                            </p>
+                        </div>
+
+                        <h4 class="font-bold text-slate-900">{{ __('Hệ thống điểm số:') }}</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>0.2 điểm (Mặc định):</strong> {{ __('Các việc nhỏ, phụ trợ (VD: Gửi mail, báo cáo nhanh, gọi điện).') }}</li>
+                            <li><strong>1.0 - 3.0 điểm:</strong> {{ __('Các việc trung bình (VD: Code chức năng nhỏ, sửa lỗi, viết tài liệu).') }}</li>
+                            <li><strong>5.0+ điểm:</strong> {{ __('Các việc lớn, quan trọng (VD: Thiết kế core, deploy server, demo khách hàng).') }}</li>
+                        </ul>
+
+                        <div class="mt-4">
+                            <h4 class="font-bold text-slate-900">{{ __('Ví dụ minh họa:') }}</h4>
+                            <p>{{ __('Bạn có 2 đầu việc:') }}</p>
+                            <ol class="list-decimal pl-5 space-y-1">
+                                <li>{{ __('Gửi email (0.2 điểm) -> Đã xong') }}</li>
+                                <li>{{ __('Viết báo cáo (5.0 điểm) -> Chưa xong') }}</li>
+                            </ol>
+                            <p class="mt-2 text-slate-600 italic">
+                                {{ __('Nếu tính theo số lượng: 1/2 việc = 50% (Sai lệch).') }}<br>
+                                {{ __('Tính theo trọng số: 0.2 / 5.2 = ') }} <strong>3.8%</strong> {{ __('(Chính xác khối lượng thực).') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 text-right">
+                        <button @click="showPointsInfo = false" class="btn-primary">{{ __('Đã hiểu') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="space-y-2 mb-3 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent flex-1" id="subtasks-list">
                     @foreach($task->subtasks as $subtask)
-                        <div class="flex items-start gap-2 p-2 hover:bg-slate-50 rounded-lg group transition-colors" x-data="{ editing: false, title: '{{ $subtask->title }}' }">
+                        <div class="flex items-start gap-2 p-2 hover:bg-slate-50 rounded-lg group transition-colors" x-data="{ editing: false, title: '{{ $subtask->title }}', points: {{ $subtask->points ?? 0.2 }} }">
                              <form method="POST" action="{{ route('subtasks.update', $subtask) }}" class="flex items-center pt-1">
                                 @csrf
                                 @method('PATCH')
@@ -324,17 +380,21 @@
                                        {{ $subtask->is_completed ? 'checked' : '' }}>
                              </form>
                              
-                             <div class="flex-grow min-w-0">
-                                 <span x-show="!editing" 
-                                       @dblclick="editing = true"
-                                       class="text-sm text-slate-700 block break-words cursor-pointer {{ $subtask->is_completed ? 'line-through text-slate-400' : '' }}">
-                                     {{ $subtask->title }}
-                                 </span>
+                             <div class="flex-grow min-w-0 flex flex-col gap-1">
+                                 <div class="flex items-center justify-between gap-2">
+                                     <span x-show="!editing" 
+                                           @dblclick="editing = true"
+                                           class="text-sm text-slate-700 block break-words cursor-pointer {{ $subtask->is_completed ? 'line-through text-slate-400' : '' }}">
+                                         {{ $subtask->title }}
+                                     </span>
+                                     <span x-show="!editing" class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 flex-shrink-0" title="{{ __('Efficiency Points') }}">{{ $subtask->points * 1 }} pts</span>
+                                 </div>
+
                                  <form x-show="editing" 
                                        method="POST" 
                                        action="{{ route('subtasks.update', $subtask) }}" 
                                        @click.away="editing = false"
-                                       class="flex-grow"
+                                       class="flex-grow flex flex-col gap-2"
                                        style="display: none;">
                                      @csrf
                                      @method('PATCH')
@@ -342,9 +402,13 @@
                                             name="title" 
                                             x-model="title" 
                                             class="w-full text-sm border-slate-200 rounded px-2 py-1 focus:ring-accent focus:border-accent resize-none overflow-hidden"
-                                            rows="1"
-                                            @keydown.enter.prevent="$el.form.submit()"
+                                            rows="2"
                                             autofocus></textarea>
+                                     <div class="flex items-center gap-2">
+                                         <label class="text-[10px] uppercase font-bold text-slate-500">{{ __('Points') }}:</label>
+                                         <input type="number" name="points" x-model="points" min="0.1" max="10" step="0.1" class="w-16 h-6 text-xs border-slate-200 rounded focus:ring-accent focus:border-accent">
+                                         <button type="submit" class="ml-auto bg-accent text-white text-[10px] px-2 py-1 rounded hover:bg-accent/90">{{ __('Save') }}</button>
+                                     </div>
                                  </form>
                              </div>
 
@@ -362,6 +426,7 @@
                 <form method="POST" action="{{ route('tasks.subtasks.store', $task) }}" class="flex items-center gap-2 mt-auto pt-2 border-t border-slate-100">
                     @csrf
                     <input type="text" name="title" placeholder="{{ __('Add subtask...') }}" class="flex-grow text-xs border-slate-200 rounded-lg focus:ring-accent focus:border-accent placeholder-slate-400" required>
+                    <input type="number" name="points" placeholder="Pts" class="w-14 text-xs border-slate-200 rounded-lg focus:ring-accent focus:border-accent placeholder-slate-400 text-center" min="0.1" max="10" step="0.1" value="0.2" title="{{ __('Efficiency Points (0.1-10)') }}">
                     <button type="submit" class="p-1.5 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 hover:text-slate-900 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
@@ -445,4 +510,5 @@
         </div>
 
     </div>
+</div>
 </x-app-layout>

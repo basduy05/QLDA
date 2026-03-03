@@ -43,11 +43,11 @@
     <div class="grid gap-4 md:grid-cols-2">
         <div>
             <label class="text-sm font-medium text-slate-600">{{ __('Start date') }}</label>
-            <input type="date" name="start_date" value="{{ old('start_date', optional($project->start_date ?? null)->format('Y-m-d')) }}" class="mt-2 w-full rounded-xl border-slate-200">
+            <input type="datetime-local" name="start_date" value="{{ old('start_date', optional($project->start_date ?? null)->format('Y-m-d\TH:i')) }}" class="mt-2 w-full rounded-xl border-slate-200">
         </div>
         <div>
             <label class="text-sm font-medium text-slate-600">{{ __('End date') }}</label>
-            <input type="date" name="end_date" value="{{ old('end_date', optional($project->end_date ?? null)->format('Y-m-d')) }}" class="mt-2 w-full rounded-xl border-slate-200">
+            <input type="datetime-local" name="end_date" value="{{ old('end_date', optional($project->end_date ?? null)->format('Y-m-d\TH:i')) }}" class="mt-2 w-full rounded-xl border-slate-200">
         </div>
     </div>
 </div>

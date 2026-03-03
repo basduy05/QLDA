@@ -41,7 +41,7 @@
     <div class="grid gap-4 md:grid-cols-2">
         <div>
             <label class="text-sm font-medium text-slate-600">{{ __('Due date') }}</label>
-            <input type="date" name="due_date" value="{{ old('due_date', optional($task->due_date ?? null)->format('Y-m-d')) }}" class="mt-2 w-full rounded-xl border-slate-200">
+            <input type="datetime-local" name="due_date" value="{{ old('due_date', optional($task->due_date ?? null)->format('Y-m-d\TH:i')) }}" class="mt-2 w-full rounded-xl border-slate-200">
         </div>
         <div>
             <label class="text-sm font-medium text-slate-600">{{ __('Assignee') }}</label>

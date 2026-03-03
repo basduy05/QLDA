@@ -180,7 +180,7 @@
                                             $dateClass = 'text-amber-600 font-medium';
                                         }
                                     @endphp
-                                    <span class="{{ $dateClass }}">{{ $task->due_date->format('d/m/Y') }}</span>
+                                    <span class="{{ $dateClass }}">{{ $task->due_date->format('d/m/Y H:i') }}</span>
                                 @else
                                     <span class="text-slate-400">—</span>
                                 @endif

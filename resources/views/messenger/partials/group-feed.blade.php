@@ -19,7 +19,7 @@
             @endunless
 
             @if (trim((string) $message->body) !== '')
-                <p class="text-sm whitespace-pre-wrap">{{ $message->body }}</p>
+                <p class="text-sm whitespace-pre-wrap">{!! \App\Helpers\TextHelper::parseLinks($message->body) !!}</p>
             @endif
 
             @if ($hasAttachment)

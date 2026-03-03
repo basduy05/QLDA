@@ -18,10 +18,12 @@ class TaskSubtaskController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
+            'points' => ['nullable', 'numeric', 'min:0.1', 'max:10'],
         ]);
 
         $task->subtasks()->create([
             'title' => $validated['title'],
+            'points' => $validated['points'] ?? 0.2,
             'is_completed' => false,
         ]);
 
@@ -38,6 +40,7 @@ class TaskSubtaskController extends Controller
         $validated = $request->validate([
             'is_completed' => ['nullable', 'boolean'],
             'title' => ['nullable', 'string', 'max:255'],
+            'points' => ['nullable', 'numeric', 'min:0.1', 'max:10'],
         ]);
 
         $subtask->update($validated);

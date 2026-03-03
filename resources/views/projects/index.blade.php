@@ -85,9 +85,11 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-slate-500 text-xs">
-                                    <span>{{ $project->start_date?->format('d/m/Y') ?? '—' }}</span>
-                                    <span class="text-slate-300 mx-1">→</span>
-                                    <span>{{ $project->end_date?->format('d/m/Y') ?? '—' }}</span>
+                                    <div class="flex flex-col gap-1">
+                                        <span>{{ $project->start_date?->format('d/m/Y H:i') ?? '—' }}</span>
+                                        <span class="text-slate-300 transform rotate-90 mx-auto w-fit md:rotate-0 md:mx-0">↓</span>
+                                        <span>{{ $project->end_date?->format('d/m/Y H:i') ?? '—' }}</span>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <a href="{{ route('projects.show', $project) }}" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-accent hover:bg-accent/5 transition-colors" title="{{ __('Open') }}">
