@@ -32,6 +32,8 @@ COPY . .
 
 COPY --from=assets /app/public/build /var/www/html/public/build
 
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+
 RUN composer update --no-dev --optimize-autoloader
 RUN php artisan storage:link || true
 RUN chown -R www-data:www-data storage bootstrap/cache
