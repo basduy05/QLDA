@@ -2,22 +2,22 @@
     <div class="w-full px-4 md:px-6 xl:px-10">
         <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-4">
-                <a href="{{ route('dashboard') }}" class="text-lg font-semibold text-slate-800">QhorizonPM</a>
+                <a wire:navigate href="{{ route('dashboard') }}" class="text-lg font-semibold text-slate-800">QhorizonPM</a>
                 <div class="hidden md:flex items-center gap-3 text-sm font-medium text-slate-600">
-                    <a href="{{ route('dashboard') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}" title="{{ __('Dashboard') }}" aria-label="{{ __('Dashboard') }}">
+                    <a wire:navigate href="{{ route('dashboard') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}" title="{{ __('Dashboard') }}" aria-label="{{ __('Dashboard') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
                     </a>
-                    <a href="{{ route('projects.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('projects.*') ? 'nav-pill-active' : '' }}" title="{{ __('Projects') }}" aria-label="{{ __('Projects') }}">
+                    <a wire:navigate href="{{ route('projects.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('projects.*') ? 'nav-pill-active' : '' }}" title="{{ __('Projects') }}" aria-label="{{ __('Projects') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
                     </a>
-                    <a href="{{ route('tasks.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('tasks.index') ? 'nav-pill-active' : '' }}" title="{{ __('Tasks') }}" aria-label="{{ __('Tasks') }}">
+                    <a wire:navigate href="{{ route('tasks.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('tasks.index') ? 'nav-pill-active' : '' }}" title="{{ __('Tasks') }}" aria-label="{{ __('Tasks') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                     </a>
                     @if (Auth::user()?->isAdmin())
-                        <a href="{{ route('admin.users.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.users.*') ? 'nav-pill-active' : '' }}" title="{{ __('Users') }}" aria-label="{{ __('Users') }}">
+                        <a wire:navigate href="{{ route('admin.users.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.users.*') ? 'nav-pill-active' : '' }}" title="{{ __('Users') }}" aria-label="{{ __('Users') }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
                         </a>
-                        <a href="{{ route('admin.settings.ai.edit') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.settings.ai.*') ? 'nav-pill-active' : '' }}" title="{{ __('AI Settings') }}" aria-label="{{ __('AI Settings') }}">
+                        <a wire:navigate href="{{ route('admin.settings.ai.edit') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.settings.ai.*') ? 'nav-pill-active' : '' }}" title="{{ __('AI Settings') }}" aria-label="{{ __('AI Settings') }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4"/><path d="m16.24 7.76 2.83-2.83"/><path d="M18 12h4"/><path d="m16.24 16.24 2.83 2.83"/><path d="M12 18v4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M2 12h4"/><path d="m4.93 4.93 2.83 2.83"/><circle cx="12" cy="12" r="4"/></svg>
                         </a>
                     @endif
@@ -25,7 +25,7 @@
             </div>
 
             <div class="hidden md:flex items-center gap-2">
-                <a href="{{ route('notifications.index') }}" class="nav-action-btn" title="{{ __('Notifications') }}" aria-label="{{ __('Notifications') }}">
+                <a wire:navigate href="{{ route('notifications.index') }}" class="nav-action-btn" title="{{ __('Notifications') }}" aria-label="{{ __('Notifications') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
                         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
@@ -41,7 +41,7 @@
                     <span class="nav-profile-chip">
                         {{ Auth::user()->name }}
                     </span>
-                    <a href="{{ route('profile.edit') }}" class="btn-secondary h-9 text-xs !px-3">{{ __('Profile') }}</a>
+                    <a wire:navigate href="{{ route('profile.edit') }}" class="btn-secondary h-9 text-xs !px-3">{{ __('Profile') }}</a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="btn-secondary h-9 text-xs !px-3">{{ __('Log Out') }}</button>
@@ -62,15 +62,15 @@
 
     <div :class="{'block': open, 'hidden': ! open}" class="hidden md:hidden border-t border-slate-100 bg-white">
         <div class="px-6 py-4 space-y-2 text-sm text-slate-600">
-            <a class="nav-pill block" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
-            <a class="nav-pill block" href="{{ route('projects.index') }}">{{ __('Projects') }}</a>
-            <a class="nav-pill block" href="{{ route('tasks.index') }}">{{ __('Tasks') }}</a>
-            <a class="nav-pill block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
+            <a wire:navigate class="nav-pill block" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
+            <a wire:navigate class="nav-pill block" href="{{ route('projects.index') }}">{{ __('Projects') }}</a>
+            <a wire:navigate class="nav-pill block" href="{{ route('tasks.index') }}">{{ __('Tasks') }}</a>
+            <a wire:navigate class="nav-pill block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
             @if (Auth::user()?->isAdmin())
-                <a class="nav-pill block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
-                <a class="nav-pill block" href="{{ route('admin.settings.ai.edit') }}">{{ __('Settings') }}</a>
+                <a wire:navigate class="nav-pill block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
+                <a wire:navigate class="nav-pill block" href="{{ route('admin.settings.ai.edit') }}">{{ __('Settings') }}</a>
             @endif
-            <a class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
+            <a wire:navigate class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
             <div class="pt-2">
                 <div class="nav-lang">
                     <a href="{{ route('lang.switch', 'vi') }}" class="nav-lang-btn {{ app()->getLocale() === 'vi' ? 'nav-lang-btn-active' : '' }}">VI</a>

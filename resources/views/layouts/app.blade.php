@@ -13,6 +13,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
     </head>
     <body class="antialiased">
         <div class="page-shell {{ request()->query('popup') ? '!min-h-0 !bg-none bg-white' : '' }}">
@@ -162,6 +163,7 @@
 
         <x-toast-notification />
 
+        @livewireScripts
         @stack('scripts')
     </body>
 </html>
