@@ -32,7 +32,7 @@ COPY . .
 
 COPY --from=assets /app/public/build /var/www/html/public/build
 
-RUN composer install --no-dev --optimize-autoloader
+RUN composer update --no-dev --optimize-autoloader
 RUN php artisan storage:link || true
 RUN chown -R www-data:www-data storage bootstrap/cache
 
