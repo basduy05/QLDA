@@ -50,7 +50,7 @@ class CallSessionController extends Controller
             'status' => 'ringing',
         ]);
         
-        $realtime->broadcast('user.'.$contact->id, 'call.incoming', [
+        $realtime->broadcast(['user.'.$contact->id], 'call.incoming', [
             'call' => $this->serialize($call)
         ]);
 
@@ -122,7 +122,7 @@ class CallSessionController extends Controller
                 'accepted_at' => now(),
             ]);
 
-            $realtime->broadcast('user.'.$callSession->caller_id, 'call.accepted', [
+            $realtime->broadcast(['user.'.$callSession->caller_id], 'call.accepted', [
                 'call' => $this->serialize($callSession)
             ]);
         }
@@ -141,7 +141,7 @@ class CallSessionController extends Controller
             ]);
             
             $other = $callSession->caller_id === Auth::id() ? $callSession->callee_id : $callSession->caller_id;
-            $realtime->broadcast('user.'.$other, 'call.rejected', ['call' => $this->serialize($callSession)]);
+            $realtime->broadcast(['user.'.$other], 'call.rejected', ['call' => $this->serialize($callSession)]);
         }
 
         return response()->json(['call' => $this->serialize($callSession->fresh())]);
@@ -158,7 +158,7 @@ class CallSessionController extends Controller
             ]);
 
             $other = $callSession->caller_id === Auth::id() ? $callSession->callee_id : $callSession->caller_id;
-            $realtime->broadcast('user.'.$other, 'call.ended', ['call' => $this->serialize($callSession)]);
+            $realtime->broadcast(['user.'.$other], 'call.ended', ['call' => $this->serialize($callSession)]);
         }
 
         return response()->json(['call' => $this->serialize($callSession->fresh())]);

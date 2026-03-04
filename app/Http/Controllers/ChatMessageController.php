@@ -50,7 +50,7 @@ class ChatMessageController extends Controller
                     __(':name: :message', ['name' => $user->name, 'message' => trim($data['body'])]),
                     route('messenger.group', $chatGroup)
                 ));
-                $realtime->broadcast('user.'.$member->id, 'notification.new', []);
+                $realtime->broadcast(['user.'.$member->id], 'notification.new', []);
             });
 
         return redirect()->route('messenger.group', $chatGroup)

@@ -154,7 +154,7 @@ class TaskController extends Controller
             $assignee = User::find($task->assignee_id);
             if ($assignee && $assignee->id !== Auth::id()) {
                 $assignee->notify(new TaskAssignedNotification($task));
-                $realtime->broadcast('user.'.$assignee->id, 'notification.new', []);
+                $realtime->broadcast(['user.'.$assignee->id], 'notification.new', []);
             }
         }
 
@@ -236,7 +236,7 @@ class TaskController extends Controller
             $assignee = User::find($task->assignee_id);
             if ($assignee && $assignee->id !== Auth::id()) {
                 $assignee->notify(new TaskAssignedNotification($task));
-                $realtime->broadcast('user.'.$assignee->id, 'notification.new', []);
+                $realtime->broadcast(['user.'.$assignee->id], 'notification.new', []);
             }
         }
 
