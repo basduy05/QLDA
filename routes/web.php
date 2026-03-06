@@ -140,6 +140,13 @@ Route::middleware('auth')->group(function () {
         ->middleware('admin')
         ->name('admin.settings.ai.update');
 
+    Route::patch('/admin/settings/email', [AdminSettingController::class, 'updateEmail'])
+        ->middleware('admin')
+        ->name('admin.settings.email.update');
+    Route::post('/admin/settings/email/test', [AdminSettingController::class, 'sendTestEmail'])
+        ->middleware('admin')
+        ->name('admin.settings.email.test');
+
     Route::get('/admin/settings/messenger', [AdminSettingController::class, 'editMessenger'])
         ->middleware('admin')
         ->name('admin.settings.messenger.edit');
