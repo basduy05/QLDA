@@ -28,6 +28,8 @@ RUN apt-get update \
 ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
+
 COPY . .
 
 COPY --from=assets /app/public/build /var/www/html/public/build
