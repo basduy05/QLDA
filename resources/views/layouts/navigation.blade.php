@@ -3,8 +3,7 @@
         <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-4">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                    <img src="/images/logo-icon.svg" alt="Aperlex" class="h-8 w-8">
-                    <span class="text-lg font-semibold bg-gradient-to-r from-cyan-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent">Aperlex</span>
+                    <img src="/images/logo-full.png" alt="Aperlex" class="h-8">
                 </a>
                 <div class="hidden md:flex items-center gap-3 text-sm font-medium text-slate-600">
                     <a wire:navigate href="{{ route('dashboard') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}" title="{{ __('Dashboard') }}" aria-label="{{ __('Dashboard') }}">

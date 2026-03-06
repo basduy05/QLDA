@@ -8,7 +8,7 @@
         <title>{{ config('app.name', 'Aperlex') }}</title>
 
         <!-- Favicon -->
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <link rel="icon" type="image/png" href="/images/logo-full.png">
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
         <!-- Fonts -->

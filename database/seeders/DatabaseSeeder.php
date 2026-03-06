@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $project = Project::updateOrCreate(
-            ['name' => 'Qhorizon PM System'],
+            ['name' => 'Aperlex System'],
             [
                 'description' => 'Internal rollout for project management platform.',
                 'status' => 'active',

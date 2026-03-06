@@ -13,7 +13,7 @@
 <div class="grid gap-4">
     <div>
         <label class="text-sm font-medium text-slate-600">{{ __('Project name') }}</label>
-        <input type="text" name="name" value="{{ old('name', $project->name ?? '') }}" class="mt-2 w-full rounded-xl border-slate-200" placeholder="{{ __('E.g. Qhorizon rollout') }}" required>
+        <input type="text" name="name" value="{{ old('name', $project->name ?? '') }}" class="mt-2 w-full rounded-xl border-slate-200" placeholder="{{ __('E.g. Aperlex rollout') }}" required>
     </div>
 
     <div>

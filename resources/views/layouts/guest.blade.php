@@ -8,7 +8,7 @@
         <title>{{ config('app.name', 'Aperlex') }}</title>
 
         <!-- Favicon -->
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <link rel="icon" type="image/png" href="/images/logo-full.png">
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
         <!-- Fonts -->
@@ -22,8 +22,7 @@
         <div class="page-shell min-h-screen flex flex-col justify-center items-center px-6 py-10">
             <div class="text-center mb-8">
                 <a href="/" class="inline-flex items-center gap-2">
-                    <img src="/images/logo-icon.svg" alt="Aperlex" class="h-10 w-10">
-                    <span class="text-2xl font-semibold bg-gradient-to-r from-cyan-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent">Aperlex</span>
+                    <img src="/images/logo-full.png" alt="Aperlex" class="h-10">
                 </a>
                 <p class="text-sm text-slate-500 mt-2">{{ __('Plan, deliver, and celebrate project wins.') }}</p>
             </div>

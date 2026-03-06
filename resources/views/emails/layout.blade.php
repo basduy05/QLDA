@@ -33,23 +33,7 @@
                     {{-- Logo header --}}
                     <tr>
                         <td style="padding:24px 32px; background:linear-gradient(135deg, #0891b2 0%, #6366f1 60%, #7c3aed 100%);">
-                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                                <tr>
-                                    <td>
-                                        {{-- Inline SVG Aperlex icon --}}
-                                        <table role="presentation" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td style="vertical-align:middle; padding-right:10px;">
-                                                    <img src="{{ rtrim(config('app.url', ''), '/') }}/images/logo-icon.svg" alt="" width="32" height="32" style="display:block; width:32px; height:32px;">
-                                                </td>
-                                                <td style="vertical-align:middle;">
-                                                    <span style="font-size:20px; font-weight:700; color:#ffffff; letter-spacing:-0.3px;">Aperlex</span>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
+                            <img src="{{ rtrim(config('app.url', ''), '/') }}/images/logo-full.png" alt="Aperlex" width="140" style="display:block; height:auto; max-height:36px;">
                         </td>
                     </tr>
 
@@ -85,8 +69,7 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td align="center">
-                                        <img src="{{ rtrim(config('app.url', ''), '/') }}/images/logo-icon.svg" alt="" width="20" height="20" style="display:inline-block; width:20px; height:20px; vertical-align:middle; opacity:0.5;">
-                                        <span style="font-size:12px; color:#94a3b8; vertical-align:middle; margin-left:6px;">{{ config('app.name', 'Aperlex') }}</span>
+                                        <img src="{{ rtrim(config('app.url', ''), '/') }}/images/logo-full.png" alt="Aperlex" width="90" height="auto" style="display:inline-block; height:auto; max-height:20px; vertical-align:middle; opacity:0.6;">
                                     </td>
                                 </tr>
                                 <tr>

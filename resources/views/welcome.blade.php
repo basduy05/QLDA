@@ -6,7 +6,7 @@
         <title>{{ config('app.name', 'Aperlex') }} — {{ __('Smart Project Management') }}</title>
 
         <!-- Favicon -->
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <link rel="icon" type="image/png" href="/images/logo-full.png">
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -43,8 +43,7 @@
         <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-100/80">
             <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2.5">
-                    <img src="/images/logo-icon.svg" alt="Aperlex" class="h-8 w-8">
-                    <span class="text-xl font-bold bg-gradient-to-r from-cyan-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent">Aperlex</span>
+                    <img src="/images/logo-full.png" alt="Aperlex" class="h-8">
                 </a>
                 <div class="flex items-center gap-3 text-sm">
                     <a href="{{ route('lang.switch', 'vi') }}" class="px-3 py-1 rounded-full transition {{ app()->getLocale() === 'vi' ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white' : 'border border-slate-200 text-slate-600 hover:border-slate-300' }}">VI</a>
@@ -111,7 +110,7 @@
                     <div class="relative">
                         <div class="card-strong p-6 space-y-4">
                             <div class="flex items-center gap-3 mb-4">
-                                <img src="/images/logo-icon.svg" alt="" class="h-7 w-7">
+                                <img src="/images/logo-full.png" alt="Aperlex" class="h-6">
                                 <span class="font-semibold text-slate-800">{{ __('Project Overview') }}</span>
                             </div>
                             <div class="grid gap-3">
@@ -288,8 +287,7 @@
             <div class="max-w-6xl mx-auto px-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                     <div class="flex items-center gap-2.5">
-                        <img src="/images/logo-icon.svg" alt="Aperlex" class="h-7 w-7">
-                        <span class="text-lg font-bold bg-gradient-to-r from-cyan-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent">Aperlex</span>
+                        <img src="/images/logo-full.png" alt="Aperlex" class="h-7">
                     </div>
                     <p class="text-sm text-slate-500">© {{ date('Y') }} Aperlex. {{ __('All rights reserved.') }}</p>
                 </div>
