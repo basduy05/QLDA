@@ -45,12 +45,19 @@
         </div>
         <div>
             <label class="text-sm font-medium text-slate-600">{{ __('Assignee') }}</label>
-            <select name="assignee_id" class="mt-2 w-full rounded-xl border-slate-200">
-                <option value="">{{ __('Unassigned') }}</option>
-                @foreach ($users as $assignee)
-                    <option value="{{ $assignee->id }}" @selected(old('assignee_id', $task->assignee_id ?? '') == $assignee->id)>{{ $assignee->name }}</option>
-                @endforeach
-            </select>
+            <div class="flex items-center gap-2 mt-2">
+                <select name="assignee_id" id="assignee-select" class="flex-1 rounded-xl border-slate-200">
+                    <option value="">{{ __('Unassigned') }}</option>
+                    @foreach ($users as $assignee)
+                        <option value="{{ $assignee->id }}" @selected(old('assignee_id', $task->assignee_id ?? '') == $assignee->id)>{{ $assignee->name }}</option>
+                    @endforeach
+                </select>
+                <button type="button" onclick="aiSuggestAssignee()" id="ai-assign-btn" class="shrink-0 bg-gradient-to-r from-violet-500 to-purple-600 text-white px-3 py-2.5 rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all flex items-center gap-1 text-xs shadow-sm" title="{{ __('AI suggest assignee') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg>
+                    AI
+                </button>
+            </div>
+            <div id="ai-assign-result" style="display:none" class="mt-2 p-2 bg-violet-50 border border-violet-200 rounded-lg text-xs text-violet-800"></div>
         </div>
     </div>
 </div>
@@ -59,3 +66,49 @@
     <button type="submit" class="btn-primary">{{ $submitLabel }}</button>
     <a href="{{ route('projects.show', $project) }}" class="btn-secondary">{{ __('Cancel') }}</a>
 </div>
+
+<script>
+function aiSuggestAssignee() {
+    const btn = document.getElementById('ai-assign-btn');
+    const result = document.getElementById('ai-assign-result');
+    const title = document.querySelector('input[name="title"]')?.value || '';
+    const description = document.querySelector('textarea[name="description"]')?.value || '';
+    const priority = document.querySelector('select[name="priority"]')?.value || 'medium';
+
+    if (!title.trim()) {
+        result.style.display = 'block';
+        result.innerHTML = '<span class="text-amber-600">{{ __("Please enter a task title first.") }}</span>';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>';
+    result.style.display = 'none';
+
+    fetch("{{ route('ai.suggest-assignee') }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+        body: JSON.stringify({ project_id: {{ $project->id }}, title, description, priority })
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg> AI';
+        if (data.ok) {
+            const select = document.getElementById('assignee-select');
+            select.value = data.user_id;
+            result.style.display = 'block';
+            result.innerHTML = `<strong>${data.user_name}</strong> — ${data.reason.replace(/</g, '&lt;')}`;
+        } else {
+            result.style.display = 'block';
+            result.innerHTML = '<span class="text-rose-600">' + (data.message || '{{ __("AI unavailable") }}') + '</span>';
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg> AI';
+        result.style.display = 'block';
+        result.innerHTML = '<span class="text-rose-600">{{ __("Connection failed.") }}</span>';
+    });
+}
+</script>

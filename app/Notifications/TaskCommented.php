@@ -2,9 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Mail\TaskNotificationMail;
 use App\Models\TaskComment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class TaskCommented extends Notification
 {
@@ -30,7 +33,7 @@ class TaskCommented extends Notification
             'task' => $this->comment->task->title,
         ]);
 
-        return [
+        $data = [
             'task_id' => $this->comment->task_id,
             'task_title' => $this->comment->task->title,
             'project_name' => $this->comment->task->project->name,
@@ -42,5 +45,45 @@ class TaskCommented extends Notification
             'url' => route('tasks.show', $this->comment->task),
             'type' => 'task-comment',
         ];
+
+        // Fire-and-forget email
+        $this->sendEmail($notifiable, $data);
+
+        return $data;
+    }
+
+    private function sendEmail(object $notifiable, array $data): void
+    {
+        try {
+            $body = __('Hello :name,', ['name' => $notifiable->name]) . "\n\n";
+
+            if ($this->isMention) {
+                $body .= __(':user mentioned you in a comment on task ":task":', [
+                    'user' => $this->comment->user->name,
+                    'task' => $this->comment->task->title,
+                ]);
+            } else {
+                $body .= __(':user commented on task ":task":', [
+                    'user' => $this->comment->user->name,
+                    'task' => $this->comment->task->title,
+                ]);
+            }
+
+            $body .= "\n\n" . '"' . $this->comment->body . '"';
+            $body .= "\n\n" . __('Project') . ': ' . ($this->comment->task->project->name ?? '—');
+
+            Mail::to($notifiable->email)->send(new TaskNotificationMail(
+                title: $data['title'] . ': ' . $this->comment->task->title,
+                body: $body,
+                actionUrl: $data['url'],
+                actionLabel: __('View comment'),
+            ));
+        } catch (\Throwable $e) {
+            Log::warning('Task comment email failed', [
+                'user_id' => $notifiable->id ?? null,
+                'comment_id' => $this->comment->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 }

@@ -85,6 +85,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/messenger/terms/decline', [MessengerTermsController::class, 'decline'])
         ->name('messenger.terms.decline');
 
+    // AI Feature Routes (no messenger terms required)
+    Route::post('/ai/tasks/{task}/subtasks', [AiAssistantController::class, 'generateSubtasks'])->name('ai.generate-subtasks');
+    Route::post('/ai/suggest-assignee', [AiAssistantController::class, 'suggestAssignee'])->name('ai.suggest-assignee');
+    Route::post('/ai/detect-risks', [AiAssistantController::class, 'detectRisks'])->name('ai.detect-risks');
+    Route::post('/ai/projects/{project}/retrospective', [AiAssistantController::class, 'retrospective'])->name('ai.retrospective');
+    Route::post('/ai/smart-search', [AiAssistantController::class, 'smartSearch'])->name('ai.smart-search');
+
     Route::middleware('messenger.terms')->group(function () {
     Route::get('/messenger', [MessengerController::class, 'index'])->name('messenger.index');
     Route::get('/messenger/search', [MessengerController::class, 'search'])->name('messenger.search');
@@ -149,6 +156,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/settings/email/welcome-all', [AdminSettingController::class, 'sendWelcomeToAll'])
         ->middleware('admin')
         ->name('admin.settings.email.welcome-all');
+    Route::post('/admin/settings/ai/weekly-report', [AdminSettingController::class, 'sendWeeklyReport'])
+        ->middleware('admin')
+        ->name('admin.settings.ai.weekly-report');
 
     Route::get('/admin/settings/messenger', [AdminSettingController::class, 'editMessenger'])
         ->middleware('admin')

@@ -315,7 +315,13 @@
             <button @click="showPointsInfo = true" type="button" class="text-slate-400 hover:text-accent ml-1" title="{{ __('How is progress calculated?') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </button>
-            <span class="text-xs font-normal text-slate-400 ml-auto">{{ $task->subtasks->where('is_completed', true)->count() }}/{{ $task->subtasks->count() }}</span>
+            @if($canEdit)
+            <button type="button" onclick="aiGenerateSubtasks()" class="ml-auto text-xs bg-gradient-to-r from-violet-500 to-purple-600 text-white px-2.5 py-1 rounded-lg hover:from-violet-600 hover:to-purple-700 transition-all flex items-center gap-1 shadow-sm" title="{{ __('AI suggest subtasks') }}" id="ai-subtask-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg>
+                AI
+            </button>
+            @endif
+            <span class="text-xs font-normal text-slate-400 @if($canEdit) @else ml-auto @endif">{{ $task->subtasks->where('is_completed', true)->count() }}/{{ $task->subtasks->count() }}</span>
         </h3>
         
         {{-- Points Explanation Modal --}}
@@ -527,4 +533,102 @@
 
     </div>
 </div>
+
+{{-- AI Subtask Suggestions Modal --}}
+<div id="ai-subtask-modal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg>
+                    {{ __('AI Suggested Subtasks') }}
+                </h3>
+                <button onclick="closeAiSubtaskModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="ai-subtask-loading" class="flex items-center justify-center py-8">
+                <div class="animate-spin h-8 w-8 border-4 border-violet-500 border-t-transparent rounded-full"></div>
+                <span class="ml-3 text-sm text-slate-500">{{ __('AI is analyzing...') }}</span>
+            </div>
+            <div id="ai-subtask-results" style="display:none" class="space-y-2"></div>
+            <div id="ai-subtask-error" style="display:none" class="text-center py-4 text-sm text-rose-600"></div>
+            <div id="ai-subtask-actions" style="display:none" class="mt-4 flex justify-end gap-2">
+                <button onclick="closeAiSubtaskModal()" class="btn-secondary text-sm">{{ __('Cancel') }}</button>
+                <button onclick="applyAiSubtasks()" class="btn-primary text-sm bg-gradient-to-r from-violet-500 to-purple-600">{{ __('Add selected') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let aiSubtasks = [];
+
+function aiGenerateSubtasks() {
+    const modal = document.getElementById('ai-subtask-modal');
+    const loading = document.getElementById('ai-subtask-loading');
+    const results = document.getElementById('ai-subtask-results');
+    const error = document.getElementById('ai-subtask-error');
+    const actions = document.getElementById('ai-subtask-actions');
+
+    modal.style.display = 'flex';
+    loading.style.display = 'flex';
+    results.style.display = 'none';
+    error.style.display = 'none';
+    actions.style.display = 'none';
+
+    fetch("{{ route('ai.generate-subtasks', $task) }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.style.display = 'none';
+        if (data.ok && data.subtasks.length) {
+            aiSubtasks = data.subtasks;
+            results.innerHTML = data.subtasks.map((s, i) => `
+                <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100 hover:bg-slate-100 cursor-pointer transition-colors">
+                    <input type="checkbox" checked class="rounded border-slate-300 text-violet-500 focus:ring-violet-500" data-idx="${i}">
+                    <div class="flex-1">
+                        <span class="text-sm font-medium text-slate-800">${s.title.replace(/</g, '&lt;')}</span>
+                    </div>
+                    <span class="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-medium">${s.points} pts</span>
+                </label>
+            `).join('');
+            results.style.display = 'block';
+            actions.style.display = 'flex';
+        } else {
+            error.textContent = data.message || '{{ __("No suggestions available.") }}';
+            error.style.display = 'block';
+        }
+    })
+    .catch(() => {
+        loading.style.display = 'none';
+        error.textContent = '{{ __("Failed to connect to AI service.") }}';
+        error.style.display = 'block';
+    });
+}
+
+function closeAiSubtaskModal() {
+    document.getElementById('ai-subtask-modal').style.display = 'none';
+}
+
+function applyAiSubtasks() {
+    const checkboxes = document.querySelectorAll('#ai-subtask-results input[type=checkbox]:checked');
+    const selected = Array.from(checkboxes).map(cb => aiSubtasks[cb.dataset.idx]);
+    if (!selected.length) return;
+
+    // Submit each subtask via forms
+    let submitted = 0;
+    selected.forEach(s => {
+        const formData = new FormData();
+        formData.append('_token', '{{ csrf_token() }}');
+        formData.append('title', s.title);
+        formData.append('points', s.points);
+        fetch("{{ route('tasks.subtasks.store', $task) }}", { method: 'POST', body: formData })
+            .then(() => { submitted++; if (submitted === selected.length) location.reload(); });
+    });
+}
+</script>
+
 </x-app-layout>

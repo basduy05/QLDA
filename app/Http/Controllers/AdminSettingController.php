@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
+use App\Models\Project;
 use App\Models\User;
 use App\Mail\OtpCodeMail;
+use App\Mail\WeeklyAiReportMail;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -160,6 +163,99 @@ class AdminSettingController extends Controller
         return view('admin.settings.messenger', [
             'projectMembersOnly' => (bool) AppSetting::getValue('messenger.project_members_only', false),
         ]);
+    }
+
+    public function sendWeeklyReport(): RedirectResponse
+    {
+        $apiKey = AppSetting::getValue('ai.gemini_api_key');
+        $model = AppSetting::getValue('ai.gemini_model', 'gemini-2.5-flash');
+
+        if (! filled($apiKey)) {
+            return back()->with('status', __('AI API key is not configured.'));
+        }
+
+        $projects = Project::with(['tasks.assignee', 'tasks.subtasks', 'members', 'owner'])->get();
+        $locale = app()->getLocale();
+        $language = $locale === 'vi' ? 'Vietnamese' : 'English';
+
+        // Build context for all projects
+        $projectSummaries = $projects->map(function ($project) {
+            $tasks = $project->tasks;
+            $total = $tasks->count();
+            $done = $tasks->where('status', 'done')->count();
+            $inProgress = $tasks->where('status', 'in_progress')->count();
+            $overdue = $tasks->filter(fn($t) => $t->due_date && $t->due_date->isPast() && $t->status !== 'done')->count();
+            $highOpen = $tasks->where('priority', 'high')->where('status', '!=', 'done')->count();
+
+            return "- {$project->name} (Status: {$project->status}): Total={$total}, Done={$done}, In Progress={$inProgress}, Overdue={$overdue}, High Priority Open={$highOpen}, Members={$project->members->count()}";
+        })->implode("\n");
+
+        $prompt = "You are a project manager generating a weekly report. Reply in {$language}.\n\n" .
+            "Date: " . now()->format('Y-m-d') . "\n\n" .
+            "Project summaries:\n{$projectSummaries}\n\n" .
+            "Generate a weekly project report with:\n" .
+            "1. **Executive Summary** - overall status across all projects\n" .
+            "2. **Key Highlights** - achievements this week\n" .
+            "3. **Risk Areas** - projects that need attention\n" .
+            "4. **Recommendations** - top 3-5 action items for next week\n\n" .
+            "Be concise. Use bullet points. Use markdown formatting with headers. Use emojis for visual emphasis.";
+
+        $url = sprintf(
+            'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s',
+            urlencode($model),
+            urlencode($apiKey)
+        );
+
+        try {
+            $response = Http::withoutVerifying()->timeout(60)->acceptJson()->post($url, [
+                'contents' => [['role' => 'user', 'parts' => [['text' => $prompt]]]],
+                'generationConfig' => ['temperature' => 0.5, 'maxOutputTokens' => 8192],
+            ]);
+
+            $reply = trim((string) data_get($response->json(), 'candidates.0.content.parts.0.text', ''));
+        } catch (\Throwable $e) {
+            Log::warning('Weekly AI report generation failed', ['error' => $e->getMessage()]);
+            return back()->with('status', __('AI report generation failed.'));
+        }
+
+        if (empty($reply)) {
+            return back()->with('status', __('AI returned an empty report.'));
+        }
+
+        // Convert markdown to HTML (simple conversion)
+        $reportHtml = $this->markdownToHtml($reply);
+
+        // Send to all admin users and project leads
+        $recipients = User::where('role', 'admin')->get();
+        $sent = 0;
+
+        foreach ($recipients as $user) {
+            try {
+                Mail::to($user->email)->send(new WeeklyAiReportMail($reportHtml, $user->name));
+                $sent++;
+            } catch (\Throwable $e) {
+                Log::warning('Weekly report email failed', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+            }
+            usleep(500_000);
+        }
+
+        return back()->with('status', __('Weekly AI report sent to :count admins.', ['count' => $sent]));
+    }
+
+    private function markdownToHtml(string $md): string
+    {
+        // Simple markdown → HTML conversion for emails
+        $html = e($md);
+        $html = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $html);
+        $html = preg_replace('/\*(.+?)\*/', '<em>$1</em>', $html);
+        $html = preg_replace('/^### (.+)$/m', '<h3 style="color:#1e293b;font-size:16px;margin:16px 0 8px;">$1</h3>', $html);
+        $html = preg_replace('/^## (.+)$/m', '<h2 style="color:#1e293b;font-size:18px;margin:20px 0 10px;">$1</h2>', $html);
+        $html = preg_replace('/^# (.+)$/m', '<h1 style="color:#1e293b;font-size:20px;margin:24px 0 12px;">$1</h1>', $html);
+        $html = preg_replace('/^- (.+)$/m', '<li style="margin:4px 0;">$1</li>', $html);
+        $html = preg_replace('/(<li.*<\/li>\n?)+/', '<ul style="padding-left:20px;margin:8px 0;">$0</ul>', $html);
+        $html = nl2br($html);
+
+        return $html;
     }
 
     public function updateMessenger(Request $request): RedirectResponse

@@ -96,6 +96,10 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-slate-900">✉ {{ __('Email Configuration') }}</h3>
                 <div class="flex items-center gap-2">
+                    <form method="POST" action="{{ route('admin.settings.ai.weekly-report') }}" onsubmit="return confirm('{{ __('Generate and send weekly AI report to all admins?') }}')">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm">🤖 {{ __('AI Weekly Report') }}</button>
+                    </form>
                     <form method="POST" action="{{ route('admin.settings.email.welcome-all') }}" onsubmit="return confirm('{{ __('Send welcome email to ALL users? This cannot be undone.') }}')">
                         @csrf
                         <button type="submit" class="btn-secondary text-sm">🎉 {{ __('Send welcome to all') }}</button>

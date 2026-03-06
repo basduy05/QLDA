@@ -46,6 +46,121 @@
             </div>
         </div>
 
+        {{-- AI Smart Search --}}
+        <div class="card-strong p-4" x-data="aiSmartSearch()">
+            <div class="flex items-center gap-3">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg>
+                    </div>
+                    <input type="text" 
+                        x-model="query" 
+                        @keydown.enter="search()" 
+                        class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-violet-500 focus:border-violet-500 placeholder-slate-400"
+                        placeholder="{{ __('AI Smart Search — e.g. "overdue tasks in Project X" or "high priority assigned to John"') }}">
+                </div>
+                <button @click="search()" :disabled="loading" class="shrink-0 bg-gradient-to-r from-violet-500 to-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:from-violet-600 hover:to-purple-700 transition-all flex items-center gap-2 shadow-sm disabled:opacity-50">
+                    <template x-if="loading">
+                        <span class="animate-spin inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                    </template>
+                    <template x-if="!loading">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </template>
+                    {{ __('Search') }}
+                </button>
+            </div>
+
+            {{-- Parsed filters --}}
+            <div x-show="filters" x-cloak class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-slate-500">{{ __('AI parsed:') }}</span>
+                <template x-for="(v, k) in filters" :key="k">
+                    <template x-if="v && v !== false && v !== 'null'">
+                        <span class="inline-flex items-center px-2 py-0.5 bg-violet-50 text-violet-700 border border-violet-200 rounded-full" x-text="k + ': ' + v"></span>
+                    </template>
+                </template>
+            </div>
+
+            {{-- Results --}}
+            <div x-show="results.length > 0" x-cloak class="mt-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-slate-700" x-text="'{{ __('Found') }} ' + results.length + ' {{ __('tasks') }}'"></span>
+                    <button @click="results = []; filters = null" class="text-xs text-slate-400 hover:text-slate-600">{{ __('Clear') }}</button>
+                </div>
+                <div class="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden max-h-64 overflow-y-auto">
+                    <template x-for="t in results" :key="t.id">
+                        <a :href="t.url" class="flex items-center justify-between gap-4 px-4 py-3 hover:bg-slate-50 transition-colors">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-medium text-slate-800 truncate" x-text="t.title"></span>
+                                    <span class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded border"
+                                        :class="{
+                                            'bg-rose-50 text-rose-600 border-rose-200': t.priority === 'high',
+                                            'bg-amber-50 text-amber-600 border-amber-200': t.priority === 'medium',
+                                            'bg-slate-50 text-slate-500 border-slate-200': t.priority === 'low'
+                                        }" x-text="t.priority"></span>
+                                </div>
+                                <div class="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
+                                    <span x-text="t.project"></span>
+                                    <span x-text="t.assignee || '{{ __('Unassigned') }}'"></span>
+                                    <span x-text="t.due_date || '—'"></span>
+                                </div>
+                            </div>
+                            <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full border"
+                                :class="{
+                                    'bg-slate-100 text-slate-600 border-slate-200': t.status === 'todo',
+                                    'bg-sky-100 text-sky-600 border-sky-200': t.status === 'in_progress',
+                                    'bg-emerald-100 text-emerald-600 border-emerald-200': t.status === 'done'
+                                }" x-text="t.status.replace('_', ' ')"></span>
+                        </a>
+                    </template>
+                </div>
+            </div>
+
+            {{-- Error --}}
+            <div x-show="error" x-cloak class="mt-3 text-sm text-rose-600 text-center py-2" x-text="error"></div>
+        </div>
+
+        <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('aiSmartSearch', () => ({
+                query: '',
+                loading: false,
+                results: [],
+                filters: null,
+                error: '',
+
+                search() {
+                    if (!this.query.trim() || this.loading) return;
+                    this.loading = true;
+                    this.error = '';
+                    this.results = [];
+                    this.filters = null;
+
+                    fetch("{{ route('ai.smart-search') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                        body: JSON.stringify({ query: this.query })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        this.loading = false;
+                        if (data.ok) {
+                            this.results = data.results;
+                            this.filters = data.filters;
+                            if (!data.results.length) this.error = '{{ __("No tasks found matching your search.") }}';
+                        } else {
+                            this.error = data.message || '{{ __("Search failed.") }}';
+                        }
+                    })
+                    .catch(() => {
+                        this.loading = false;
+                        this.error = '{{ __("Connection failed.") }}';
+                    });
+                }
+            }));
+        });
+        </script>
+
         <div class="grid gap-4 xl:grid-cols-5">
             <div class="card-strong p-4 xl:col-span-3">
                 <div class="mb-4 flex items-center justify-between gap-2">

@@ -127,6 +127,14 @@
                             {{ __('Add task') }}
                         </a>
                     @endif
+                    <button type="button" onclick="aiRetro()" id="ai-retro-btn" class="w-full justify-center gap-2 inline-flex items-center px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl text-sm font-semibold hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg>
+                        {{ __('AI Retrospective') }}
+                    </button>
+                    <button type="button" onclick="aiRisks()" id="ai-risk-btn" class="w-full justify-center gap-2 inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        {{ __('AI Risk Detection') }}
+                    </button>
                     <a href="{{ route('projects.index') }}" class="btn-secondary w-full justify-center gap-2 bg-white">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         {{ __('Back to projects') }}
@@ -517,4 +525,165 @@
             </div>
         </div>
     </div>
+
+{{-- AI Retrospective Modal --}}
+<div id="ai-retro-modal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4 sticky top-0 bg-white pb-2">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-violet-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg>
+                    {{ __('AI Project Retrospective') }}
+                </h3>
+                <button onclick="document.getElementById('ai-retro-modal').style.display='none'" class="text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="ai-retro-loading" class="flex items-center justify-center py-12">
+                <div class="animate-spin h-8 w-8 border-4 border-violet-500 border-t-transparent rounded-full"></div>
+                <span class="ml-3 text-sm text-slate-500">{{ __('AI is generating retrospective...') }}</span>
+            </div>
+            <div id="ai-retro-content" style="display:none" class="prose prose-sm prose-slate max-w-none"></div>
+            <div id="ai-retro-error" style="display:none" class="text-center py-8 text-sm text-rose-600"></div>
+        </div>
+    </div>
+</div>
+
+{{-- AI Risk Detection Modal --}}
+<div id="ai-risk-modal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    {{ __('AI Risk Analysis') }}
+                </h3>
+                <button onclick="document.getElementById('ai-risk-modal').style.display='none'" class="text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="ai-risk-loading" class="flex items-center justify-center py-12">
+                <div class="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full"></div>
+                <span class="ml-3 text-sm text-slate-500">{{ __('AI is analyzing risks...') }}</span>
+            </div>
+            <div id="ai-risk-summary" style="display:none" class="grid grid-cols-4 gap-3 mb-4"></div>
+            <div id="ai-risk-content" style="display:none" class="space-y-3"></div>
+            <div id="ai-risk-error" style="display:none" class="text-center py-8 text-sm text-rose-600"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+function aiRetro() {
+    const modal = document.getElementById('ai-retro-modal');
+    const loading = document.getElementById('ai-retro-loading');
+    const content = document.getElementById('ai-retro-content');
+    const error = document.getElementById('ai-retro-error');
+
+    modal.style.display = 'flex';
+    loading.style.display = 'flex';
+    content.style.display = 'none';
+    error.style.display = 'none';
+
+    fetch("{{ route('ai.retrospective', $project) }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.style.display = 'none';
+        if (data.ok) {
+            content.innerHTML = marked.parse(data.report);
+            content.style.display = 'block';
+        } else {
+            error.textContent = data.message || '{{ __("Failed to generate retrospective.") }}';
+            error.style.display = 'block';
+        }
+    })
+    .catch(() => {
+        loading.style.display = 'none';
+        error.textContent = '{{ __("Connection failed.") }}';
+        error.style.display = 'block';
+    });
+}
+
+function aiRisks() {
+    const modal = document.getElementById('ai-risk-modal');
+    const loading = document.getElementById('ai-risk-loading');
+    const summary = document.getElementById('ai-risk-summary');
+    const content = document.getElementById('ai-risk-content');
+    const error = document.getElementById('ai-risk-error');
+
+    modal.style.display = 'flex';
+    loading.style.display = 'flex';
+    summary.style.display = 'none';
+    content.style.display = 'none';
+    error.style.display = 'none';
+
+    fetch("{{ route('ai.detect-risks') }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+        body: JSON.stringify({ project_id: {{ $project->id }} })
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.style.display = 'none';
+        if (data.ok) {
+            const s = data.summary;
+            summary.innerHTML = `
+                <div class="text-center p-3 bg-rose-50 rounded-lg border border-rose-200">
+                    <div class="text-2xl font-bold text-rose-600">${s.overdue}</div>
+                    <div class="text-xs text-rose-500">{{ __('Overdue') }}</div>
+                </div>
+                <div class="text-center p-3 bg-amber-50 rounded-lg border border-amber-200">
+                    <div class="text-2xl font-bold text-amber-600">${s.due_soon}</div>
+                    <div class="text-xs text-amber-500">{{ __('Due soon') }}</div>
+                </div>
+                <div class="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    <div class="text-2xl font-bold text-orange-600">${s.high_priority}</div>
+                    <div class="text-xs text-orange-500">{{ __('High priority') }}</div>
+                </div>
+                <div class="text-center p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <div class="text-2xl font-bold text-slate-600">${s.unassigned}</div>
+                    <div class="text-xs text-slate-500">{{ __('Unassigned') }}</div>
+                </div>
+            `;
+            summary.style.display = 'grid';
+
+            const levelColors = { high: 'border-rose-300 bg-rose-50', medium: 'border-amber-300 bg-amber-50', low: 'border-sky-300 bg-sky-50' };
+            const levelLabels = { high: '{{ __("High") }}', medium: '{{ __("Medium") }}', low: '{{ __("Low") }}' };
+            const levelBadge = { high: 'bg-rose-100 text-rose-700', medium: 'bg-amber-100 text-amber-700', low: 'bg-sky-100 text-sky-700' };
+
+            content.innerHTML = data.risks.map(r => `
+                <div class="p-4 border rounded-lg ${levelColors[r.level] || 'border-slate-200 bg-slate-50'}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded ${levelBadge[r.level] || 'bg-slate-100 text-slate-700'}">${levelLabels[r.level] || r.level}</span>
+                        <span class="font-semibold text-sm text-slate-900">${r.title.replace(/</g, '&lt;')}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-2">${r.detail.replace(/</g, '&lt;')}</p>
+                    <div class="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                        <strong>{{ __('Action') }}:</strong> ${r.action.replace(/</g, '&lt;')}
+                    </div>
+                </div>
+            `).join('');
+            content.style.display = 'block';
+
+            if (!data.risks.length) {
+                content.innerHTML = '<div class="text-center py-8 text-emerald-600 font-medium">{{ __("No significant risks detected. Great job!") }}</div>';
+            }
+        } else {
+            error.textContent = data.message || '{{ __("Failed to analyze risks.") }}';
+            error.style.display = 'block';
+        }
+    })
+    .catch(() => {
+        loading.style.display = 'none';
+        error.textContent = '{{ __("Connection failed.") }}';
+        error.style.display = 'block';
+    });
+}
+</script>
+
 </x-app-layout>
