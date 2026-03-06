@@ -210,6 +210,60 @@
             </div>
         </section>
 
+        <!-- Author Section -->
+        <section class="py-20 bg-slate-50/50">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="text-center mb-10">
+                    <p class="text-sm uppercase tracking-widest text-indigo-600 font-semibold mb-3">{{ __('Developer') }}</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">{{ __('About the Author') }}</h2>
+                </div>
+                <div class="max-w-3xl mx-auto">
+                    <div class="card-strong overflow-hidden">
+                        <div class="h-32 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 relative">
+                            <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; viewBox=&quot;0 0 40 40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23fff&quot; fill-opacity=&quot;0.3&quot;%3E%3Cpath d=&quot;M20 20.5V18H0v-2h20v-2l2 3.5-2 3z&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+                        </div>
+                        <div class="px-8 pb-8 -mt-16 relative">
+                            <div class="flex flex-col sm:flex-row items-start gap-6">
+                                <div class="w-28 h-28 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-gradient-to-br from-cyan-100 to-indigo-100 flex-shrink-0 flex items-center justify-center">
+                                    <span class="text-4xl font-bold bg-gradient-to-br from-cyan-600 to-indigo-600 bg-clip-text text-transparent">BD</span>
+                                </div>
+                                <div class="pt-2 sm:pt-8">
+                                    <h3 class="text-2xl font-bold text-slate-900">Nguyễn Bá Duy</h3>
+                                    <p class="text-indigo-600 font-semibold text-sm mt-1">Full-stack Developer & AI Enthusiast</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 space-y-3 text-sm text-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                    <span>{{ __('Student at') }} <strong>74DCTT23</strong> — {{ __('Faculty of IT, University of Transport Technology') }}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-cyan-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    <span>basduy05@gmail.com</span>
+                                </div>
+                            </div>
+
+                            <p class="mt-5 text-sm text-slate-600 leading-relaxed">
+                                {{ __('A passionate young developer with a burning love for technology, always exploring and applying creative solutions to real-world problems. With a special interest in AI, web development, and educational technology products.') }}
+                            </p>
+
+                            <div class="mt-6 flex flex-wrap gap-2">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200/60 text-xs font-semibold text-amber-700">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    Google Student Ambassador 2026
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200/60 text-xs font-semibold text-red-700">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm-3 8a22.963 22.963 0 005 .56 22.96 22.96 0 005-.56V17a2 2 0 01-2 2H7a2 2 0 01-2-2v-4z" clip-rule="evenodd"/></svg>
+                                    {{ __('Youth Union Executive Committee — HCM City') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- CTA Section -->
         <section class="py-20 relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-cyan-600 via-indigo-600 to-purple-700"></div>

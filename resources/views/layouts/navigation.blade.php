@@ -23,6 +23,9 @@
                         <a wire:navigate href="{{ route('admin.settings.ai.edit') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.settings.ai.*') ? 'nav-pill-active' : '' }}" title="{{ __('AI Settings') }}" aria-label="{{ __('AI Settings') }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4"/><path d="m16.24 7.76 2.83-2.83"/><path d="M18 12h4"/><path d="m16.24 16.24 2.83 2.83"/><path d="M12 18v4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M2 12h4"/><path d="m4.93 4.93 2.83 2.83"/><circle cx="12" cy="12" r="4"/></svg>
                         </a>
+                        <a wire:navigate href="{{ route('admin.email-composer') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.email-composer*') ? 'nav-pill-active' : '' }}" title="{{ __('Email Composer') }}" aria-label="{{ __('Email Composer') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </a>
                     @endif
                 </div>
             </div>
@@ -72,6 +75,7 @@
             @if (Auth::user()?->isAdmin())
                 <a wire:navigate class="nav-pill block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
                 <a wire:navigate class="nav-pill block" href="{{ route('admin.settings.ai.edit') }}">{{ __('Settings') }}</a>
+                <a wire:navigate class="nav-pill block" href="{{ route('admin.email-composer') }}">{{ __('Email Composer') }}</a>
             @endif
             <a wire:navigate class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
             <div class="pt-2">

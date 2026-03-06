@@ -8,6 +8,7 @@ use App\Http\Controllers\ChatGroupController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DirectMessageController;
+use App\Http\Controllers\EmailComposerController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\MessengerTermsController;
@@ -166,6 +167,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/admin/settings/messenger', [AdminSettingController::class, 'updateMessenger'])
         ->middleware('admin')
         ->name('admin.settings.messenger.update');
+
+    Route::get('/admin/email-composer', [EmailComposerController::class, 'index'])
+        ->middleware('admin')
+        ->name('admin.email-composer');
+    Route::post('/admin/email-composer/send', [EmailComposerController::class, 'send'])
+        ->middleware('admin')
+        ->name('admin.email-composer.send');
+    Route::post('/admin/email-composer/ai-suggest', [EmailComposerController::class, 'aiSuggest'])
+        ->middleware('admin')
+        ->name('admin.email-composer.ai-suggest');
+    Route::get('/admin/email-composer/template', [EmailComposerController::class, 'getTemplate'])
+        ->middleware('admin')
+        ->name('admin.email-composer.template');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
