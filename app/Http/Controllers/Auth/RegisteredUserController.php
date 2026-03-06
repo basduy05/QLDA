@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\WelcomeUserMail;
+use App\Http\Controllers\Auth\OtpController;
+use App\Models\PendingRegistration;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -39,48 +36,24 @@ class RegisteredUserController extends Controller
             'accept_terms' => ['accepted'],
         ]);
 
-        $role = User::where('role', 'admin')->exists() ? 'user' : 'admin';
-        $locale = app()->getLocale();
+        PendingRegistration::where('email', $request->email)->delete();
 
-        $user = User::create([
+        PendingRegistration::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $role,
-            'locale' => $locale,
-            'email_verified_at' => now(),
+            'locale' => app()->getLocale(),
             'terms_accepted_at' => now(),
+            'expires_at' => now()->addMinutes(30),
         ]);
 
-        event(new Registered($user));
+        $error = OtpController::sendOtp($request->email, 'register_pending', __('registration'));
+        if ($error) {
+            return back()->withInput()->withErrors(['email' => $error]);
+        }
 
-        $welcomeUserId = (int) $user->id;
-        $welcomeEmail = (string) $user->email;
-        $welcomeLocale = (string) ($user->locale ?? app()->getLocale());
+        $request->session()->put('register_otp_email', $request->email);
 
-        app()->terminating(function () use ($welcomeUserId, $welcomeEmail, $welcomeLocale) {
-            try {
-                $welcomeUser = User::find($welcomeUserId);
-                if (! $welcomeUser) {
-                    return;
-                }
-
-                Mail::to($welcomeEmail)->send(
-                    (new WelcomeUserMail($welcomeUser))->locale($welcomeLocale)
-                );
-            } catch (\Throwable $exception) {
-                Log::warning('Welcome email send failed', [
-                    'user_id' => $welcomeUserId,
-                    'email' => $welcomeEmail,
-                    'message' => $exception->getMessage(),
-                ]);
-            }
-        });
-
-        Auth::login($user);
-
-        $request->session()->regenerate();
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('register.otp.show');
     }
 }

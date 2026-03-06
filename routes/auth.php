@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,26 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    // OTP – Registration
+    Route::get('register/otp', [OtpController::class, 'showRegisterForm'])
+        ->name('register.otp.show');
+    Route::post('register/otp/verify', [OtpController::class, 'verifyRegister'])
+        ->name('register.otp.verify');
+    Route::post('register/otp/resend', [OtpController::class, 'resendRegister'])
+        ->name('register.otp.resend');
+
+    // OTP – Password Reset
+    Route::get('password/otp', [OtpController::class, 'showPasswordForm'])
+        ->name('password.otp.show');
+    Route::post('password/otp/verify', [OtpController::class, 'verifyPassword'])
+        ->name('password.otp.verify');
+    Route::post('password/otp/resend', [OtpController::class, 'resendPassword'])
+        ->name('password.otp.resend');
+    Route::get('password/otp/reset', [OtpController::class, 'showOtpResetForm'])
+        ->name('password.otp.reset.form');
+    Route::post('password/otp/reset', [OtpController::class, 'storeOtpResetPassword'])
+        ->name('password.otp.reset.store');
 });
 
 Route::middleware('auth')->group(function () {
