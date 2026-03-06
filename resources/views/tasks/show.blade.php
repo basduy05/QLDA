@@ -471,7 +471,7 @@
                                     @endif
                                 </div>
                                 <div class="min-w-0">
-                                    <a href="{{ Storage::url($attachment->file_path) }}" target="_blank" class="block text-xs font-medium text-slate-700 hover:text-accent truncate" title="{{ $attachment->file_name }}">
+                                    <a href="{{ route('attachments.show', $attachment) }}" target="_blank" class="block text-xs font-medium text-slate-700 hover:text-accent truncate" title="{{ $attachment->file_name }}">
                                         {{ $attachment->file_name }}
                                     </a>
                                     <p class="text-[10px] text-slate-400">

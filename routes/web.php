@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
 
     // Attachments
     Route::post('/tasks/{task}/attachments', [TaskAttachmentController::class, 'store'])->name('tasks.attachments.store');
+    Route::get('/attachments/{attachment}', [TaskAttachmentController::class, 'show'])->name('attachments.show');
     Route::delete('/attachments/{attachment}', [TaskAttachmentController::class, 'destroy'])->name('attachments.destroy');
 
     Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store'])

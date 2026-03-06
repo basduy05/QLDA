@@ -44,6 +44,17 @@ class TaskAttachmentController extends Controller
         return back()->with("status", "Files uploaded successfully.");
     }
 
+    public function show(TaskAttachment $attachment)
+    {
+        $this->ensureAccess($attachment->task);
+
+        if (!Storage::disk("public")->exists($attachment->file_path)) {
+            abort(404, 'File not found');
+        }
+
+        return Storage::disk("public")->download($attachment->file_path, $attachment->file_name);
+    }
+
     public function destroy(TaskAttachment $attachment)
     {
         $user = Auth::user();
