@@ -581,7 +581,10 @@ function aiGenerateSubtasks() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.text().then(t => { try { return JSON.parse(t); } catch { return { ok: false, message: '{{ __("AI request failed. Please try again.") }}' }; } });
+        return r.json();
+    })
     .then(data => {
         loading.style.display = 'none';
         if (data.ok && data.subtasks.length) {
@@ -620,13 +623,15 @@ function applyAiSubtasks() {
 
     // Submit each subtask via forms
     let submitted = 0;
+    const total = selected.length;
     selected.forEach(s => {
         const formData = new FormData();
         formData.append('_token', '{{ csrf_token() }}');
         formData.append('title', s.title);
         formData.append('points', s.points);
         fetch("{{ route('tasks.subtasks.store', $task) }}", { method: 'POST', body: formData })
-            .then(() => { submitted++; if (submitted === selected.length) location.reload(); });
+            .then(r => { if (!r.ok) throw new Error('fail'); submitted++; if (submitted === total) location.reload(); })
+            .catch(() => { submitted++; if (submitted === total) location.reload(); });
     });
 }
 </script>

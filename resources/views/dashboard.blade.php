@@ -141,7 +141,7 @@
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
                         body: JSON.stringify({ query: this.query })
                     })
-                    .then(r => r.json())
+                    .then(r => { if (!r.ok && r.status === 419) throw new Error('CSRF'); return r.json(); })
                     .then(data => {
                         this.loading = false;
                         if (data.ok) {
@@ -154,7 +154,7 @@
                     })
                     .catch(() => {
                         this.loading = false;
-                        this.error = '{{ __("Connection failed.") }}';
+                        this.error = '{{ __("AI service is temporarily unavailable. Please try again.") }}';
                     });
                 }
             }));

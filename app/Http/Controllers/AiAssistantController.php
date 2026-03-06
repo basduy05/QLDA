@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AiAssistantController extends Controller
@@ -122,7 +123,7 @@ class AiAssistantController extends Controller
         );
 
         try {
-            $response = Http::withoutVerifying()->timeout(60)->acceptJson()->post($url, [
+            $response = Http::timeout(60)->acceptJson()->post($url, [
                 'contents' => [
                     [
                         'role' => 'user',
@@ -136,7 +137,8 @@ class AiAssistantController extends Controller
                     'maxOutputTokens' => 4096,
                 ],
             ]);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            Log::error('AI chat API call failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'ok' => false,
                 'message' => __('AI service is temporarily unavailable.'),
@@ -144,6 +146,7 @@ class AiAssistantController extends Controller
         }
 
         if (! $response->ok()) {
+            Log::warning('AI chat API returned non-OK', ['status' => $response->status(), 'body' => Str::limit($response->body(), 500)]);
             return response()->json([
                 'ok' => false,
                 'message' => __('AI request failed. Please try again later.'),
@@ -154,6 +157,7 @@ class AiAssistantController extends Controller
         $reply = trim($reply);
 
         if ($reply === '') {
+            Log::warning('AI chat returned empty response', ['body' => Str::limit($response->body(), 500)]);
             return response()->json([
                 'ok' => false,
                 'message' => __('AI returned an empty response.'),
@@ -220,6 +224,7 @@ class AiAssistantController extends Controller
         $subtasks = json_decode($cleaned, true);
 
         if (! is_array($subtasks)) {
+            Log::warning('AI subtask generation returned invalid JSON', ['raw' => Str::limit($reply, 500)]);
             return response()->json(['ok' => false, 'message' => __('AI returned invalid format. Please try again.')], 503);
         }
 
@@ -301,6 +306,7 @@ class AiAssistantController extends Controller
         $suggestion = json_decode($cleaned, true);
 
         if (! is_array($suggestion) || empty($suggestion['user_id'])) {
+            Log::warning('AI assignee suggestion returned invalid JSON', ['raw' => Str::limit($reply, 500)]);
             return response()->json(['ok' => false, 'message' => __('AI returned invalid format. Please try again.')], 503);
         }
 
@@ -390,6 +396,7 @@ class AiAssistantController extends Controller
         $risks = json_decode($cleaned, true);
 
         if (! is_array($risks)) {
+            Log::warning('AI risk detection returned invalid JSON', ['raw' => Str::limit($reply, 500)]);
             return response()->json(['ok' => false, 'message' => __('AI returned invalid format.')], 503);
         }
 
@@ -518,6 +525,7 @@ class AiAssistantController extends Controller
         $filters = json_decode($cleaned, true);
 
         if (! is_array($filters)) {
+            Log::warning('AI smart search returned invalid JSON', ['raw' => Str::limit($reply, 500)]);
             return response()->json(['ok' => false, 'message' => __('Could not parse search query.')], 422);
         }
 
@@ -607,18 +615,20 @@ class AiAssistantController extends Controller
         );
 
         try {
-            $response = Http::withoutVerifying()->timeout(60)->acceptJson()->post($url, [
+            $response = Http::timeout(60)->acceptJson()->post($url, [
                 'contents' => [['role' => 'user', 'parts' => [['text' => $prompt]]]],
                 'generationConfig' => [
                     'temperature' => $temperature,
                     'maxOutputTokens' => $maxTokens,
                 ],
             ]);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            Log::error('Gemini API call failed', ['error' => $e->getMessage()]);
             return null;
         }
 
         if (! $response->ok()) {
+            Log::warning('Gemini API returned non-OK', ['status' => $response->status(), 'body' => Str::limit($response->body(), 500)]);
             return null;
         }
 
@@ -715,7 +725,7 @@ class AiAssistantController extends Controller
         // 2. User's Task Workload (Assigned to Me)
         $myTasks = \App\Models\Task::where('assignee_id', $user->id)
             ->with('project:id,name')
-            ->orderByRaw("FIELD(status, 'in_progress', 'todo', 'done')")
+            ->orderByRaw("CASE status WHEN 'in_progress' THEN 0 WHEN 'todo' THEN 1 WHEN 'done' THEN 2 ELSE 3 END")
             ->orderBy('due_date')
             ->limit(50)
             ->get();

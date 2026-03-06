@@ -90,7 +90,10 @@ function aiSuggestAssignee() {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
         body: JSON.stringify({ project_id: {{ $project->id }}, title, description, priority })
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.text().then(t => { try { return JSON.parse(t); } catch { return { ok: false, message: '{{ __("AI request failed. Please try again.") }}' }; } });
+        return r.json();
+    })
     .then(data => {
         btn.disabled = false;
         btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v1h12v-1a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg> AI';

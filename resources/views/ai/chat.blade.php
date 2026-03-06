@@ -156,8 +156,16 @@
                         }),
                     });
 
-                    const payload = await response.json().catch(() => ({}));
-                    if (!response.ok || !payload?.ok || !Array.isArray(payload?.suggestions) || !suggestionList) {
+                    if (!response.ok || response.status === 419) return;
+
+                    let payload;
+                    try {
+                        payload = await response.json();
+                    } catch {
+                        return;
+                    }
+
+                    if (!payload?.ok || !Array.isArray(payload?.suggestions) || !suggestionList) {
                         return;
                     }
 
@@ -225,7 +233,18 @@
                         }),
                     });
 
-                    const payload = await response.json().catch(() => ({}));
+                    if (response.status === 419) {
+                        setError("{{ __('Session expired. Please reload the page.') }}");
+                        return;
+                    }
+
+                    let payload;
+                    try {
+                        payload = await response.json();
+                    } catch {
+                        setError("{{ __('AI returned an invalid response. Please try again.') }}");
+                        return;
+                    }
 
                     if (!response.ok || !payload?.ok) {
                         setError(payload?.message || "{{ __('AI request failed. Please try again later.') }}");
@@ -233,8 +252,12 @@
                     }
 
                     addBubble(payload.reply || "{{ __('AI returned an empty response.') }}", false, true);
-                } catch (_) {
-                    setError("{{ __('AI service is temporarily unavailable.') }}");
+                } catch (e) {
+                    if (e.name === 'TypeError') {
+                        setError("{{ __('Network error. Please check your connection.') }}");
+                    } else {
+                        setError("{{ __('AI service is temporarily unavailable.') }}");
+                    }
                 } finally {
                     locked = false;
                     if (submit) {

@@ -590,11 +590,18 @@ function aiRetro() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.text().then(t => { try { return JSON.parse(t); } catch { return { ok: false, message: '{{ __("AI request failed. Please try again.") }}' }; } });
+        return r.json();
+    })
     .then(data => {
         loading.style.display = 'none';
         if (data.ok) {
-            content.innerHTML = marked.parse(data.report);
+            if (typeof window.marked !== 'undefined' && typeof window.marked.parse === 'function') {
+                content.innerHTML = window.marked.parse(data.report);
+            } else {
+                content.innerHTML = '<pre class="whitespace-pre-wrap text-sm text-slate-700">' + data.report.replace(/</g, '&lt;') + '</pre>';
+            }
             content.style.display = 'block';
         } else {
             error.textContent = data.message || '{{ __("Failed to generate retrospective.") }}';
@@ -626,7 +633,10 @@ function aiRisks() {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
         body: JSON.stringify({ project_id: {{ $project->id }} })
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) return r.text().then(t => { try { return JSON.parse(t); } catch { return { ok: false, message: '{{ __("AI request failed. Please try again.") }}' }; } });
+        return r.json();
+    })
     .then(data => {
         loading.style.display = 'none';
         if (data.ok) {
