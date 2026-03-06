@@ -33,16 +33,24 @@ class EmailComposerController extends Controller
             'body' => ['required', 'string', 'max:50000'],
         ]);
 
-        $sender = Auth::user();
-        $body = $this->markdownToHtml($data['body']);
+        $senderName = config('app.name', 'Aperlex');
         $sent = 0;
         $failed = 0;
         $errors = [];
 
+        // Get all users for personalization
+        $userMap = User::whereIn('email', $data['recipients'])->get()->keyBy('email');
+
         foreach ($data['recipients'] as $email) {
+            $recipientName = $userMap[$email]->name ?? null;
+            $body = $this->markdownToHtml($data['body']);
+            // Personalize greeting if name is available
+            if ($recipientName) {
+                $body = '<p>Hi ' . e($recipientName) . ',</p>' . $body;
+            }
             try {
                 Mail::to(trim($email))->send(
-                    new CustomComposedMail($data['subject'], $body, $sender->name)
+                    new CustomComposedMail($data['subject'], $body, $senderName)
                 );
                 $sent++;
             } catch (\Throwable $e) {

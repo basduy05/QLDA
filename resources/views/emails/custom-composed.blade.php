@@ -7,7 +7,7 @@
     </div>
     <div style="margin-top:24px; padding-top:16px; border-top:1px solid #f1f5f9;">
         <p style="margin:0; font-size:13px; color:#64748b;">
-            — {{ $senderName }}
+            — Aperlex
         </p>
     </div>
 @endcomponent
