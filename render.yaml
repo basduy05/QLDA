@@ -67,6 +67,20 @@ services:
         fromDatabase:
           name: qhorizonpm-db
           property: password
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        sync: false
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_URL
+        sync: false
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: "false"
       - key: RUN_MIGRATIONS
         value: "true"
       - key: RUN_SEED

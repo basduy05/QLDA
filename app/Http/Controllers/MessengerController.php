@@ -697,7 +697,7 @@ class MessengerController extends Controller
         $original = trim((string) $attachment->getClientOriginalName());
 
         return [
-            'attachment_path' => $attachment->store('messenger-attachments', 'public'),
+            'attachment_path' => $attachment->store('messenger-attachments', 's3'),
             'attachment_name' => $original !== '' ? Str::limit($original, 180, '') : 'file',
             'attachment_size' => $attachment->getSize(),
             'attachment_mime' => (string) $attachment->getClientMimeType(),

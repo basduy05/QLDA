@@ -500,7 +500,7 @@
                     @endforelse
                 </div>
 
-                <form method="POST" action="{{ route('tasks.attachments.store', $task) }}" enctype="multipart/form-data" class="mt-auto" x-data="{ isDragging: false }">
+                <form x-ref="form" method="POST" action="{{ route('tasks.attachments.store', $task) }}" enctype="multipart/form-data" class="mt-auto" x-data="{ isDragging: false }">
                     @csrf
                     <div class="relative group">
                         <label 

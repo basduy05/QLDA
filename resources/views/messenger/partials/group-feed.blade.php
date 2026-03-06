@@ -10,7 +10,7 @@
         $mine = (int) $message->user_id === (int) $authUserId;
         $sender = $nicknames[$message->user_id] ?? $message->user?->name;
         $hasAttachment = filled($message->attachment_path);
-        $attachmentUrl = $hasAttachment ? asset('storage/' . ltrim((string) $message->attachment_path, '/')) : null;
+        $attachmentUrl = $hasAttachment ? \Illuminate\Support\Facades\Storage::disk('s3')->url($message->attachment_path) : null;
     @endphp
     <div class="message-row flex {{ $mine ? 'justify-end' : 'justify-start' }}">
         <div class="message-bubble max-w-[92%] md:max-w-[78%] rounded-2xl px-4 py-2 {{ $mine ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800' }}">
