@@ -21,7 +21,7 @@ class TaskAttachmentController extends Controller
 
         if ($request->hasFile("files")) {
             foreach ($request->file("files") as $file) {
-                 $path = $file->store("task-attachments", "s3");
+                 $path = $file->store("task-attachments", "public");
                  $mime = $file->getMimeType();
                  $type = "other";
 
@@ -48,11 +48,11 @@ class TaskAttachmentController extends Controller
     {
         $this->ensureAccess($attachment->task);
 
-        if (!Storage::disk("s3")->exists($attachment->file_path)) {
+        if (!Storage::disk("public")->exists($attachment->file_path)) {
             abort(404, 'File not found');
         }
 
-        return Storage::disk("s3")->download($attachment->file_path, $attachment->file_name);
+        return Storage::disk("public")->download($attachment->file_path, $attachment->file_name);
     }
 
     public function destroy(TaskAttachment $attachment)
@@ -62,8 +62,8 @@ class TaskAttachmentController extends Controller
              $this->ensureAccess($attachment->task);
         }
 
-        if (Storage::disk("s3")->exists($attachment->file_path)) {
-            Storage::disk("s3")->delete($attachment->file_path);
+        if (Storage::disk("public")->exists($attachment->file_path)) {
+            Storage::disk("public")->delete($attachment->file_path);
         }
 
         $attachment->delete();
