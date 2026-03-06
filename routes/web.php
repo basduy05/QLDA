@@ -146,6 +146,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/settings/email/test', [AdminSettingController::class, 'sendTestEmail'])
         ->middleware('admin')
         ->name('admin.settings.email.test');
+    Route::post('/admin/settings/email/welcome-all', [AdminSettingController::class, 'sendWelcomeToAll'])
+        ->middleware('admin')
+        ->name('admin.settings.email.welcome-all');
 
     Route::get('/admin/settings/messenger', [AdminSettingController::class, 'editMessenger'])
         ->middleware('admin')

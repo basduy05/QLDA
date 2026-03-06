@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
+use App\Models\User;
+use App\Mail\OtpCodeMail;
+use App\Mail\WelcomeUserMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpCodeMail;
 
 class AdminSettingController extends Controller
 {
@@ -103,6 +106,39 @@ class AdminSettingController extends Controller
         }
 
         return back()->with('status', __('Test email sent to :email', ['email' => $user->email]));
+    }
+
+    public function sendWelcomeToAll(): RedirectResponse
+    {
+        // Mark unverified users as verified
+        User::whereNull('email_verified_at')->update(['email_verified_at' => now()]);
+
+        $users = User::all();
+        $sent = 0;
+        $failed = 0;
+
+        foreach ($users as $user) {
+            try {
+                Mail::to($user->email)->send(
+                    (new WelcomeUserMail($user))->locale($user->locale ?? 'vi')
+                );
+                $sent++;
+            } catch (\Throwable $e) {
+                $failed++;
+                Log::warning('Welcome email failed (batch)', [
+                    'user_id' => $user->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+            usleep(500_000);
+        }
+
+        if ($failed > 0) {
+            return back()->with('status', __('Welcome emails sent: :sent, failed: :failed', ['sent' => $sent, 'failed' => $failed]));
+        }
+
+        return back()->with('status', __('Welcome emails sent to all :count users.', ['count' => $sent]));
     }
 
     private function maskApiKey(?string $key): ?string

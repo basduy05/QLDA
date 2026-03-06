@@ -95,10 +95,16 @@
         <div class="card-strong p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-slate-900">✉ {{ __('Email Configuration') }}</h3>
-                <form method="POST" action="{{ route('admin.settings.email.test') }}">
-                    @csrf
-                    <button type="submit" class="btn-secondary text-sm">✉ {{ __('Send test email') }}</button>
-                </form>
+                <div class="flex items-center gap-2">
+                    <form method="POST" action="{{ route('admin.settings.email.welcome-all') }}" onsubmit="return confirm('{{ __('Send welcome email to ALL users? This cannot be undone.') }}')">
+                        @csrf
+                        <button type="submit" class="btn-secondary text-sm">🎉 {{ __('Send welcome to all') }}</button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.settings.email.test') }}">
+                        @csrf
+                        <button type="submit" class="btn-secondary text-sm">✉ {{ __('Send test email') }}</button>
+                    </form>
+                </div>
             </div>
 
             @if ($errors->has('email_test'))
