@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OtpCodeMail;
+use App\Mail\WelcomeUserMail;
 use App\Models\EmailOtp;
 use App\Models\PendingRegistration;
 use App\Models\User;
@@ -92,6 +93,21 @@ class OtpController extends Controller
         });
 
         event(new Registered($user));
+
+        // Send welcome email (fire-and-forget)
+        $welcomeUser = $user;
+        app()->terminating(function () use ($welcomeUser) {
+            try {
+                Mail::to($welcomeUser->email)->send(
+                    (new WelcomeUserMail($welcomeUser))->locale($welcomeUser->locale ?? app()->getLocale())
+                );
+            } catch (\Throwable $e) {
+                Log::warning('Welcome email failed', [
+                    'user_id' => $welcomeUser->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
+        });
 
         $request->session()->forget('register_otp_email');
 
