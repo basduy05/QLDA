@@ -1,9 +1,9 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center justify-between gap-4">
             <div>
-                <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">{{ __('Workspace') }}</p>
-                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">{{ __('Projects') }}</h2>
+                <p class="text-sm text-slate-500">{{ __('Workspace') }}</p>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ __('Projects') }}</h2>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ route('exports.projects') }}" class="btn-secondary inline-flex items-center gap-2">
@@ -22,7 +22,7 @@
 
 
         <div class="card-strong overflow-hidden">
-            <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <form method="GET" action="{{ route('projects.index') }}" class="relative w-full sm:max-w-xs">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
@@ -35,18 +35,18 @@
                 <table class="min-w-full text-sm">
                     <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold">
                         <tr>
-                            <th class="px-6 py-4 text-left">{{ __('Project') }}</th>
-                            <th class="px-6 py-4 text-left">{{ __('Owner') }}</th>
-                            <th class="px-6 py-4 text-left">{{ __('Status') }}</th>
-                            <th class="px-6 py-4 text-center">{{ __('Tasks') }}</th>
-                            <th class="px-6 py-4 text-left">{{ __('Timeline') }}</th>
-                            <th class="px-6 py-4 text-right"></th>
+                            <th class="px-5 py-3 text-left">{{ __('Project') }}</th>
+                            <th class="px-5 py-3 text-left">{{ __('Owner') }}</th>
+                            <th class="px-5 py-3 text-left">{{ __('Status') }}</th>
+                            <th class="px-5 py-3 text-center">{{ __('Tasks') }}</th>
+                            <th class="px-5 py-3 text-left">{{ __('Timeline') }}</th>
+                            <th class="px-5 py-3 text-right"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
                         @forelse ($projects as $project)
                             <tr class="hover:bg-slate-50/80 transition-colors group">
-                                <td class="px-6 py-4 whitespace-normal min-w-[250px]">
+                                <td class="px-5 py-3.5 whitespace-normal min-w-[250px]">
                                     <div class="flex items-center gap-3">
                                         <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/10 flex items-center justify-center text-accent font-bold text-lg shrink-0">
                                             {{ strtoupper(substr($project->name, 0, 1)) }}
@@ -57,7 +57,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-5 py-3.5">
                                     <div class="flex items-center gap-2">
                                         <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-medium text-slate-600 shrink-0">
                                             {{ strtoupper(substr($project->owner?->name ?? '?', 0, 2)) }}
@@ -65,7 +65,7 @@
                                         <span class="text-slate-700 font-medium">{{ $project->owner?->name }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-5 py-3.5">
                                     @php
                                         $statusColors = [
                                             'planning' => 'bg-sky-100 text-sky-700 border-sky-200',
@@ -79,19 +79,19 @@
                                         {{ __(ucwords(str_replace('_', ' ', $project->status))) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-5 py-3.5 text-center">
                                     <span class="inline-flex items-center justify-center h-6 min-w-[1.5rem] px-2 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
                                         {{ $project->tasks_count }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-slate-500 text-xs">
+                                <td class="px-5 py-3.5 text-slate-500 text-xs">
                                     <div class="flex flex-col gap-1">
-                                        <span>{{ $project->start_date?->format('d/m/Y H:i') ?? '—' }}</span>
-                                        <span class="text-slate-300 transform rotate-90 mx-auto w-fit md:rotate-0 md:mx-0">↓</span>
-                                        <span>{{ $project->end_date?->format('d/m/Y H:i') ?? '—' }}</span>
+                                        <span>{{ $project->start_date?->format('d/m/Y H:i') ?? 'â€”' }}</span>
+                                        <span class="text-slate-300 transform rotate-90 mx-auto w-fit md:rotate-0 md:mx-0">â†“</span>
+                                        <span>{{ $project->end_date?->format('d/m/Y H:i') ?? 'â€”' }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-5 py-3.5 text-right">
                                     <a href="{{ route('projects.show', $project) }}" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-accent hover:bg-accent/5 transition-colors" title="{{ __('Open') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                                     </a>
@@ -123,7 +123,7 @@
             </div>
 
             @if($projects->hasPages())
-                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+                <div class="px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
                     {{ $projects->links() }}
                 </div>
             @endif

@@ -1,9 +1,9 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center justify-between gap-4">
             <div>
-                <p class="text-sm font-medium text-slate-500 uppercase tracking-wider">{{ __('Workspace') }}</p>
-                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">{{ __('Tasks') }}</h2>
+                <p class="text-sm text-slate-500">{{ __('Workspace') }}</p>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ __('Tasks') }}</h2>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <div class="relative" x-data="{ open: false }">
@@ -41,7 +41,7 @@
     </x-slot>
 
     <div class="card-strong overflow-hidden">
-        <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <form method="GET" action="{{ route('tasks.index') }}" class="w-full flex flex-col sm:flex-row gap-3 sm:items-center">
                 <div class="relative w-full sm:max-w-xs">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -81,19 +81,19 @@
             <table class="min-w-full text-sm">
                 <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold">
                     <tr>
-                        <th class="px-6 py-4 text-left">{{ __('Task') }}</th>
-                        <th class="px-6 py-4 text-left">{{ __('Project') }}</th>
-                        <th class="px-6 py-4 text-left">{{ __('Assignee') }}</th>
-                        <th class="px-6 py-4 text-left">{{ __('Status') }}</th>
-                        <th class="px-6 py-4 text-left">{{ __('Priority') }}</th>
-                        <th class="px-6 py-4 text-left">{{ __('Due date') }}</th>
-                        <th class="px-6 py-4 text-right"></th>
+                        <th class="px-5 py-3.5 text-left">{{ __('Task') }}</th>
+                        <th class="px-5 py-3.5 text-left">{{ __('Project') }}</th>
+                        <th class="px-5 py-3.5 text-left">{{ __('Assignee') }}</th>
+                        <th class="px-5 py-3.5 text-left">{{ __('Status') }}</th>
+                        <th class="px-5 py-3.5 text-left">{{ __('Priority') }}</th>
+                        <th class="px-5 py-3.5 text-left">{{ __('Due date') }}</th>
+                        <th class="px-5 py-3.5 text-right"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                     @forelse ($tasks as $task)
                         <tr class="hover:bg-slate-50/80 transition-colors group">
-                            <td class="px-6 py-4 whitespace-normal min-w-[250px]">
+                            <td class="px-5 py-3.5 whitespace-normal min-w-[250px]">
                                 <div class="flex items-start gap-3">
                                     <div class="mt-1">
                                         @if($task->status === 'done')
@@ -110,13 +110,13 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-3.5">
                                 <a href="{{ route('projects.show', $task->project) }}" class="inline-flex items-center gap-1.5 text-slate-600 hover:text-accent transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
                                     <span class="font-medium">{{ $task->project?->name }}</span>
                                 </a>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-3.5">
                                 @if($task->assignee)
                                     <div class="flex items-center gap-2">
                                         <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-medium text-slate-600 shrink-0">
@@ -131,7 +131,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-3.5">
                                 @php
                                     $statusColors = [
                                         'todo' => 'bg-slate-100 text-slate-700 border-slate-200',
@@ -144,7 +144,7 @@
                                     {{ __(ucwords(str_replace('_', ' ', $task->status))) }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-3.5">
                                 @php
                                     $priorityColors = [
                                         'low' => 'text-slate-500 bg-slate-50 border-slate-200',
@@ -164,7 +164,7 @@
                                     {{ __(ucwords($task->priority)) }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-slate-500 text-xs">
+                            <td class="px-5 py-3.5 text-slate-500 text-xs">
                                 @if($task->due_date)
                                     @php
                                         $dateClass = '';
@@ -182,10 +182,10 @@
                                     @endphp
                                     <span class="{{ $dateClass }}">{{ $task->due_date->format('d/m/Y H:i') }}</span>
                                 @else
-                                    <span class="text-slate-400">—</span>
+                                    <span class="text-slate-400">â€”</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="px-5 py-3.5 text-right">
                                 <a href="{{ route('tasks.show', $task) }}" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-accent hover:bg-accent/5 transition-colors" title="{{ __('Open') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                                 </a>
@@ -212,7 +212,7 @@
         </div>
 
         @if($tasks->hasPages())
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+            <div class="px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
                 {{ $tasks->links() }}
             </div>
         @endif

@@ -1,9 +1,9 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-slate-500">{{ __('Admin') }}</p>
-                <h2 class="text-3xl font-semibold text-slate-900">{{ __('General Settings') }}</h2>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ __('General Settings') }}</h2>
                 <p class="text-sm text-slate-500 mt-1">{{ __('Configure system-wide settings.') }}</p>
             </div>
             <a href="{{ route('admin.users.index') }}" class="btn-secondary">{{ __('Back to users') }}</a>
@@ -12,7 +12,7 @@
 
     <div class="space-y-6 max-w-3xl">
         <!-- AI Settings Card -->
-        <div class="card-strong p-6">
+        <div class="card-strong p-5">
             <h3 class="text-lg font-bold text-slate-900 mb-4">{{ __('AI Configuration') }}</h3>
             <form method="POST" action="{{ route('admin.settings.ai.update') }}" class="space-y-4">
                 @csrf
@@ -61,7 +61,7 @@
         </div>
 
         <!-- Messenger Settings Card -->
-        <div class="card-strong p-6">
+        <div class="card-strong p-5">
             <h3 class="text-lg font-bold text-slate-900 mb-4">{{ __('Messenger Configuration') }}</h3>
             <form method="POST" action="{{ route('admin.settings.messenger.update') }}" class="space-y-4">
                 @csrf
@@ -92,21 +92,21 @@
         </div>
 
         <!-- Email Configuration Card -->
-        <div class="card-strong p-6">
+        <div class="card-strong p-5">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-slate-900">✉ {{ __('Email Configuration') }}</h3>
+                <h3 class="text-lg font-bold text-slate-900">âœ‰ {{ __('Email Configuration') }}</h3>
                 <div class="flex items-center gap-2">
                     <form method="POST" action="{{ route('admin.settings.ai.weekly-report') }}" onsubmit="return confirm('{{ __('Generate and send weekly AI report to all admins?') }}')">
                         @csrf
-                        <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm">🤖 {{ __('AI Weekly Report') }}</button>
+                        <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-violet-600 hover:to-purple-700 transition-all shadow-sm">ðŸ¤– {{ __('AI Weekly Report') }}</button>
                     </form>
                     <form method="POST" action="{{ route('admin.settings.email.welcome-all') }}" onsubmit="return confirm('{{ __('Send welcome email to ALL users? This cannot be undone.') }}')">
                         @csrf
-                        <button type="submit" class="btn-secondary text-sm">🎉 {{ __('Send welcome to all') }}</button>
+                        <button type="submit" class="btn-secondary text-sm">ðŸŽ‰ {{ __('Send welcome to all') }}</button>
                     </form>
                     <form method="POST" action="{{ route('admin.settings.email.test') }}">
                         @csrf
-                        <button type="submit" class="btn-secondary text-sm">✉ {{ __('Send test email') }}</button>
+                        <button type="submit" class="btn-secondary text-sm">âœ‰ {{ __('Send test email') }}</button>
                     </form>
                 </div>
             </div>
@@ -118,7 +118,7 @@
             @endif
 
             <div class="mb-4 rounded-xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
-                <strong>{{ __('Note') }}:</strong> {{ __('Render free tier blocks SMTP (port 587/465). Use Brevo (300 emails/day free). Sign up at brevo.com → SMTP & API → API Keys.') }}
+                <strong>{{ __('Note') }}:</strong> {{ __('Render free tier blocks SMTP (port 587/465). Use Brevo (300 emails/day free). Sign up at brevo.com â†’ SMTP & API â†’ API Keys.') }}
             </div>
 
             <form method="POST" action="{{ route('admin.settings.email.update') }}" class="space-y-4">
@@ -145,7 +145,7 @@
                         <div class="relative">
                             <input id="brevo_api_key" type="password" name="brevo_api_key" class="mt-2 w-full rounded-xl border-slate-200 pr-10" placeholder="xkeysib-..." autocomplete="off">
                             <button type="button" onclick="togglePassword('brevo_api_key')" class="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-slate-400 hover:text-slate-600">
-                                👁
+                                ðŸ‘
                             </button>
                         </div>
                         @if ($hasBrevoKey)
@@ -183,7 +183,7 @@
                             <div class="relative">
                                 <input id="smtp_password" type="password" name="smtp_password" class="mt-2 w-full rounded-xl border-slate-200 pr-10" autocomplete="off">
                                 <button type="button" onclick="togglePassword('smtp_password')" class="absolute right-3 top-1/2 -translate-y-1/2 mt-1 text-slate-400 hover:text-slate-600">
-                                    👁
+                                    ðŸ‘
                                 </button>
                             </div>
                             @if ($hasSmtpPassword)

@@ -27,7 +27,7 @@
                 <!-- Page Heading -->
                 @isset($header)
                     <header class="bg-white/80 backdrop-blur border-b border-slate-100">
-                        <div class="mx-auto w-full max-w-[1440px] px-4 py-3 md:px-6 md:py-4 xl:px-8">
+                        <div class="mx-auto w-full max-w-[1440px] px-5 py-4 md:px-8">
                             {{ $header }}
                         </div>
                     </header>
@@ -39,7 +39,7 @@
 
             <!-- Page Content -->
             <main>
-                <div class="{{ request()->query('popup') ? 'w-full h-screen overflow-hidden p-0' : 'mx-auto w-full max-w-[1440px] px-4 py-4 md:px-6 md:py-5 xl:px-8' }}">
+                <div class="{{ request()->query('popup') ? 'w-full h-screen overflow-hidden p-0' : 'mx-auto w-full max-w-[1440px] px-5 py-5 md:px-8' }}">
                     {{ $slot }}
                 </div>
             </main>

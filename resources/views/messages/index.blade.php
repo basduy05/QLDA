@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-slate-500">{{ __('Messenger') }}</p>
-                <h2 class="text-3xl font-semibold text-slate-900">{{ __('Private Messages') }}</h2>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ __('Private Messages') }}</h2>
             </div>
             @if ($callUrl)
                 <a href="{{ $callUrl }}" target="_blank" rel="noopener noreferrer" class="btn-primary">{{ __('Call') }}</a>

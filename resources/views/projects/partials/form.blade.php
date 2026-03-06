@@ -1,7 +1,7 @@
 @csrf
 
 @if ($errors->any())
-    <div class="card p-4 mb-6 text-sm text-rose-700 bg-rose-50">
+    <div class="card p-5 mb-6 text-sm text-rose-700 bg-rose-50">
         <ul class="list-disc list-inside">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -10,7 +10,7 @@
     </div>
 @endif
 
-<div class="grid gap-4">
+<div class="grid gap-5">
     <div>
         <label class="text-sm font-medium text-slate-600">{{ __('Project name') }}</label>
         <input type="text" name="name" value="{{ old('name', $project->name ?? '') }}" class="mt-2 w-full rounded-xl border-slate-200" placeholder="{{ __('E.g. Aperlex rollout') }}" required>

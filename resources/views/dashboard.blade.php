@@ -1,38 +1,38 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="space-y-1">
+        <div class="flex items-center justify-between gap-4">
+            <div>
                 <p class="text-sm text-slate-500">{{ __('Overview') }}</p>
-                <h2 class="text-2xl font-semibold text-slate-900 lg:text-3xl">{{ __('Project command center') }}</h2>
-                <p class="text-sm text-slate-500">{{ __('A quick pulse of project health and delivery rhythm.') }}</p>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ __('Project command center') }}</h2>
+                <p class="text-sm text-slate-500 mt-1">{{ __('A quick pulse of project health and delivery rhythm.') }}</p>
             </div>
             <a href="{{ route('exports.reports') }}" class="btn-secondary">{{ __('Export report') }}</a>
         </div>
     </x-slot>
 
     <div class="space-y-6">
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <div class="card-strong dashboard-kpi p-4">
+        <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+            <div class="card-strong dashboard-kpi p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Total projects') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $projectsCount }}</p>
                 <p class="mt-0.5 text-xs text-slate-500">{{ __('Across all monitored workspaces') }}</p>
             </div>
-            <div class="card-strong dashboard-kpi p-4">
+            <div class="card-strong dashboard-kpi p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Active projects') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $activeProjectsCount }}</p>
                 <p class="mt-0.5 text-xs text-slate-500">{{ __('In current execution phase') }}</p>
             </div>
-            <div class="card-strong dashboard-kpi p-4">
+            <div class="card-strong dashboard-kpi p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Tasks in view') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $tasksCount }}</p>
                 <p class="mt-0.5 text-xs text-slate-500">{{ __('All tasks inside your visibility') }}</p>
             </div>
-            <div class="card-strong dashboard-kpi p-4">
+            <div class="card-strong dashboard-kpi p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Open tasks') }}</p>
                 <p class="mt-1 text-2xl font-semibold text-slate-900">{{ $openTasksCount }}</p>
                 <p class="mt-0.5 text-xs text-slate-500">{{ __('Need follow-up or action') }}</p>
             </div>
-            <div class="card-strong dashboard-kpi p-4 bg-gradient-to-br from-white to-sky-50">
+            <div class="card-strong dashboard-kpi p-5 bg-gradient-to-br from-white to-sky-50">
                 <p class="text-xs uppercase tracking-widest text-slate-500">{{ __('Completion rate') }}</p>
                 <div class="mt-2 flex items-center gap-3">
                     <div id="completion-ring" data-rate="{{ $completionRate }}" class="h-12 w-12 rounded-full border border-slate-200 grid place-items-center text-sm font-semibold text-slate-800 bg-slate-100">
@@ -47,7 +47,7 @@
         </div>
 
         {{-- AI Smart Search --}}
-        <div class="card-strong p-4" x-data="aiSmartSearch()">
+        <div class="card-strong p-5" x-data="aiSmartSearch()">
             <div class="flex items-center gap-3">
                 <div class="relative flex-1">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -161,8 +161,8 @@
         });
         </script>
 
-        <div class="grid gap-4 xl:grid-cols-5">
-            <div class="card-strong p-4 xl:col-span-3">
+        <div class="grid gap-5 xl:grid-cols-5">
+            <div class="card-strong p-5 xl:col-span-3">
                 <div class="mb-4 flex items-center justify-between gap-2">
                     <h3 class="text-base font-semibold">{{ __('Workload trend (6 months)') }}</h3>
                     <span class="text-xs text-slate-500">{{ __('Created vs Completed') }}</span>
@@ -176,7 +176,7 @@
                 </div>
             </div>
 
-            <div class="card-strong p-4 xl:col-span-2">
+            <div class="card-strong p-5 xl:col-span-2">
                 <h3 class="text-base font-semibold mb-3">{{ __('Task status') }}</h3>
                 <div class="dashboard-chart-card rounded-xl p-2">
                     <canvas id="task-status-chart" height="140" class="dashboard-chart-canvas"></canvas>
@@ -184,8 +184,8 @@
             </div>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-5">
-            <div class="card-strong p-4 lg:col-span-3">
+        <div class="grid gap-5 lg:grid-cols-5">
+            <div class="card-strong p-5 lg:col-span-3">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-base font-semibold">{{ __('Recent projects') }}</h3>
                     <a href="{{ route('projects.index') }}" class="text-sm text-slate-500 hover:text-slate-800">{{ __('View all') }}</a>
@@ -205,7 +205,7 @@
                 </div>
             </div>
 
-            <div class="card-strong p-4 lg:col-span-2">
+            <div class="card-strong p-5 lg:col-span-2">
                 <h3 class="text-base font-semibold mb-3">{{ __('Project status') }}</h3>
                 <div class="dashboard-chart-card rounded-xl p-2">
                     <canvas id="project-status-chart" height="160" class="dashboard-chart-canvas"></canvas>
@@ -225,7 +225,7 @@
             </div>
         </div>
 
-        <div class="card-strong p-4">
+        <div class="card-strong p-5">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-base font-semibold">{{ __('Overdue tasks') }}</h3>
                 <a href="{{ route('tasks.index') }}" class="text-sm text-slate-500 hover:text-slate-800">{{ __('Manage tasks') }}</a>

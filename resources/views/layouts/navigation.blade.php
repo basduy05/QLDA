@@ -1,5 +1,5 @@
 <nav x-data="{ open: false }" class="bg-white/80 backdrop-blur border-b border-slate-100">
-    <div class="w-full px-4 md:px-6 xl:px-10">
+    <div class="mx-auto w-full max-w-[1440px] px-5 md:px-8">
         <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-4">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center gap-2">

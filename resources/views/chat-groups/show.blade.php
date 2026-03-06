@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-slate-500">{{ __('Group Chat') }}</p>
-                <h2 class="text-3xl font-semibold text-slate-900">{{ $group->name }}</h2>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ $group->name }}</h2>
                 <p class="text-sm text-slate-500 mt-2">{{ __('Messages expire after 24 hours.') }}</p>
             </div>
             <a href="{{ route('chat-groups.index') }}" class="btn-secondary">{{ __('Back') }}</a>
@@ -13,7 +13,7 @@
     <div class="space-y-6">
 
 
-        <div class="card-strong p-6">
+        <div class="card-strong p-5">
             <h3 class="text-lg font-semibold text-slate-900 mb-4">{{ __('Members') }}</h3>
             <div class="flex flex-wrap gap-2">
                 @foreach ($group->members as $member)
@@ -22,7 +22,7 @@
             </div>
         </div>
 
-        <div class="card-strong p-6">
+        <div class="card-strong p-5">
             <h3 class="text-lg font-semibold text-slate-900 mb-4">{{ __('Messages') }}</h3>
             <div id="messages-list" class="max-h-[500px] overflow-y-auto space-y-3 mb-4">
                 @include('chat-groups.partials.messages', ['messages' => $messages])
@@ -104,7 +104,7 @@
                     const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 120;
 
                     const card = document.createElement('div');
-                    card.className = "card p-4";
+                    card.className = "card p-5";
                     card.setAttribute('data-message-id', payload.id);
                     
                     const dateDesc = new Date(payload.created_at).toLocaleString('vi-VN', {

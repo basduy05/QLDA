@@ -9,7 +9,7 @@
     <x-slot name="header">
         <div>
             <p class="text-sm text-slate-500">{{ __('Communication') }}</p>
-            <h2 class="text-3xl font-semibold text-slate-900">{{ __('Chat Groups') }}</h2>
+            <h2 class="text-2xl font-semibold text-slate-900">{{ __('Chat Groups') }}</h2>
             <p class="text-sm text-slate-500 mt-2">{{ __('Messages are automatically removed after 24 hours.') }}</p>
         </div>
     </x-slot>
@@ -17,7 +17,7 @@
     <div class="space-y-6">
 
 
-        <div class="card-strong p-6">
+        <div class="card-strong p-5">
             <h3 class="text-lg font-semibold text-slate-900 mb-4">{{ __('Create Group') }}</h3>
             <form method="POST" action="{{ route('chat-groups.store') }}" class="space-y-4">
                 @csrf
@@ -76,11 +76,11 @@
             </form>
         </div>
 
-        <div class="card-strong p-6">
+        <div class="card-strong p-5">
             <h3 class="text-lg font-semibold text-slate-900 mb-4">{{ __('Available Groups') }}</h3>
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-5 md:grid-cols-2">
                 @forelse ($groups as $group)
-                    <div class="card p-4 hover:border-slate-300 transition">
+                    <div class="card p-5 hover:border-slate-300 transition">
                         <a href="{{ route('messenger.group', $group) }}" class="block">
                             <p class="font-semibold text-slate-900">{{ $group->name }}</p>
                             <p class="text-sm text-slate-500 mt-1">

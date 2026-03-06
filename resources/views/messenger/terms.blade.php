@@ -6,7 +6,7 @@
         </div>
     </x-slot>
 
-    <div class="card-strong p-6 space-y-4">
+    <div class="card-strong p-5 space-y-4">
         <p class="text-sm text-slate-700">{{ __('By continuing, you agree to use Messenger respectfully, avoid sharing sensitive personal data, and follow team communication rules.') }}</p>
         <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1">
             <li>{{ __('Do not share passwords, OTPs, or private credentials in chat.') }}</li>

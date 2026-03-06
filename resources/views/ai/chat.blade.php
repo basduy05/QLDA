@@ -1,7 +1,7 @@
 <x-app-layout>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-slate-500">{{ __('AI Assistant') }}</p>
                 <h2 class="text-2xl font-semibold text-slate-900">{{ __('Project AI Chat') }}</h2>

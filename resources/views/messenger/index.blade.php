@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-slate-500">{{ __('Messenger') }}</p>
                 <h2 class="text-2xl font-semibold text-slate-900">{{ __('Chats & Groups') }}</h2>

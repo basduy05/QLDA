@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-slate-500">{{ __('Inbox') }}</p>
-                <h2 class="text-3xl font-semibold text-slate-900">{{ __('Notifications') }}</h2>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ __('Notifications') }}</h2>
             </div>
             <form method="POST" action="{{ route('notifications.read') }}">
                 @csrf
@@ -12,10 +12,10 @@
         </div>
     </x-slot>
 
-    <div class="card-strong p-6">
+    <div class="card-strong p-5">
         <div class="space-y-4">
             @forelse ($notifications as $notification)
-                <div class="card p-4 {{ $notification->read_at ? '' : 'border-amber-200 bg-amber-50' }}">
+                <div class="card p-5 {{ $notification->read_at ? '' : 'border-amber-200 bg-amber-50' }}">
                     <div class="flex items-center justify-between text-sm text-slate-500">
                         <span class="font-semibold text-slate-900">{{ $notification->data['title'] ?? __('Notification') }}</span>
                         <span>{{ $notification->created_at->format('d/m/Y H:i') }}</span>

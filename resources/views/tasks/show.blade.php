@@ -1,13 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <div class="flex items-center gap-2 mb-1">
                     <a href="{{ route('projects.show', $task->project) }}" class="text-sm font-medium text-slate-500 hover:text-accent transition-colors uppercase tracking-wider">{{ $task->project->name }}</a>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                     <span class="text-sm font-medium text-slate-400 uppercase tracking-wider">{{ __('Task Details') }}</span>
                 </div>
-                <h2 class="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+                <h2 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
                     {{ $task->title }}
                 </h2>
             </div>
@@ -37,7 +37,7 @@
         {{-- Main content --}}
         <div class="lg:col-span-2 space-y-6">
             {{-- Task Overview (Description + Details) --}}
-            <div class="card-strong p-6">
+            <div class="card-strong p-5">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -120,7 +120,7 @@
             </div>
 
             {{-- Comments Section (Moved to be more visible) --}}
-            <div class="card-strong p-6 flex flex-col h-[500px]">
+            <div class="card-strong p-5 flex flex-col h-[500px]">
                 <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2 flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     {{ __('Comments') }}

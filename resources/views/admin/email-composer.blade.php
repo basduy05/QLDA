@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-slate-500">{{ __('Admin') }}</p>
-                <h2 class="text-3xl font-semibold text-slate-900">{{ __('Email Composer') }}</h2>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ __('Email Composer') }}</h2>
                 <p class="text-sm text-slate-500 mt-1">{{ __('Compose and send professional emails to team members.') }}</p>
             </div>
             <a href="{{ route('admin.settings.ai.edit') }}" class="btn-secondary" wire:navigate>

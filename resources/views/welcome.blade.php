@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ config('app.name', 'Aperlex') }} — {{ __('Smart Project Management') }}</title>
+        <title>{{ config('app.name', 'Aperlex') }} â€” {{ __('Smart Project Management') }}</title>
 
         <!-- Favicon -->
         <link rel="icon" type="image/png" href="/images/logo-full.png">
@@ -108,7 +108,7 @@
 
                     <!-- Hero visual card -->
                     <div class="relative">
-                        <div class="card-strong p-6 space-y-4">
+                        <div class="card-strong p-5 space-y-4">
                             <div class="flex items-center gap-3 mb-4">
                                 <img src="/images/logo-full.png" alt="Aperlex" class="h-6">
                                 <span class="font-semibold text-slate-800">{{ __('Project Overview') }}</span>
@@ -158,7 +158,7 @@
                 </div>
                 <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <!-- Feature 1 -->
-                    <div class="card-strong p-6 group">
+                    <div class="card-strong p-5 group">
                         <div class="feature-icon bg-gradient-to-br from-cyan-100 to-cyan-200/50 mb-4">
                             <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
                         </div>
@@ -166,7 +166,7 @@
                         <p class="text-sm text-slate-500 leading-relaxed">{{ __('Admins oversee all projects while users focus on their assigned work.') }}</p>
                     </div>
                     <!-- Feature 2 -->
-                    <div class="card-strong p-6 group">
+                    <div class="card-strong p-5 group">
                         <div class="feature-icon bg-gradient-to-br from-indigo-100 to-indigo-200/50 mb-4">
                             <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2v4m4.24 1.76l2.83-2.83M18 12h4m-4.24 4.24l2.83 2.83M12 18v4m-7.07-2.83l2.83-2.83M2 12h4m-.93-7.07l2.83 2.83"/><circle cx="12" cy="12" r="4"/></svg>
                         </div>
@@ -174,7 +174,7 @@
                         <p class="text-sm text-slate-500 leading-relaxed">{{ __('Get smart task suggestions, risk detection, and automated reports powered by AI.') }}</p>
                     </div>
                     <!-- Feature 3 -->
-                    <div class="card-strong p-6 group">
+                    <div class="card-strong p-5 group">
                         <div class="feature-icon bg-gradient-to-br from-purple-100 to-purple-200/50 mb-4">
                             <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                         </div>
@@ -182,7 +182,7 @@
                         <p class="text-sm text-slate-500 leading-relaxed">{{ __('Chat, comment, and collaborate with your team in real time.') }}</p>
                     </div>
                     <!-- Feature 4 -->
-                    <div class="card-strong p-6 group">
+                    <div class="card-strong p-5 group">
                         <div class="feature-icon bg-gradient-to-br from-cyan-100 to-indigo-200/50 mb-4">
                             <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
                         </div>
@@ -190,7 +190,7 @@
                         <p class="text-sm text-slate-500 leading-relaxed">{{ __('Track status, milestones, and deadlines in a unified view with charts.') }}</p>
                     </div>
                     <!-- Feature 5 -->
-                    <div class="card-strong p-6 group">
+                    <div class="card-strong p-5 group">
                         <div class="feature-icon bg-gradient-to-br from-indigo-100 to-purple-200/50 mb-4">
                             <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         </div>
@@ -198,7 +198,7 @@
                         <p class="text-sm text-slate-500 leading-relaxed">{{ __('Stay updated with task assignments, comments, and project changes.') }}</p>
                     </div>
                     <!-- Feature 6 -->
-                    <div class="card-strong p-6 group">
+                    <div class="card-strong p-5 group">
                         <div class="feature-icon bg-gradient-to-br from-purple-100 to-cyan-200/50 mb-4">
                             <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
                         </div>
@@ -227,7 +227,7 @@
                                     <span class="text-4xl font-bold bg-gradient-to-br from-cyan-600 to-indigo-600 bg-clip-text text-transparent">BD</span>
                                 </div>
                                 <div class="pt-2 sm:pt-8">
-                                    <h3 class="text-2xl font-bold text-slate-900">Nguyễn Bá Duy</h3>
+                                    <h3 class="text-2xl font-bold text-slate-900">Nguyá»…n BÃ¡ Duy</h3>
                                     <p class="text-indigo-600 font-semibold text-sm mt-1">Full-stack Developer & AI Enthusiast</p>
                                 </div>
                             </div>
@@ -235,7 +235,7 @@
                             <div class="mt-6 space-y-3 text-sm text-slate-600">
                                 <div class="flex items-start gap-3">
                                     <svg class="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
-                                    <span>{{ __('Student at') }} <strong>74DCTT23</strong> — {{ __('Faculty of IT, University of Transport Technology') }}</span>
+                                    <span>{{ __('Student at') }} <strong>74DCTT23</strong> â€” {{ __('Faculty of IT, University of Transport Technology') }}</span>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <svg class="w-5 h-5 text-cyan-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -254,7 +254,7 @@
                                 </span>
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200/60 text-xs font-semibold text-red-700">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm-3 8a22.963 22.963 0 005 .56 22.96 22.96 0 005-.56V17a2 2 0 01-2 2H7a2 2 0 01-2-2v-4z" clip-rule="evenodd"/></svg>
-                                    {{ __('Youth Union Executive Committee — HCM City') }}
+                                    {{ __('Youth Union Executive Committee â€” HCM City') }}
                                 </span>
                             </div>
                         </div>
@@ -289,7 +289,7 @@
                     <div class="flex items-center gap-2.5">
                         <img src="/images/logo-full.png" alt="Aperlex" class="h-7">
                     </div>
-                    <p class="text-sm text-slate-500">© {{ date('Y') }} Aperlex. {{ __('All rights reserved.') }}</p>
+                    <p class="text-sm text-slate-500">Â© {{ date('Y') }} Aperlex. {{ __('All rights reserved.') }}</p>
                 </div>
             </div>
         </footer>

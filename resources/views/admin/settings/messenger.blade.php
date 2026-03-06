@@ -1,16 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-4">
             <div>
                 <p class="text-sm text-slate-500">{{ __('Admin') }}</p>
-                <h2 class="text-3xl font-semibold text-slate-900">{{ __('Messenger Settings') }}</h2>
+                <h2 class="text-2xl font-semibold text-slate-900">{{ __('Messenger Settings') }}</h2>
                 <p class="text-sm text-slate-500 mt-1">{{ __('Configure messaging permissions and restrictions.') }}</p>
             </div>
             <a href="{{ route('admin.users.index') }}" class="btn-secondary">{{ __('Back to users') }}</a>
         </div>
     </x-slot>
 
-    <div class="card-strong p-6 max-w-3xl">
+    <div class="card-strong p-5 max-w-3xl">
 
         <form method="POST" action="{{ route('admin.settings.messenger.update') }}" class="space-y-4">
             @csrf
