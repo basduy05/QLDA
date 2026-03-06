@@ -2,7 +2,7 @@
     <div class="space-y-4">
         <div>
             <h1 class="text-xl font-semibold text-slate-900">{{ __('Terms of Use') }}</h1>
-            <p class="mt-2 text-sm text-slate-600">{{ __('These terms apply to project and team communication features in QhorizonPM.') }}</p>
+            <p class="mt-2 text-sm text-slate-600">{{ __('These terms apply to project and team communication features in Aperlex.') }}</p>
         </div>
 
         <div class="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700 space-y-3">

@@ -1,4 +1,4 @@
-# QhorizonPM
+# Aperlex
 
 Project management website built with Laravel MVC for Admin and User roles.
 

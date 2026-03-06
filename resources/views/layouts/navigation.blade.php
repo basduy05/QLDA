@@ -2,7 +2,10 @@
     <div class="w-full px-4 md:px-6 xl:px-10">
         <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-4">
-                <a wire:navigate href="{{ route('dashboard') }}" class="text-lg font-semibold text-slate-800">QhorizonPM</a>
+                <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center gap-2">
+                    <img src="/images/logo-icon.svg" alt="Aperlex" class="h-8 w-8">
+                    <span class="text-lg font-semibold bg-gradient-to-r from-cyan-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent">Aperlex</span>
+                </a>
                 <div class="hidden md:flex items-center gap-3 text-sm font-medium text-slate-600">
                     <a wire:navigate href="{{ route('dashboard') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}" title="{{ __('Dashboard') }}" aria-label="{{ __('Dashboard') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>

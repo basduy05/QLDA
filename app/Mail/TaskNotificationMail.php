@@ -36,7 +36,7 @@ class TaskNotificationMail extends Mailable
                 'body' => $this->body,
                 'actionUrl' => $this->actionUrl,
                 'actionLabel' => $this->actionLabel,
-                'appName' => config('app.name', 'QhorizonPM'),
+                'appName' => config('app.name', 'Aperlex'),
             ],
         );
     }

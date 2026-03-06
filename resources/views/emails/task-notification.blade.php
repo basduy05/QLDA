@@ -11,7 +11,7 @@
             <td align="center">
                 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:620px; background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden;">
                     <tr>
-                        <td style="padding:22px 24px; background:linear-gradient(120deg, #0f766e, #0891b2); color:#ffffff;">
+                        <td style="padding:22px 24px; background:linear-gradient(120deg, #0891b2, #6366f1); color:#ffffff;">
                             <h1 style="margin:0; font-size:22px; font-weight:700;">{{ $title }}</h1>
                         </td>
                     </tr>
@@ -22,7 +22,7 @@
                             </p>
 
                             <p style="margin:0 0 22px;">
-                                <a href="{{ $actionUrl }}" style="display:inline-block; padding:11px 18px; border-radius:999px; background:#0f766e; color:#ffffff; text-decoration:none; font-size:14px; font-weight:600;">
+                                <a href="{{ $actionUrl }}" style="display:inline-block; padding:11px 18px; border-radius:999px; background:#0891b2; color:#ffffff; text-decoration:none; font-size:14px; font-weight:600;">
                                     {{ $actionLabel }}
                                 </a>
                             </p>

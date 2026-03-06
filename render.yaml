@@ -42,7 +42,7 @@ services:
       - key: MAIL_FROM_ADDRESS
         sync: false
       - key: MAIL_FROM_NAME
-        value: QhorizonPM
+        value: Aperlex
       - key: MAIL_EHLO_DOMAIN
         value: qhorizonpm.onrender.com
       - key: DB_CONNECTION

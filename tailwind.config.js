@@ -10,14 +10,16 @@ export default {
     ],
 
     safelist: [
-        'from-emerald-500',
-        'to-green-600',
-        'focus:ring-emerald-500',
-        'text-emerald-500', 
-        'bg-emerald-500',
-        'border-emerald-500',
-        'text-green-600',
-        'bg-green-600',
+        'from-cyan-500',
+        'to-indigo-600',
+        'focus:ring-cyan-500',
+        'text-cyan-500', 
+        'bg-cyan-500',
+        'border-cyan-500',
+        'text-indigo-600',
+        'bg-indigo-600',
+        'from-indigo-500',
+        'to-purple-600',
     ],
 
     theme: {

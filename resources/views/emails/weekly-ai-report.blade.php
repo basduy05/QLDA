@@ -12,7 +12,7 @@
                 <table width="640" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
                     {{-- Header --}}
                     <tr>
-                        <td style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:32px 24px;text-align:center;">
+                        <td style="background:linear-gradient(135deg,#0891b2,#6366f1);padding:32px 24px;text-align:center;">
                             <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;">{{ __('Weekly AI Project Report') }}</h1>
                             <p style="margin:8px 0 0;color:rgba(255,255,255,0.8);font-size:14px;">{{ now()->format('d/m/Y') }}</p>
                         </td>

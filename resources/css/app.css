@@ -6,8 +6,8 @@
 	:root {
 		--ink: #132237;
 		--ink-soft: #41546b;
-		--accent: #0f766e;
-		--accent-strong: #0a4f49;
+		--accent: #0891b2;
+		--accent-strong: #0e7490;
 		--sun: #f6c453;
 		--rose: #f4b2a3;
 		--mist: #eef2f6;
@@ -19,8 +19,8 @@
 	body {
 		font-family: "Space Grotesk", "Segoe UI", sans-serif;
 		color: var(--ink);
-		background: radial-gradient(circle at 12% 10%, #fff4e2 0%, transparent 38%),
-			radial-gradient(circle at 88% 6%, #eaf5ff 0%, transparent 42%),
+		background: radial-gradient(circle at 12% 10%, #e0f7fa 0%, transparent 38%),
+			radial-gradient(circle at 88% 6%, #ede9fe 0%, transparent 42%),
 			linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
 		line-height: 1.6;
 		text-rendering: optimizeLegibility;
@@ -57,7 +57,7 @@
 	select:focus,
 	textarea:focus {
 		border-color: var(--accent);
-		box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+		box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18);
 	}
 }
 
@@ -86,8 +86,8 @@
 @layer components {
 	.page-shell {
 		@apply min-h-screen;
-		background: radial-gradient(circle at 16% 18%, #fff0d7 0%, transparent 40%),
-			radial-gradient(circle at 84% 6%, #e7f4ff 0%, transparent 40%),
+		background: radial-gradient(circle at 16% 18%, #e0f7fa 0%, transparent 40%),
+			radial-gradient(circle at 84% 6%, #ede9fe 0%, transparent 40%),
 			linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
 		animation: softFadeUp 260ms ease-out both;
 	}
@@ -120,7 +120,7 @@
 
 	.btn-primary {
 		@apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white shadow-lg transition;
-		background: linear-gradient(135deg, var(--accent), #0891b2);
+		background: linear-gradient(135deg, #0891b2, #6366f1);
 		min-height: 40px;
 		transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
 	}

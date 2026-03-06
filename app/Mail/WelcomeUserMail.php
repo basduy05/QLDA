@@ -21,7 +21,7 @@ class WelcomeUserMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('Welcome to :app', ['app' => config('app.name', 'QhorizonPM')]),
+            subject: __('Welcome to :app', ['app' => config('app.name', 'Aperlex')]),
         );
     }
 
@@ -32,7 +32,7 @@ class WelcomeUserMail extends Mailable
             with: [
                 'user' => $this->user,
                 'dashboardUrl' => route('dashboard'),
-                'appName' => config('app.name', 'QhorizonPM'),
+                'appName' => config('app.name', 'Aperlex'),
             ],
         );
     }
