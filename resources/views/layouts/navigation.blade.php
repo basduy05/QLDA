@@ -1,92 +1,130 @@
-<nav x-data="{ open: false }" class="bg-white/80 backdrop-blur border-b border-slate-100">
-    <div class="mx-auto w-full max-w-[1440px] px-5 md:px-8">
-        <div class="flex items-center justify-between h-16">
-            <div class="flex items-center gap-4">
-                <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                    <img src="/images/logo-full.png" alt="Aperlex" class="h-8">
-                </a>
-                <div class="hidden md:flex items-center gap-3 text-sm font-medium text-slate-600">
-                    <a wire:navigate href="{{ route('dashboard') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('dashboard') ? 'nav-pill-active' : '' }}" title="{{ __('Dashboard') }}" aria-label="{{ __('Dashboard') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
-                    </a>
-                    <a wire:navigate href="{{ route('projects.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('projects.*') ? 'nav-pill-active' : '' }}" title="{{ __('Projects') }}" aria-label="{{ __('Projects') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
-                    </a>
-                    <a wire:navigate href="{{ route('tasks.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('tasks.index') ? 'nav-pill-active' : '' }}" title="{{ __('Tasks') }}" aria-label="{{ __('Tasks') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                    </a>
-                    @if (Auth::user()?->isAdmin())
-                        <a wire:navigate href="{{ route('admin.users.index') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.users.*') ? 'nav-pill-active' : '' }}" title="{{ __('Users') }}" aria-label="{{ __('Users') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
-                        </a>
-                        <a wire:navigate href="{{ route('admin.settings.ai.edit') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.settings.ai.*') ? 'nav-pill-active' : '' }}" title="{{ __('AI Settings') }}" aria-label="{{ __('AI Settings') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4"/><path d="m16.24 7.76 2.83-2.83"/><path d="M18 12h4"/><path d="m16.24 16.24 2.83 2.83"/><path d="M12 18v4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M2 12h4"/><path d="m4.93 4.93 2.83 2.83"/><circle cx="12" cy="12" r="4"/></svg>
-                        </a>
-                        <a wire:navigate href="{{ route('admin.email-composer') }}" class="nav-pill nav-pill-icon {{ request()->routeIs('admin.email-composer*') ? 'nav-pill-active' : '' }}" title="{{ __('Email Composer') }}" aria-label="{{ __('Email Composer') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                        </a>
-                    @endif
-                </div>
-            </div>
+{{-- ── Sidebar Navigation ── --}}
+<aside class="sidebar" :class="{ 'collapsed': sidebarCollapsed, 'mobile-open': mobileOpen }">
 
-            <div class="hidden md:flex items-center gap-2">
-                <a wire:navigate href="{{ route('notifications.index') }}" class="nav-action-btn" title="{{ __('Notifications') }}" aria-label="{{ __('Notifications') }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                    @php($unreadCount = Auth::user()?->unreadNotificationsCountSafe() ?? 0)
-                    <span id="nav-unread-count" class="absolute -top-2 -right-3 text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full {{ $unreadCount > 0 ? '' : 'hidden' }}">{{ $unreadCount }}</span>
-                </a>
-                <div class="nav-lang" aria-label="{{ __('Locale') }}">
-                    <a href="{{ route('lang.switch', 'vi') }}" class="nav-lang-btn {{ app()->getLocale() === 'vi' ? 'nav-lang-btn-active' : '' }}">VI</a>
-                    <a href="{{ route('lang.switch', 'en') }}" class="nav-lang-btn {{ app()->getLocale() === 'en' ? 'nav-lang-btn-active' : '' }}">EN</a>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="nav-profile-chip">
-                        {{ Auth::user()->name }}
-                    </span>
-                    <a wire:navigate href="{{ route('profile.edit') }}" class="btn-secondary h-9 text-xs !px-3">{{ __('Profile') }}</a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn-secondary h-9 text-xs !px-3">{{ __('Log Out') }}</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="md:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-slate-700">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
+    {{-- ── Logo ── --}}
+    <div class="sidebar-logo">
+        <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center gap-3 w-full">
+            <img src="/images/logo-full.png" alt="Aperlex" class="h-8 w-8 object-contain shrink-0">
+            <span class="text-white font-bold text-lg tracking-tight"
+                :class="{ 'opacity-0 w-0 overflow-hidden': sidebarCollapsed }">Aperlex</span>
+        </a>
     </div>
 
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden md:hidden border-t border-slate-100 bg-white">
-        <div class="px-6 py-4 space-y-2 text-sm text-slate-600">
-            <a wire:navigate class="nav-pill block" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
-            <a wire:navigate class="nav-pill block" href="{{ route('projects.index') }}">{{ __('Projects') }}</a>
-            <a wire:navigate class="nav-pill block" href="{{ route('tasks.index') }}">{{ __('Tasks') }}</a>
-            <a wire:navigate class="nav-pill block" href="{{ route('notifications.index') }}">{{ __('Notifications') }}</a>
-            @if (Auth::user()?->isAdmin())
-                <a wire:navigate class="nav-pill block" href="{{ route('admin.users.index') }}">{{ __('Users') }}</a>
-                <a wire:navigate class="nav-pill block" href="{{ route('admin.settings.ai.edit') }}">{{ __('Settings') }}</a>
-                <a wire:navigate class="nav-pill block" href="{{ route('admin.email-composer') }}">{{ __('Email Composer') }}</a>
-            @endif
-            <a wire:navigate class="nav-pill block" href="{{ route('profile.edit') }}">{{ __('Profile') }}</a>
-            <div class="pt-2">
-                <div class="nav-lang">
-                    <a href="{{ route('lang.switch', 'vi') }}" class="nav-lang-btn {{ app()->getLocale() === 'vi' ? 'nav-lang-btn-active' : '' }}">VI</a>
-                    <a href="{{ route('lang.switch', 'en') }}" class="nav-lang-btn {{ app()->getLocale() === 'en' ? 'nav-lang-btn-active' : '' }}">EN</a>
+    {{-- ── Navigation Links ── --}}
+    <nav class="sidebar-nav">
+        <div class="sidebar-section-label">{{ __('Main') }}</div>
+
+        <a wire:navigate href="{{ route('dashboard') }}"
+            class="sidebar-link relative {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-link-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="4" rx="1" />
+                <rect x="14" y="10" width="7" height="11" rx="1" />
+                <rect x="3" y="13" width="7" height="8" rx="1" />
+            </svg>
+            <span class="sidebar-link-text">{{ __('Dashboard') }}</span>
+        </a>
+
+        <a wire:navigate href="{{ route('projects.index') }}"
+            class="sidebar-link relative {{ request()->routeIs('projects.*') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-link-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            <span class="sidebar-link-text">{{ __('Projects') }}</span>
+        </a>
+
+        <a wire:navigate href="{{ route('tasks.index') }}"
+            class="sidebar-link relative {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-link-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75">
+                <path d="M9 11 12 14 22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg>
+            <span class="sidebar-link-text">{{ __('Tasks') }}</span>
+        </a>
+
+        <a wire:navigate href="{{ route('messenger.index') }}"
+            class="sidebar-link relative {{ request()->routeIs('messenger.*') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-link-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span class="sidebar-link-text">{{ __('Messenger') }}</span>
+        </a>
+
+        <a wire:navigate href="{{ route('notifications.index') }}"
+            class="sidebar-link relative {{ request()->routeIs('notifications.*') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-link-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <span class="sidebar-link-text">{{ __('Notifications') }}</span>
+        </a>
+
+        @if (Auth::user()?->isAdmin())
+            <div class="sidebar-section-label">{{ __('Administration') }}</div>
+
+            <a wire:navigate href="{{ route('admin.users.index') }}"
+                class="sidebar-link relative {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-link-icon" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="sidebar-link-text">{{ __('Users') }}</span>
+            </a>
+
+            <a wire:navigate href="{{ route('admin.settings.ai.edit') }}"
+                class="sidebar-link relative {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-link-icon" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span class="sidebar-link-text">{{ __('Settings') }}</span>
+            </a>
+
+            <a wire:navigate href="{{ route('admin.email-composer') }}"
+                class="sidebar-link relative {{ request()->routeIs('admin.email-composer*') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-link-icon" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75">
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+                <span class="sidebar-link-text">{{ __('Email Composer') }}</span>
+            </a>
+        @endif
+    </nav>
+
+    {{-- ── Sidebar Footer ── --}}
+    <div class="sidebar-footer">
+        <div class="flex items-center justify-between">
+            <a wire:navigate href="{{ route('profile.edit') }}"
+                class="sidebar-link relative flex-1 {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                <div
+                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                 </div>
-            </div>
-            <form method="POST" action="{{ route('logout') }}" class="pt-2">
-                @csrf
-                <button type="submit" class="text-left text-slate-600">{{ __('Log Out') }}</button>
-            </form>
+                <div class="sidebar-link-text min-w-0">
+                    <p class="text-sm font-medium text-slate-200 truncate">{{ Auth::user()->name }}</p>
+                    <p class="text-[11px] text-slate-500 truncate">{{ Auth::user()->email }}</p>
+                </div>
+            </a>
+            <button @click="sidebarCollapsed = !sidebarCollapsed" class="sidebar-toggle hidden md:flex shrink-0"
+                title="{{ __('Toggle sidebar') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform"
+                    :class="{ 'rotate-180': sidebarCollapsed }" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m11 17-5-5 5-5" />
+                    <path d="m18 17-5-5 5-5" />
+                </svg>
+            </button>
         </div>
     </div>
-</nav>
+</aside>

@@ -1,56 +1,56 @@
 ﻿<x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center justify-between gap-4 w-full">
             <div>
-                <p class="text-sm text-slate-500">{{ __('Workspace') }}</p>
-                <h2 class="text-2xl font-semibold text-slate-900">{{ __('Tasks') }}</h2>
+                <h2 class="text-xl font-bold text-slate-900">{{ __('Tasks') }}</h2>
+                <p class="text-sm text-slate-500 mt-0.5">{{ __('Track and manage all your tasks') }}</p>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2">
                 <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="btn-primary inline-flex items-center gap-2">
+                    <button @click="open = !open" @click.away="open = false" class="btn-primary inline-flex items-center gap-2 text-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                         {{ __('New Task') }}
                     </button>
-                    <div x-show="open" 
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="transform opacity-0 scale-95"
-                         x-transition:enter-end="transform opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-75"
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="transform opacity-0 scale-95 -translate-y-1"
+                         x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="transform opacity-100 scale-100"
                          x-transition:leave-end="transform opacity-0 scale-95"
-                         class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
-                         style="display: none;">
-                         <div class="py-1 max-h-60 overflow-y-auto">
+                         class="absolute right-0 z-10 mt-2 w-60 origin-top-right rounded-xl bg-white ring-1 ring-slate-200 focus:outline-none"
+                         style="display: none; box-shadow: var(--shadow-lg);">
+                         <div class="py-1.5 max-h-60 overflow-y-auto">
                             @if($manageableProjects->isEmpty())
-                                <p class="block px-4 py-2 text-sm text-slate-500">{{ __('No projects available for task creation.') }}</p>
+                                <p class="block px-4 py-3 text-sm text-slate-500">{{ __('No projects available for task creation.') }}</p>
                             @else
-                                <p class="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">{{ __('Select Project') }}</p>
+                                <p class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ __('Select Project') }}</p>
                                 @foreach($manageableProjects as $project)
-                                    <a href="{{ route('projects.tasks.create', $project) }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900">{{ $project->name }}</a>
+                                    <a href="{{ route('projects.tasks.create', $project) }}" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors rounded-lg mx-1.5">{{ $project->name }}</a>
                                 @endforeach
                             @endif
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('exports.tasks') }}" class="btn-secondary inline-flex items-center gap-2">
+                <a href="{{ route('exports.tasks') }}" class="btn-secondary inline-flex items-center gap-2 text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                    {{ __('Export XLSX') }}
+                    {{ __('Export') }}
                 </a>
             </div>
         </div>
     </x-slot>
 
     <div class="card-strong overflow-hidden">
-        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="p-4 border-b border-slate-100 bg-slate-50/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <form method="GET" action="{{ route('tasks.index') }}" class="w-full flex flex-col sm:flex-row gap-3 sm:items-center">
                 <div class="relative w-full sm:max-w-xs">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                         <svg class="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search tasks...') }}" class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent sm:text-sm transition-shadow">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search tasks...') }}" class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
 
-                <select name="project_id" onchange="this.form.submit()" class="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent">
+                <select name="project_id" onchange="this.form.submit()" class="w-full sm:w-48 px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="">{{ __('All Projects') }}</option>
                     @foreach ($projectsFilter as $projectOption)
                         <option value="{{ $projectOption->id }}" @selected((string) request('project_id') === (string) $projectOption->id)>
@@ -59,7 +59,7 @@
                     @endforeach
                 </select>
 
-                <select name="assignee_id" class="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent">
+                <select name="assignee_id" class="w-full sm:w-48 px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     <option value="">{{ __('All Assignees') }}</option>
                     @foreach ($usersFilter as $userOption)
                         <option value="{{ $userOption->id }}" @selected((string) request('assignee_id') === (string) $userOption->id)>
@@ -69,9 +69,9 @@
                 </select>
 
                 <div class="flex items-center gap-2">
-                    <button type="submit" class="btn-secondary h-10 !px-4">{{ __('Filter') }}</button>
+                    <button type="submit" class="btn-secondary h-10 !px-4 text-sm">{{ __('Filter') }}</button>
                     @if(request()->filled('search') || request()->filled('project_id'))
-                        <a href="{{ route('tasks.index') }}" class="btn-secondary h-10 !px-4">{{ __('Clear') }}</a>
+                        <a href="{{ route('tasks.index') }}" class="btn-ghost h-10 !px-3 text-sm">{{ __('Clear') }}</a>
                     @endif
                 </div>
             </form>
@@ -79,8 +79,8 @@
 
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
-                <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider text-xs font-semibold">
-                    <tr>
+                <thead class="bg-slate-50/50">
+                    <tr class="text-slate-500 uppercase tracking-wider text-xs font-bold">
                         <th class="px-5 py-3.5 text-left">{{ __('Task') }}</th>
                         <th class="px-5 py-3.5 text-left">{{ __('Project') }}</th>
                         <th class="px-5 py-3.5 text-left">{{ __('Assignee') }}</th>
@@ -92,59 +92,69 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
                     @forelse ($tasks as $task)
-                        <tr class="hover:bg-slate-50/80 transition-colors group">
-                            <td class="px-5 py-3.5 whitespace-normal min-w-[250px]">
+                        <tr class="hover:bg-indigo-50/30 transition-colors group">
+                            <td class="px-5 py-4 whitespace-normal min-w-[250px]">
                                 <div class="flex items-start gap-3">
-                                    <div class="mt-1">
+                                    <div class="mt-0.5">
                                         @if($task->status === 'done')
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                            <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                            </div>
                                         @elseif($task->status === 'in_progress')
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                            <div class="w-6 h-6 rounded-lg bg-sky-100 flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                            </div>
                                         @else
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                                            <div class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center">
+                                                <div class="w-3 h-3 rounded-full border-2 border-slate-300"></div>
+                                            </div>
                                         @endif
                                     </div>
                                     <div>
-                                        <a href="{{ route('tasks.show', $task) }}" class="font-semibold text-slate-900 hover:text-accent transition-colors {{ $task->status === 'done' ? 'line-through text-slate-500' : '' }}">{{ $task->title }}</a>
+                                        <a href="{{ route('tasks.show', $task) }}" class="font-semibold text-slate-900 hover:text-indigo-600 transition-colors {{ $task->status === 'done' ? 'line-through text-slate-400' : '' }}">{{ $task->title }}</a>
                                         <p class="text-xs text-slate-500 mt-0.5 line-clamp-1" title="{{ $task->description }}">{{ \Illuminate\Support\Str::limit($task->description, 60) }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-5 py-3.5">
-                                <a href="{{ route('projects.show', $task->project) }}" class="inline-flex items-center gap-1.5 text-slate-600 hover:text-accent transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h12"/></svg>
-                                    <span class="font-medium">{{ $task->project?->name }}</span>
+                            <td class="px-5 py-4">
+                                <a href="{{ route('projects.show', $task->project) }}" class="inline-flex items-center gap-1.5 text-slate-600 hover:text-indigo-600 transition-colors">
+                                    <div class="w-5 h-5 rounded bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-500 shrink-0">
+                                        {{ strtoupper(substr($task->project?->name ?? '', 0, 1)) }}
+                                    </div>
+                                    <span class="font-medium text-sm">{{ $task->project?->name }}</span>
                                 </a>
                             </td>
-                            <td class="px-5 py-3.5">
+                            <td class="px-5 py-4">
                                 @if($task->assignee)
                                     <div class="flex items-center gap-2">
-                                        <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-medium text-slate-600 shrink-0">
+                                        <div class="h-7 w-7 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 shrink-0">
                                             {{ strtoupper(substr($task->assignee->name, 0, 2)) }}
                                         </div>
-                                        <span class="text-slate-700 font-medium">{{ $task->assignee->name }}</span>
+                                        <span class="text-slate-700 font-medium text-sm">{{ $task->assignee->name }}</span>
                                     </div>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 text-slate-400 italic">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                                    <span class="inline-flex items-center gap-1.5 text-slate-400 text-sm italic">
+                                        <div class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center border border-dashed border-slate-300">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                        </div>
                                         {{ __('Unassigned') }}
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3.5">
+                            <td class="px-5 py-4">
                                 @php
                                     $statusColors = [
-                                        'todo' => 'bg-slate-100 text-slate-700 border-slate-200',
-                                        'in_progress' => 'bg-sky-100 text-sky-700 border-sky-200',
-                                        'done' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                        'todo' => 'bg-slate-100 text-slate-600 border-slate-200',
+                                        'in_progress' => 'bg-sky-50 text-sky-700 border-sky-200',
+                                        'done' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                                     ];
-                                    $colorClass = $statusColors[$task->status] ?? 'bg-slate-100 text-slate-700 border-slate-200';
+                                    $colorClass = $statusColors[$task->status] ?? 'bg-slate-100 text-slate-600 border-slate-200';
                                 @endphp
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $colorClass }}">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border {{ $colorClass }}">
                                     {{ __(ucwords(str_replace('_', ' ', $task->status))) }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3.5">
+                            <td class="px-5 py-4">
                                 @php
                                     $priorityColors = [
                                         'low' => 'text-slate-500 bg-slate-50 border-slate-200',
@@ -153,53 +163,53 @@
                                     ];
                                     $pColorClass = $priorityColors[$task->priority] ?? 'text-slate-500 bg-slate-50 border-slate-200';
                                 @endphp
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border {{ $pColorClass }}">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border {{ $pColorClass }}">
                                     @if($task->priority === 'high')
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m7 7 5-5 5 5"/><path d="m7 13 5-5 5 5"/></svg>
                                     @elseif($task->priority === 'medium')
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg>
                                     @else
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="m18 14-6-6-6 6"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m7 17 5 5 5-5"/></svg>
                                     @endif
                                     {{ __(ucwords($task->priority)) }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3.5 text-slate-500 text-xs">
+                            <td class="px-5 py-4 text-slate-500 text-xs">
                                 @if($task->due_date)
                                     @php
                                         $dateClass = '';
                                         if ($task->status === 'done') {
                                             if ($task->updated_at->gt($task->due_date)) {
-                                                $dateClass = 'text-amber-600 bg-amber-50 px-2 py-1 rounded font-medium';
+                                                $dateClass = 'text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg font-bold';
                                             } else {
-                                                $dateClass = 'text-emerald-600 bg-emerald-50 px-2 py-1 rounded font-medium';
+                                                $dateClass = 'text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg font-bold';
                                             }
                                         } elseif ($task->due_date->isPast()) {
-                                            $dateClass = 'text-rose-600 bg-rose-50 px-2 py-1 rounded font-medium';
+                                            $dateClass = 'text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg font-bold';
                                         } elseif ($task->due_date->isFuture() && $task->due_date->diffInDays(now()) <= 2) {
-                                            $dateClass = 'text-amber-600 font-medium';
+                                            $dateClass = 'text-amber-600 font-bold';
                                         }
                                     @endphp
                                     <span class="{{ $dateClass }}">{{ $task->due_date->format('d/m/Y H:i') }}</span>
                                 @else
-                                    <span class="text-slate-400">â€”</span>
+                                    <span class="text-slate-400">—</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3.5 text-right">
-                                <a href="{{ route('tasks.show', $task) }}" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-accent hover:bg-accent/5 transition-colors" title="{{ __('Open') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            <td class="px-5 py-4 text-right">
+                                <a href="{{ route('tasks.show', $task) }}" class="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors" title="{{ __('Open') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
+                            <td colspan="7" class="px-6 py-16 text-center">
                                 <div class="flex flex-col items-center justify-center">
-                                    <div class="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                    <div class="empty-state-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" style="color: var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                                     </div>
-                                    <h3 class="text-sm font-medium text-slate-900 mb-1">{{ __('No tasks found') }}</h3>
-                                    <p class="text-sm text-slate-500 mb-4 max-w-sm">{{ (request()->filled('search') || request()->filled('project_id')) ? __('We couldn\'t find any tasks matching your filters.') : __('You don\'t have any tasks assigned to you yet.') }}</p>
+                                    <h3 class="text-sm font-bold text-slate-900 mb-1">{{ __('No tasks found') }}</h3>
+                                    <p class="text-sm text-slate-500 mb-5 max-w-sm">{{ (request()->filled('search') || request()->filled('project_id')) ? __('We couldn\'t find any tasks matching your filters.') : __('You don\'t have any tasks assigned to you yet.') }}</p>
                                     @if(request()->filled('search') || request()->filled('project_id'))
                                         <a href="{{ route('tasks.index') }}" class="btn-secondary">{{ __('Clear search') }}</a>
                                     @endif
@@ -212,7 +222,7 @@
         </div>
 
         @if($tasks->hasPages())
-            <div class="px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
+            <div class="px-5 py-4 border-t border-slate-100 bg-slate-50/30">
                 {{ $tasks->links() }}
             </div>
         @endif
