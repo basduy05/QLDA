@@ -9,14 +9,13 @@
     <title>{{ config('app.name', 'Aperlex') }}</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/images/logo-full.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/images/logo-full.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Google+Sans:wght@400;500;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
 
     <!-- Scripts -->
@@ -30,17 +29,17 @@
 
     @if(!request()->query('popup'))
     <div class="page-shell flex">
-        {{-- ── Sidebar ── --}}
+        {{-- Sidebar --}}
         @include('layouts.navigation')
 
-        {{-- ── Mobile overlay ── --}}
+        {{-- Mobile overlay --}}
         <div x-show="mobileOpen" x-transition.opacity @click="mobileOpen = false" class="sidebar-overlay md:hidden"
             style="display:none;"></div>
 
-        {{-- ── Main Content ── --}}
+        {{-- Main Content --}}
         <div class="main-content flex-1 flex flex-col" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
 
-            {{-- ── Top Bar ── --}}
+            {{-- Top Bar --}}
             <header class="topbar">
                 <div class="flex items-center gap-3">
                     {{-- Mobile hamburger --}}
@@ -67,6 +66,7 @@
                                                 <span id="nav-unread-count"
                                                     class="absolute -top-1.5 -right-1.5 text-[10px] bg-red-500 text-white min-w-[18px] h-[18px] flex items-center justify-center rounded-full font-bold {{ $unreadCount > 0 ? '' : 'hidden' }}">{{ $unreadCount }}</span>
                                             </a>
+
                                             {{-- Language --}}
                                             <div class="nav-lang" aria-label="{{ __('Locale') }}">
                                                 <a href="{{ route('lang.switch', 'vi') }}"
@@ -74,6 +74,7 @@
                                                 <a href="{{ route('lang.switch', 'en') }}"
                                                     class="nav-lang-btn {{ app()->getLocale() === 'en' ? 'nav-lang-btn-active' : '' }}">EN</a>
                                             </div>
+
                                             {{-- Profile --}}
                                             <div class="flex items-center gap-2">
                                                 <a wire:navigate href="{{ route('profile.edit') }}"
@@ -100,7 +101,7 @@
                                         </div>
                                     </header>
 
-                                    {{-- Flash --}}
+                                    {{-- Flash / Toast --}}
                                     @include('components.toast-notification')
 
                                     {{-- Page Content --}}
@@ -282,8 +283,6 @@
             </button>
         </div>
     @endif
-
-    <x-toast-notification />
 
     @livewireScripts
     @stack('scripts')
