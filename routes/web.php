@@ -58,7 +58,7 @@ Route::middleware('auth')->group(function () {
         ->name('projects.export');
     Route::resource('projects.tasks', TaskController::class)->shallow();
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
-    
+
     // Subtasks
     Route::post('/tasks/{task}/subtasks', [TaskSubtaskController::class, 'store'])->name('tasks.subtasks.store');
     Route::patch('/subtasks/{subtask}', [TaskSubtaskController::class, 'update'])->name('subtasks.update');
@@ -94,21 +94,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/ai/smart-search', [AiAssistantController::class, 'smartSearch'])->name('ai.smart-search');
 
     Route::middleware('messenger.terms')->group(function () {
-    Route::get('/messenger', [MessengerController::class, 'index'])->name('messenger.index');
-    Route::get('/messenger/search', [MessengerController::class, 'search'])->name('messenger.search');
-    Route::get('/messenger/ai', [AiAssistantController::class, 'index'])->name('ai.chat.index');
-    Route::post('/messenger/ai/chat', [AiAssistantController::class, 'chat'])->name('ai.chat');
-    Route::post('/messenger/ai/suggestions', [AiAssistantController::class, 'suggestions'])->name('ai.suggestions');
-    Route::get('/messenger/direct/{contact}', [MessengerController::class, 'direct'])->name('messenger.direct');
-    Route::get('/messenger/group/{chatGroup}', [MessengerController::class, 'group'])->name('messenger.group');
-    Route::get('/messenger/direct/{contact}/feed', [MessengerController::class, 'directFeed'])->name('messenger.direct-feed');
-    Route::get('/messenger/group/{chatGroup}/feed', [MessengerController::class, 'groupFeed'])->name('messenger.group-feed');
-    Route::post('/messenger/direct/{contact}', [MessengerController::class, 'sendDirect'])->name('messenger.send-direct');
-    Route::post('/messenger/group/{chatGroup}', [MessengerController::class, 'sendGroup'])->name('messenger.send-group');
-    Route::patch('/messenger/group/{chatGroup}/name', [MessengerController::class, 'updateGroupName'])->name('messenger.group.rename');
-    Route::patch('/messenger/group/{chatGroup}/members', [MessengerController::class, 'updateGroupMembers'])->name('messenger.group.members');
-    Route::patch('/messenger/group/{chatGroup}/members/{member}/nickname', [MessengerController::class, 'updateGroupMemberNickname'])->name('messenger.group.member-nickname');
-    Route::post('/messenger/direct/{contact}/typing', [MessengerController::class, 'typing'])->name('messenger.typing');
+        Route::get('/messenger', [MessengerController::class, 'index'])->name('messenger.index');
+        Route::get('/messenger/search', [MessengerController::class, 'search'])->name('messenger.search');
+        Route::get('/messenger/ai', [AiAssistantController::class, 'index'])->name('ai.chat.index');
+        Route::post('/messenger/ai/chat', [AiAssistantController::class, 'chat'])->name('ai.chat');
+        Route::post('/messenger/ai/suggestions', [AiAssistantController::class, 'suggestions'])->name('ai.suggestions');
+        Route::get('/messenger/direct/{contact}', [MessengerController::class, 'direct'])->name('messenger.direct');
+        Route::get('/messenger/group/{chatGroup}', [MessengerController::class, 'group'])->name('messenger.group');
+        Route::get('/messenger/direct/{contact}/feed', [MessengerController::class, 'directFeed'])->name('messenger.direct-feed');
+        Route::get('/messenger/group/{chatGroup}/feed', [MessengerController::class, 'groupFeed'])->name('messenger.group-feed');
+        Route::post('/messenger/direct/{contact}', [MessengerController::class, 'sendDirect'])->name('messenger.send-direct');
+        Route::post('/messenger/group/{chatGroup}', [MessengerController::class, 'sendGroup'])->name('messenger.send-group');
+        Route::patch('/messenger/group/{chatGroup}/name', [MessengerController::class, 'updateGroupName'])->name('messenger.group.rename');
+        Route::patch('/messenger/group/{chatGroup}/members', [MessengerController::class, 'updateGroupMembers'])->name('messenger.group.members');
+        Route::patch('/messenger/group/{chatGroup}/members/{member}/nickname', [MessengerController::class, 'updateGroupMemberNickname'])->name('messenger.group.member-nickname');
+        Route::post('/messenger/direct/{contact}/typing', [MessengerController::class, 'typing'])->name('messenger.typing');
     });
     Route::post('/calls/start/{contact}', [CallSessionController::class, 'start'])->name('calls.start');
     Route::get('/calls/poll', [CallSessionController::class, 'poll'])->name('calls.poll');
@@ -180,10 +180,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/email-composer/template', [EmailComposerController::class, 'getTemplate'])
         ->middleware('admin')
         ->name('admin.email-composer.template');
+    Route::post('/admin/email-composer/preview', [EmailComposerController::class, 'previewTemplate'])
+        ->middleware('admin')
+        ->name('admin.email-composer.preview');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

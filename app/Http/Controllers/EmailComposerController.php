@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\CustomComposedMail;
 use App\Models\AppSetting;
+use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,9 +18,11 @@ class EmailComposerController extends Controller
     public function index()
     {
         $users = User::select('id', 'name', 'email')->orderBy('name')->get();
+        $projects = Project::select('id', 'name')->orderBy('name')->get();
 
         return view('admin.email-composer', [
             'users' => $users,
+            'projects' => $projects,
             'templates' => $this->getTemplates(),
         ]);
     }
@@ -38,19 +41,34 @@ class EmailComposerController extends Controller
         $failed = 0;
         $errors = [];
 
-        // Get all users for personalization
         $userMap = User::whereIn('email', $data['recipients'])->get()->keyBy('email');
 
         foreach ($data['recipients'] as $email) {
-            $recipientName = $userMap[$email]->name ?? null;
-            $body = $this->markdownToHtml($data['body']);
-            // Personalize greeting if name is available
-            if ($recipientName) {
-                $body = '<p>Hi ' . e($recipientName) . ',</p>' . $body;
+            $recipientUser = $userMap[$email] ?? null;
+            $recipientName = $recipientUser?->name ?? '';
+
+            // Variable substitution for each recipient
+            $personalBody = $data['body'];
+            $personalSubject = $data['subject'];
+
+            $replacements = [
+                '{recipient_name}' => $recipientName ?: __('there'),
+                '{sender_name}' => Auth::user()->name ?? $senderName,
+                '{app_name}' => $senderName,
+                '{date}' => now()->format('d/m/Y'),
+                '{time}' => now()->format('H:i'),
+            ];
+
+            foreach ($replacements as $placeholder => $value) {
+                $personalBody = str_replace($placeholder, $value, $personalBody);
+                $personalSubject = str_replace($placeholder, $value, $personalSubject);
             }
+
+            $body = $this->markdownToHtml($personalBody);
+
             try {
                 Mail::to(trim($email))->send(
-                    new CustomComposedMail($data['subject'], $body, $senderName)
+                    new CustomComposedMail($personalSubject, $body, $senderName)
                 );
                 $sent++;
             } catch (\Throwable $e) {
@@ -86,7 +104,7 @@ class EmailComposerController extends Controller
         $apiKey = AppSetting::getValue('ai.gemini_api_key');
         $model = AppSetting::getValue('ai.gemini_model', 'gemini-2.5-flash');
 
-        if (! filled($apiKey)) {
+        if (!filled($apiKey)) {
             return response()->json(['error' => __('AI API key is not configured.')], 422);
         }
 
@@ -97,7 +115,13 @@ class EmailComposerController extends Controller
             "Write professional, clear, and concise emails. Reply in {$language}.\n" .
             "Return ONLY the email body text (no subject, no greeting prefix like 'Subject:').\n" .
             "Use markdown formatting (bold, lists, etc.) for better readability.\n" .
-            "Keep a professional but friendly tone.";
+            "Keep a professional but friendly tone.\n" .
+            "IMPORTANT: Use these dynamic variables in your content where appropriate:\n" .
+            "- {recipient_name} → Will be replaced with actual recipient's name\n" .
+            "- {sender_name} → Will be replaced with sender's name\n" .
+            "- {app_name} → Aperlex\n" .
+            "- {date} → Current date\n" .
+            "Always start with 'Hi {recipient_name},' as the greeting.";
 
         $userPrompt = $data['prompt'];
         if (filled($data['context'] ?? null)) {
@@ -137,11 +161,44 @@ class EmailComposerController extends Controller
 
         $template = collect($templates)->firstWhere('key', $key);
 
-        if (! $template) {
+        if (!$template) {
             return response()->json(['error' => 'Template not found'], 404);
         }
 
         return response()->json($template);
+    }
+
+    /**
+     * Return rendered preview HTML for a template.
+     */
+    public function previewTemplate(Request $request): JsonResponse
+    {
+        $body = $request->input('body', '');
+        $subject = $request->input('subject', '');
+
+        // Replace variables with preview placeholders
+        $previewReplacements = [
+            '{recipient_name}' => '<span style="background:#e0e7ff;color:#4338ca;padding:1px 6px;border-radius:4px;font-weight:600;">Nguyễn Văn A</span>',
+            '{sender_name}' => '<span style="background:#e0e7ff;color:#4338ca;padding:1px 6px;border-radius:4px;font-weight:600;">' . e(Auth::user()->name ?? 'Admin') . '</span>',
+            '{app_name}' => '<span style="background:#e0e7ff;color:#4338ca;padding:1px 6px;border-radius:4px;font-weight:600;">Aperlex</span>',
+            '{date}' => '<span style="background:#e0e7ff;color:#4338ca;padding:1px 6px;border-radius:4px;font-weight:600;">' . now()->format('d/m/Y') . '</span>',
+            '{time}' => '<span style="background:#e0e7ff;color:#4338ca;padding:1px 6px;border-radius:4px;font-weight:600;">' . now()->format('H:i') . '</span>',
+        ];
+
+        $previewBody = $body;
+        $previewSubject = $subject;
+
+        foreach ($previewReplacements as $placeholder => $value) {
+            $previewBody = str_replace($placeholder, $value, $previewBody);
+            $previewSubject = str_replace($placeholder, $value, $previewSubject);
+        }
+
+        $html = $this->markdownToHtml($previewBody);
+
+        return response()->json([
+            'html' => $html,
+            'subject' => $previewSubject,
+        ]);
     }
 
     private function getTemplates(): array
@@ -151,57 +208,65 @@ class EmailComposerController extends Controller
                 'key' => 'project_kickoff',
                 'name' => __('Project Kickoff'),
                 'icon' => '🚀',
-                'subject' => __('Project Kickoff: [Project Name]'),
-                'body' => __("Hi team,\n\nI'm excited to announce the kickoff of **[Project Name]**!\n\n**Project Goals:**\n- [Goal 1]\n- [Goal 2]\n- [Goal 3]\n\n**Timeline:** [Start Date] → [End Date]\n\n**Key milestones:**\n1. [Milestone 1] — [Date]\n2. [Milestone 2] — [Date]\n3. [Milestone 3] — [Date]\n\nPlease review the project details on the dashboard and reach out if you have any questions.\n\nLet's make this a success!"),
+                'description' => __('Announce a new project to the team'),
+                'subject' => __('Project Kickoff: {project_name}'),
+                'body' => __("Hi {recipient_name},\n\nI'm excited to announce the kickoff of **{project_name}**!\n\n**Project Goals:**\n- [Goal 1]\n- [Goal 2]\n- [Goal 3]\n\n**Timeline:** [Start Date] → [End Date]\n\n**Key milestones:**\n1. [Milestone 1] — [Date]\n2. [Milestone 2] — [Date]\n3. [Milestone 3] — [Date]\n\nPlease review the project details on the dashboard and reach out if you have any questions.\n\nLet's make this a success!\n\nBest regards,\n{sender_name}"),
             ],
             [
                 'key' => 'deadline_reminder',
                 'name' => __('Deadline Reminder'),
                 'icon' => '⏰',
-                'subject' => __('Reminder: Deadline Approaching — [Task/Project]'),
-                'body' => __("Hi,\n\nThis is a friendly reminder that the deadline for **[Task/Project Name]** is approaching.\n\n**Due date:** [Date]\n**Current status:** [Status]\n\n**Action needed:**\n- [Action item 1]\n- [Action item 2]\n\nPlease make sure all deliverables are completed on time. If you're facing any blockers, let me know so we can address them together.\n\nThank you for your hard work!"),
+                'description' => __('Remind team about upcoming deadlines'),
+                'subject' => __('Reminder: Deadline Approaching — {task_name}'),
+                'body' => __("Hi {recipient_name},\n\nThis is a friendly reminder that the deadline for **{task_name}** is approaching.\n\n**Due date:** {date}\n**Current status:** [Status]\n\n**Action needed:**\n- [Action item 1]\n- [Action item 2]\n\nPlease make sure all deliverables are completed on time. If you're facing any blockers, let me know so we can address them together.\n\nThank you for your hard work!\n\n{sender_name}"),
             ],
             [
                 'key' => 'meeting_invitation',
                 'name' => __('Meeting Invitation'),
                 'icon' => '📅',
+                'description' => __('Invite team members to a meeting'),
                 'subject' => __('Meeting Invitation: [Topic]'),
-                'body' => __("Hi,\n\nYou're invited to a meeting:\n\n**Topic:** [Meeting Topic]\n**Date:** [Date]\n**Time:** [Time]\n**Duration:** [Duration]\n**Location/Link:** [Location or Meeting Link]\n\n**Agenda:**\n1. [Agenda item 1]\n2. [Agenda item 2]\n3. [Agenda item 3]\n\nPlease confirm your attendance. If you can't make it, let me know and I'll share the meeting notes afterwards.\n\nSee you there!"),
+                'body' => __("Hi {recipient_name},\n\nYou're invited to a meeting:\n\n**Topic:** [Meeting Topic]\n**Date:** {date}\n**Time:** {time}\n**Duration:** [Duration]\n**Location/Link:** [Location or Meeting Link]\n\n**Agenda:**\n1. [Agenda item 1]\n2. [Agenda item 2]\n3. [Agenda item 3]\n\nPlease confirm your attendance. If you can't make it, let me know and I'll share the meeting notes afterwards.\n\nSee you there!\n{sender_name}"),
             ],
             [
                 'key' => 'progress_update',
                 'name' => __('Progress Update'),
                 'icon' => '📊',
-                'subject' => __('Progress Update: [Project Name] — Week [X]'),
-                'body' => __("Hi team,\n\nHere's this week's progress update for **[Project Name]**:\n\n**✅ Completed:**\n- [Task 1]\n- [Task 2]\n\n**🔄 In Progress:**\n- [Task 3] — [% complete]\n- [Task 4] — [% complete]\n\n**⚠️ Blockers:**\n- [Blocker description]\n\n**📅 Next week's priorities:**\n- [Priority 1]\n- [Priority 2]\n\nOverall project health: **[On Track / At Risk / Behind]**\n\nLet me know if you have questions or concerns."),
+                'description' => __('Share weekly project progress'),
+                'subject' => __('Progress Update: {project_name} — Week [X]'),
+                'body' => __("Hi {recipient_name},\n\nHere's this week's progress update for **{project_name}**:\n\n**✅ Completed:**\n- [Task 1]\n- [Task 2]\n\n**🔄 In Progress:**\n- [Task 3] — [% complete]\n- [Task 4] — [% complete]\n\n**⚠️ Blockers:**\n- [Blocker description]\n\n**📅 Next week's priorities:**\n- [Priority 1]\n- [Priority 2]\n\nOverall project health: **[On Track / At Risk / Behind]**\n\nLet me know if you have questions or concerns.\n\n{sender_name}"),
             ],
             [
                 'key' => 'welcome_member',
                 'name' => __('Welcome New Member'),
                 'icon' => '👋',
-                'subject' => __('Welcome to the Team!'),
-                'body' => __("Hi [Name],\n\nWelcome to the team! We're thrilled to have you on board.\n\n**Getting started:**\n1. Log in to Aperlex at [URL]\n2. Check your assigned projects on the Dashboard\n3. Review any outstanding tasks\n4. Join the team chat to say hello!\n\n**Your team:**\n- [Team member 1] — [Role]\n- [Team member 2] — [Role]\n\nFeel free to reach out if you have any questions. We're here to help!\n\nWelcome aboard! 🎉"),
+                'description' => __('Welcome a new team member'),
+                'subject' => __('Welcome to the Team, {recipient_name}!'),
+                'body' => __("Hi {recipient_name},\n\nWelcome to the team! We're thrilled to have you on board.\n\n**Getting started:**\n1. Log in to {app_name}\n2. Check your assigned projects on the Dashboard\n3. Review any outstanding tasks\n4. Join the team chat to say hello!\n\n**Your team:**\n- [Team member 1] — [Role]\n- [Team member 2] — [Role]\n\nFeel free to reach out if you have any questions. We're here to help!\n\nWelcome aboard! 🎉\n{sender_name}"),
             ],
             [
                 'key' => 'task_delegation',
                 'name' => __('Task Delegation'),
                 'icon' => '📋',
-                'subject' => __('New Task Assigned: [Task Name]'),
-                'body' => __("Hi [Name],\n\nI've assigned you a new task:\n\n**Task:** [Task Name]\n**Project:** [Project Name]\n**Priority:** [High/Medium/Low]\n**Due date:** [Date]\n\n**Description:**\n[Detailed task description]\n\n**Deliverables:**\n- [Deliverable 1]\n- [Deliverable 2]\n\n**Resources:**\n- [Link/Document 1]\n- [Link/Document 2]\n\nPlease let me know if you have any questions or need clarification on any aspect of this task."),
+                'description' => __('Assign and communicate new tasks'),
+                'subject' => __('New Task Assigned: {task_name}'),
+                'body' => __("Hi {recipient_name},\n\nI've assigned you a new task:\n\n**Task:** {task_name}\n**Project:** {project_name}\n**Priority:** [High/Medium/Low]\n**Due date:** {date}\n\n**Description:**\n[Detailed task description]\n\n**Deliverables:**\n- [Deliverable 1]\n- [Deliverable 2]\n\n**Resources:**\n- [Link/Document 1]\n- [Link/Document 2]\n\nPlease let me know if you have any questions or need clarification on any aspect of this task.\n\n{sender_name}"),
             ],
             [
                 'key' => 'thank_you',
                 'name' => __('Thank You / Recognition'),
                 'icon' => '🏆',
-                'subject' => __('Great Work on [Project/Task]!'),
-                'body' => __("Hi [Name/Team],\n\nI wanted to take a moment to recognize your outstanding work on **[Project/Task Name]**.\n\n**What you achieved:**\n- [Achievement 1]\n- [Achievement 2]\n- [Achievement 3]\n\nYour dedication and effort have made a real difference. The quality of your work is truly impressive, and it hasn't gone unnoticed.\n\nKeep up the excellent work! 🌟\n\nThank you!"),
+                'description' => __('Recognize outstanding work'),
+                'subject' => __('Great Work on {project_name}!'),
+                'body' => __("Hi {recipient_name},\n\nI wanted to take a moment to recognize your outstanding work on **{project_name}**.\n\n**What you achieved:**\n- [Achievement 1]\n- [Achievement 2]\n- [Achievement 3]\n\nYour dedication and effort have made a real difference. The quality of your work is truly impressive, and it hasn't gone unnoticed.\n\nKeep up the excellent work! 🌟\n\nThank you!\n{sender_name}"),
             ],
             [
                 'key' => 'issue_report',
                 'name' => __('Issue Report'),
                 'icon' => '🐛',
+                'description' => __('Report and communicate issues'),
                 'subject' => __('Issue Report: [Brief Description]'),
-                'body' => __("Hi,\n\nI'd like to report the following issue:\n\n**Issue:** [Brief title]\n**Severity:** [Critical/High/Medium/Low]\n**Affected area:** [Module/Feature]\n\n**Description:**\n[Detailed description of the issue]\n\n**Steps to reproduce:**\n1. [Step 1]\n2. [Step 2]\n3. [Step 3]\n\n**Expected behavior:** [What should happen]\n**Actual behavior:** [What actually happens]\n\nPlease investigate and prioritize accordingly. Let me know if you need more information."),
+                'body' => __("Hi {recipient_name},\n\nI'd like to report the following issue:\n\n**Issue:** [Brief title]\n**Severity:** [Critical/High/Medium/Low]\n**Affected area:** [Module/Feature]\n\n**Description:**\n[Detailed description of the issue]\n\n**Steps to reproduce:**\n1. [Step 1]\n2. [Step 2]\n3. [Step 3]\n\n**Expected behavior:** [What should happen]\n**Actual behavior:** [What actually happens]\n\nPlease investigate and prioritize accordingly. Let me know if you need more information.\n\n{sender_name}"),
             ],
         ];
     }
