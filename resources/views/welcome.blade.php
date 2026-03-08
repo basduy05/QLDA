@@ -10,8 +10,10 @@
     <link rel="icon" type="image/png" href="/images/logo-full.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800|space-grotesk:400,500,600,700&display=swap"
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Google+Sans:wght@400;500;700&display=swap"
         rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -168,7 +170,8 @@
                                 style="background: var(--accent-soft); border-color: rgba(99, 102, 241, 0.12);">
                                 <div>
                                     <p class="text-xs font-medium" style="color: var(--accent);">
-                                        {{ __('Active projects') }}</p>
+                                        {{ __('Active projects') }}
+                                    </p>
                                     <p class="text-2xl font-bold text-indigo-700">12</p>
                                 </div>
                                 <div class="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -219,11 +222,14 @@
         <div class="max-w-6xl mx-auto px-6">
             <div class="text-center mb-16">
                 <p class="text-sm uppercase tracking-widest font-bold mb-3" style="color: var(--accent);">
-                    {{ __('Features') }}</p>
+                    {{ __('Features') }}
+                </p>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-                    {{ __('Everything your team needs') }}</h2>
+                    {{ __('Everything your team needs') }}
+                </h2>
                 <p class="text-slate-500 mt-4 max-w-2xl mx-auto text-lg">
-                    {{ __('From task management to AI-powered insights, Aperlex brings all your tools together.') }}</p>
+                    {{ __('From task management to AI-powered insights, Aperlex brings all your tools together.') }}
+                </p>
             </div>
             <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                 @php
@@ -264,9 +270,11 @@
         <div class="max-w-6xl mx-auto px-6">
             <div class="text-center mb-12">
                 <p class="text-sm uppercase tracking-widest font-bold mb-3" style="color: var(--accent);">
-                    {{ __('Developer') }}</p>
+                    {{ __('Developer') }}
+                </p>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-                    {{ __('About the Author') }}</h2>
+                    {{ __('About the Author') }}
+                </h2>
             </div>
             <div class="max-w-3xl mx-auto">
                 <div class="card-strong overflow-hidden">
@@ -346,9 +354,11 @@
         </div>
         <div class="relative max-w-4xl mx-auto px-6 text-center">
             <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
-                {{ __('Ready to transform your project management?') }}</h2>
+                {{ __('Ready to transform your project management?') }}
+            </h2>
             <p class="text-lg text-slate-400 mb-10 max-w-2xl mx-auto">
-                {{ __('Join Aperlex today and experience the power of AI-driven project management.') }}</p>
+                {{ __('Join Aperlex today and experience the power of AI-driven project management.') }}
+            </p>
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="{{ route('register') }}"
                     class="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-sm font-bold bg-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"

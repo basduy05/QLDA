@@ -3,10 +3,9 @@
 
     {{-- ── Logo ── --}}
     <div class="sidebar-logo">
-        <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center gap-3 w-full">
-            <img src="/images/logo-full.png" alt="Aperlex" class="h-8 w-8 object-contain shrink-0">
-            <span class="text-white font-bold text-lg tracking-tight"
-                :class="{ 'opacity-0 w-0 overflow-hidden': sidebarCollapsed }">Aperlex</span>
+        <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center w-full">
+            <img src="/images/logo-full.png" alt="Aperlex" class="h-8 object-contain shrink-0"
+                :class="{ 'mx-auto': sidebarCollapsed }">
         </a>
     </div>
 
@@ -112,8 +111,8 @@
                     {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                 </div>
                 <div class="sidebar-link-text min-w-0">
-                    <p class="text-sm font-medium text-slate-200 truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-[11px] text-slate-500 truncate">{{ Auth::user()->email }}</p>
+                    <p class="text-sm font-medium text-slate-700 truncate">{{ Auth::user()->name }}</p>
+                    <p class="text-[11px] text-slate-400 truncate">{{ Auth::user()->email }}</p>
                 </div>
             </a>
             <button @click="sidebarCollapsed = !sidebarCollapsed" class="sidebar-toggle hidden md:flex shrink-0"
