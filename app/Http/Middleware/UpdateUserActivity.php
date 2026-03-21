@@ -20,7 +20,12 @@ class UpdateUserActivity
 
             $syncKey = 'presence:user:last-seen-sync:'.$user->id;
             if (Cache::add($syncKey, true, 60)) {
-                $user->forceFill(['last_seen_at' => now()])->save();
+                try {
+                    $user->forceFill(['last_seen_at' => now()])->save();
+                } catch (\Exception $e) {
+                    // Silently fail if database update fails to keep the site operational
+                    \Illuminate\Support\Facades\Log::warning('Failed to update last_seen_at: ' . $e->getMessage());
+                }
             }
         }
 
