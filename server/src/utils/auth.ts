@@ -17,7 +17,7 @@ export function generateToken(userId: string, email: string, role: string): stri
   return jwt.sign(
     { id: userId, email, role },
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRE }
+    { expiresIn: JWT_EXPIRE as string | number } as jwt.SignOptions
   );
 }
 

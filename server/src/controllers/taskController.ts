@@ -191,7 +191,7 @@ export async function addComment(req: Request, res: Response, next: NextFunction
     const comment = await db.taskComment.create({
       data: {
         taskId: id,
-        authorId: userId,
+        authorId: req.user?.id as string,
         content,
       },
       include: { author: { select: { id: true, name: true, avatar: true } } },

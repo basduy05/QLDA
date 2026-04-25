@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { sendSuccess, sendError } from '@/utils/response';
 import { authService } from '@/services/AuthService';
-
+import { db } from '@/utils/database';
+import { generateToken } from '@/utils/auth';
 export async function register(req: Request, res: Response, next: NextFunction) {
   try {
     const errors = validationResult(req);

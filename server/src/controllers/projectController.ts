@@ -20,7 +20,7 @@ export async function createProject(req: Request, res: Response, next: NextFunct
         ownerId: userId,
         members: {
           create: {
-            userId,
+            userId: req.user?.id as string,
             role: 'LEAD',
           },
         },
