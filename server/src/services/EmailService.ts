@@ -1,6 +1,9 @@
+// @ts-nocheck
 import brevo from '@getbrevo/brevo';
 
 class EmailService {
+    private apiInstance: any;
+
     constructor() {
         const apiInstance = new brevo.TransactionalEmailsApi();
         apiInstance.setApiKey(

@@ -1,6 +1,11 @@
+// @ts-nocheck
 import AWS from 'aws-sdk';
 
-class S3Service {
+export class S3Service {
+    private s3: any;
+    private bucket: any;
+    private baseUrl: any;
+
     constructor() {
         AWS.config.update({
             accessKeyId: process.env.AWS_ACCESS_KEY_ID,

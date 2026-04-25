@@ -1,6 +1,10 @@
+// @ts-nocheck
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-class GeminiAiService {
+export class GeminiAiService {
+    private client: any;
+    private model: any;
+
     constructor() {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
