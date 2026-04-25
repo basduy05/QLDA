@@ -163,12 +163,12 @@
                         });
                 }
             }">
-                <div class="mb-4 relative">
+                <div class="mb-4 relative search-wrap">
                     <input
                         type="search"
                         x-model="search"
                         @input.debounce.500ms="performSearch"
-                        class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm focus:border-slate-300 focus:ring-slate-300"
+                        class="search-field bg-slate-50"
                         placeholder="{{ __('Search by email or name...') }}"
                     >
                     <div x-show="search.length > 0 && results.length > 0" class="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto" style="display: none;">
@@ -185,7 +185,7 @@
                 <div class="space-y-1 mb-4">
                     @foreach ($contacts as $contact)
                         @php($meta = $directMap->get($contact->id))
-                        <a href="{{ route('messenger.direct', [$contact, 'popup' => request()->query('popup')]) }}" class="block rounded-xl px-3 py-2 border transition duration-200 hover:-translate-y-0.5 {{ $activeType === 'direct' && $activeTarget?->id === $contact->id ? 'border-slate-900 bg-slate-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm' }}">
+                        <a href="{{ route('messenger.direct', [$contact, 'popup' => request()->query('popup')]) }}" class="list-card {{ $activeType === 'direct' && $activeTarget?->id === $contact->id ? 'list-card-active' : '' }}">
                             <div class="flex items-center justify-between gap-2">
                                 <p class="font-semibold text-sm text-slate-900">{{ $contact->name }}</p>
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full {{ $contact->isOnline() ? 'bg-emerald-500' : 'bg-slate-300' }}"></span>
@@ -202,7 +202,7 @@
                 </div>
                 <div class="space-y-1">
                     @foreach ($groups as $group)
-                        <a href="{{ route('messenger.group', [$group, 'popup' => request()->query('popup')]) }}" class="block rounded-xl px-3 py-2 border transition duration-200 hover:-translate-y-0.5 {{ $activeType === 'group' && $activeTarget?->id === $group->id ? 'border-slate-900 bg-slate-50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm' }}">
+                        <a href="{{ route('messenger.group', [$group, 'popup' => request()->query('popup')]) }}" class="list-card {{ $activeType === 'group' && $activeTarget?->id === $group->id ? 'list-card-active' : '' }}">
                             <p class="font-semibold text-sm text-slate-900">{{ $group->name }}</p>
                             <p class="text-[11px] text-slate-500">{{ $group->messages_count }} {{ __('messages') }}</p>
                         </a>

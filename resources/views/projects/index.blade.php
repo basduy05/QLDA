@@ -29,10 +29,9 @@
 
     <div class="space-y-4">
         <div class="card-strong overflow-hidden">
-            <div
-                class="p-4 border-b border-slate-100 bg-slate-50/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <form method="GET" action="{{ route('projects.index') }}" class="relative w-full sm:max-w-xs">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <div class="panel-toolbar">
+                <form method="GET" action="{{ route('projects.index') }}" class="search-wrap sm:max-w-xs">
+                    <div class="search-icon">
                         <svg class="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                             stroke-linejoin="round">
@@ -42,20 +41,20 @@
                     </div>
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="{{ __('Search projects...') }}"
-                        class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-shadow">
+                        class="search-field">
                 </form>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-slate-50/50">
-                        <tr class="text-slate-500 uppercase tracking-wider text-xs font-bold">
-                            <th class="px-5 py-3.5 text-left">{{ __('Project') }}</th>
-                            <th class="px-5 py-3.5 text-left">{{ __('Owner') }}</th>
-                            <th class="px-5 py-3.5 text-left">{{ __('Status') }}</th>
-                            <th class="px-5 py-3.5 text-center">{{ __('Tasks') }}</th>
-                            <th class="px-5 py-3.5 text-left">{{ __('Timeline') }}</th>
-                            <th class="px-5 py-3.5 text-right"></th>
+            <div class="table-shell">
+                <table class="table-clean">
+                    <thead>
+                        <tr>
+                            <th>{{ __('Project') }}</th>
+                            <th>{{ __('Owner') }}</th>
+                            <th>{{ __('Status') }}</th>
+                            <th class="text-center">{{ __('Tasks') }}</th>
+                            <th>{{ __('Timeline') }}</th>
+                            <th class="text-right"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -95,14 +94,12 @@
                                         ];
                                         $colorClass = $statusColors[$project->status] ?? 'bg-slate-100 text-slate-600 border-slate-200';
                                     @endphp
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border {{ $colorClass }}">
+                                    <span class="meta-chip {{ $colorClass }}">
                                         {{ __(ucwords(str_replace('_', ' ', $project->status))) }}
                                     </span>
                                 </td>
                                 <td class="px-5 py-4 text-center">
-                                    <span
-                                        class="inline-flex items-center justify-center h-7 min-w-[1.75rem] px-2 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold">
+                                    <span class="meta-counter">
                                         {{ $project->tasks_count }}
                                     </span>
                                 </td>
@@ -127,7 +124,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-16 text-center">
+                                <td colspan="6" class="table-empty">
                                     <div class="flex flex-col items-center justify-center">
                                         <div class="empty-state-icon">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7"

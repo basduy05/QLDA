@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0f172a;
+  --muted: #64748b;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --line: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 500px at -15% -20%, rgba(6, 182, 212, 0.16), transparent),
+    radial-gradient(900px 400px at 120% -15%, rgba(250, 204, 21, 0.12), transparent),
+    var(--bg);
+}
+
+.app-shell {
+  @apply min-h-screen;
+}
+
+.app-sidebar {
+  @apply fixed left-0 top-0 h-screen w-64 border-r bg-white/90 backdrop-blur;
+  border-color: var(--line);
+}
+
+.app-main {
+  @apply min-h-screen;
+  margin-left: 16rem;
+}
+
+@media (max-width: 1024px) {
+  .app-sidebar {
+    @apply static h-auto w-full border-r-0 border-b;
+  }
+
+  .app-main {
+    margin-left: 0;
+  }
+}
+
+.card {
+  @apply rounded-2xl border bg-white shadow-soft;
+  border-color: var(--line);
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white;
+  background: linear-gradient(120deg, #0891b2, #14b8a6);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.03);
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 border bg-white;
+  border-color: #cbd5e1;
+}
+
+.field {
+  @apply w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition;
+  border-color: #cbd5e1;
+  background: #fff;
+}
+
+.field:focus {
+  border-color: #0891b2;
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18);
+}
+
+.badge {
+  @apply inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-bold;
+}
+
+.badge-todo {
+  @apply badge border-slate-200 bg-slate-100 text-slate-700;
+}
+
+.badge-progress {
+  @apply badge border-cyan-200 bg-cyan-50 text-cyan-700;
+}
+
+.badge-done {
+  @apply badge border-emerald-200 bg-emerald-50 text-emerald-700;
+}

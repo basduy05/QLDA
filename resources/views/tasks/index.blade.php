@@ -41,16 +41,16 @@
     </x-slot>
 
     <div class="card-strong overflow-hidden">
-        <div class="p-4 border-b border-slate-100 bg-slate-50/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="panel-toolbar">
             <form method="GET" action="{{ route('tasks.index') }}" class="w-full flex flex-col sm:flex-row gap-3 sm:items-center">
-                <div class="relative w-full sm:max-w-xs">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <div class="search-wrap sm:max-w-xs">
+                    <div class="search-icon">
                         <svg class="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search tasks...') }}" class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search tasks...') }}" class="search-field">
                 </div>
 
-                <select name="project_id" onchange="this.form.submit()" class="w-full sm:w-48 px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <select name="project_id" onchange="this.form.submit()" class="filter-select">
                     <option value="">{{ __('All Projects') }}</option>
                     @foreach ($projectsFilter as $projectOption)
                         <option value="{{ $projectOption->id }}" @selected((string) request('project_id') === (string) $projectOption->id)>
@@ -59,7 +59,7 @@
                     @endforeach
                 </select>
 
-                <select name="assignee_id" class="w-full sm:w-48 px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <select name="assignee_id" class="filter-select">
                     <option value="">{{ __('All Assignees') }}</option>
                     @foreach ($usersFilter as $userOption)
                         <option value="{{ $userOption->id }}" @selected((string) request('assignee_id') === (string) $userOption->id)>
@@ -77,17 +77,17 @@
             </form>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead class="bg-slate-50/50">
-                    <tr class="text-slate-500 uppercase tracking-wider text-xs font-bold">
-                        <th class="px-5 py-3.5 text-left">{{ __('Task') }}</th>
-                        <th class="px-5 py-3.5 text-left">{{ __('Project') }}</th>
-                        <th class="px-5 py-3.5 text-left">{{ __('Assignee') }}</th>
-                        <th class="px-5 py-3.5 text-left">{{ __('Status') }}</th>
-                        <th class="px-5 py-3.5 text-left">{{ __('Priority') }}</th>
-                        <th class="px-5 py-3.5 text-left">{{ __('Due date') }}</th>
-                        <th class="px-5 py-3.5 text-right"></th>
+        <div class="table-shell">
+            <table class="table-clean">
+                <thead>
+                    <tr>
+                        <th>{{ __('Task') }}</th>
+                        <th>{{ __('Project') }}</th>
+                        <th>{{ __('Assignee') }}</th>
+                        <th>{{ __('Status') }}</th>
+                        <th>{{ __('Priority') }}</th>
+                        <th>{{ __('Due date') }}</th>
+                        <th class="text-right"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 bg-white">
@@ -150,7 +150,7 @@
                                     ];
                                     $colorClass = $statusColors[$task->status] ?? 'bg-slate-100 text-slate-600 border-slate-200';
                                 @endphp
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border {{ $colorClass }}">
+                                <span class="meta-chip {{ $colorClass }}">
                                     {{ __(ucwords(str_replace('_', ' ', $task->status))) }}
                                 </span>
                             </td>
@@ -163,7 +163,7 @@
                                     ];
                                     $pColorClass = $priorityColors[$task->priority] ?? 'text-slate-500 bg-slate-50 border-slate-200';
                                 @endphp
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border {{ $pColorClass }}">
+                                <span class="meta-chip {{ $pColorClass }}">
                                     @if($task->priority === 'high')
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m7 7 5-5 5 5"/><path d="m7 13 5-5 5 5"/></svg>
                                     @elseif($task->priority === 'medium')
@@ -203,7 +203,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-16 text-center">
+                            <td colspan="7" class="table-empty">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="empty-state-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" style="color: var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>

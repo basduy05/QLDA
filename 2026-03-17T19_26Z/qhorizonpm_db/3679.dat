@@ -1,0 +1,45 @@
+53	24	Test	f	2026-03-14 22:02:05	2026-03-14 22:02:05	7.00
+54	27	Cài đặt môi trường phát triển (Python, Spark, Kafka, Docker/Linux)	f	2026-03-14 22:04:25	2026-03-14 22:04:25	5.00
+55	27	Xây dựng script nhân bản dữ liệu lên 1GB và lưu dưới định dạng Parquet	f	2026-03-14 22:04:26	2026-03-14 22:04:26	3.00
+56	27	Phát triển logic làm sạch dữ liệu trong Spark Streaming (loại bỏ dòng trống, định dạng thời gian)	f	2026-03-14 22:04:26	2026-03-14 22:04:26	2.00
+57	27	Cài đặt InfluxDB và Grafana cho phần lưu trữ và trực quan hóa	f	2026-03-14 22:04:26	2026-03-14 22:04:26	2.50
+17	14	Thuyết trình trên lớp	t	2026-03-03 23:16:03	2026-03-03 23:16:47	0.20
+19	13	Làm Script	t	2026-03-03 23:17:09	2026-03-03 23:17:24	0.20
+21	13	Làm Slide	t	2026-03-03 23:17:22	2026-03-03 23:17:26	0.20
+20	13	Nghiên cứu tài liệu	t	2026-03-03 23:17:18	2026-03-03 23:17:27	0.20
+58	27	Nghiên cứu và lựa chọn thuật toán phát hiện bất thường hoặc hồi quy trong Spark MLlib	f	2026-03-14 22:04:26	2026-03-14 22:04:26	1.50
+59	27	Thiết lập luồng dữ liệu từ Python Producer qua Kafka đến Spark Streaming Consumer	f	2026-03-14 22:04:26	2026-03-14 22:04:26	5.00
+22	15	Mở đầu: Lý do chọn đề tài +Khách quan +Chủ quan Mục tiêu: +Mục đích +Yêu cầu,… Phạm vi.	t	2026-03-04 21:10:01	2026-03-06 09:37:20	0.20
+24	18	cái này để làm gì á	t	2026-03-06 15:05:36	2026-03-06 15:05:41	0.20
+25	16	Xác định mục tiêu và phạm vi thu thập thông tin cần thiết	f	2026-03-06 22:05:47	2026-03-06 22:05:47	2.00
+26	16	Lựa chọn các phương pháp khảo sát chính (phỏng vấn, bảng hỏi, workshop, phân tích tài liệu)	f	2026-03-06 22:05:47	2026-03-06 22:05:47	2.00
+27	16	Lập danh sách các đối tượng/bên liên quan cần khảo sát	f	2026-03-06 22:05:47	2026-03-06 22:05:47	1.50
+28	16	Phân công nhân sự và chuẩn bị tài nguyên cho hoạt động khảo sát	f	2026-03-06 22:05:47	2026-03-06 22:05:47	1.50
+29	16	Thiết kế công cụ khảo sát (ví dụ: bộ câu hỏi phỏng vấn, phiếu khảo sát, kịch bản workshop)	f	2026-03-06 22:05:47	2026-03-06 22:05:47	3.00
+30	16	Xây dựng kế hoạch chi tiết và lịch trình thực hiện khảo sát	f	2026-03-06 22:05:47	2026-03-06 22:05:47	2.00
+31	19	Phân tích và đặc tả chi tiết các yêu cầu phi chức năng (NFRs)	f	2026-03-07 01:20:09	2026-03-07 01:20:09	3.00
+32	19	Tổ chức buổi họp với các bên liên quan để thu thập yêu cầu phi chức năng	f	2026-03-07 01:20:10	2026-03-07 01:20:10	2.00
+33	19	Xây dựng cấu trúc phân chia công việc (WBS) cấp cao cho giai đoạn thực hiện	f	2026-03-07 01:20:10	2026-03-07 01:20:10	2.50
+34	19	Xác định các rủi ro chính liên quan đến yêu cầu phi chức năng và kế hoạch thực hiện	f	2026-03-07 01:20:10	2026-03-07 01:20:10	1.50
+35	19	Ước lượng sơ bộ thời gian và nguồn lực cho các gói công việc chính	f	2026-03-07 01:20:10	2026-03-07 01:20:10	2.00
+36	23	Tìm kiếm và chuẩn bị dữ liệu thời tiết phụ trợ	f	2026-03-14 21:58:35	2026-03-14 21:58:35	1.50
+37	23	Xây dựng script nhân bản và định dạng dữ liệu 1GB (sang Parquet)	f	2026-03-14 21:58:35	2026-03-14 21:58:35	2.50
+38	23	Cài đặt môi trường phát triển (Python, Spark, Kafka)	f	2026-03-14 21:58:35	2026-03-14 21:58:35	3.00
+39	23	Thiết lập luồng dữ liệu cơ bản từ Python qua Kafka đến Spark	f	2026-03-14 21:58:35	2026-03-14 21:58:35	3.00
+40	23	Cài đặt InfluxDB và Grafana	f	2026-03-14 21:58:35	2026-03-14 21:58:35	2.00
+41	23	Nghiên cứu và lựa chọn thuật toán phân tích ban đầu (Isolation Forest/Linear Regression)	f	2026-03-14 21:58:35	2026-03-14 21:58:35	2.00
+42	24	Xây dựng script tăng cường dữ liệu và tạo dataset 1GB định dạng Parquet	f	2026-03-14 21:59:51	2026-03-14 21:59:51	2.50
+43	24	Thiết lập luồng dữ liệu thời gian thực qua Kafka và Spark Streaming, bao gồm làm sạch dữ liệu	f	2026-03-14 21:59:51	2026-03-14 21:59:51	3.50
+44	24	Cài đặt môi trường phát triển (Spark, Kafka, InfluxDB, Grafana)	f	2026-03-14 21:59:51	2026-03-14 21:59:51	3.00
+45	24	Trực quan hóa dữ liệu và xây dựng Dashboard chuyên nghiệp với InfluxDB và Grafana	f	2026-03-14 21:59:51	2026-03-14 21:59:51	2.50
+46	24	Phát triển các thuật toán phân tích (Windowing, phát hiện bất thường) và tích hợp dữ liệu thời tiết trên Spark	f	2026-03-14 21:59:51	2026-03-14 21:59:51	4.00
+47	25	Cài đặt môi trường phát triển Big Data (Spark, Kafka, InfluxDB/MongoDB, Grafana) trên Docker hoặc Linux	f	2026-03-14 22:01:14	2026-03-14 22:01:14	5.00
+48	25	Triển khai các thuật toán phân tích trên Spark (tính trung bình theo khung giờ, phát hiện bất thường, kết hợp dữ liệu thời tiết)	f	2026-03-14 22:01:14	2026-03-14 22:01:14	5.00
+49	25	Chuẩn bị các thư viện Python cần thiết (Pandas, NumPy, Scikit-Learn/Spark MLlib) và tìm kiếm dữ liệu thời tiết lịch sử	f	2026-03-14 22:01:15	2026-03-14 22:01:15	1.50
+50	25	Phát triển script Python để tăng cường dữ liệu gốc lên 1GB và chuyển đổi sang định dạng Parquet	f	2026-03-14 22:01:15	2026-03-14 22:01:15	3.00
+51	25	Đẩy kết quả phân tích từ Spark vào InfluxDB và thiết kế Dashboard trực quan trên Grafana	f	2026-03-14 22:01:15	2026-03-14 22:01:15	3.00
+52	25	Xây dựng luồng dữ liệu thời gian thực từ Producer Python qua Kafka đến Spark Streaming Consumer và thực hiện làm sạch dữ liệu	f	2026-03-14 22:01:15	2026-03-14 22:01:15	5.00
+60	27	Tìm kiếm, chuẩn bị dữ liệu thời tiết lịch sử và lên kế hoạch tích hợp	f	2026-03-14 22:04:26	2026-03-14 22:04:26	1.50
+\.
+
+

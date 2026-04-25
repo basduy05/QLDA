@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: aperlex_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: aperlex
+      MYSQL_USER: aperlex
+      MYSQL_PASSWORD: aperlex123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: aperlex_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aperlex_server
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://aperlex:aperlex123@db:3306/aperlex
+      REDIS_URL: redis://redis:6379
+      PORT: 3000
+      JWT_SECRET: change_me_in_production
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./dist:/app/dist
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  redis_data:

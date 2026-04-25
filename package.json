@@ -5,7 +5,10 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "realtime": "node realtime-server.mjs"
+        "realtime": "node realtime-server.mjs",
+        "next:dev": "npm --prefix frontend-next run dev",
+        "next:build": "npm --prefix frontend-next run build",
+        "next:start": "npm --prefix frontend-next run start"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
